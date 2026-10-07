@@ -47,7 +47,7 @@ function rowElement(r: LeaderboardRow): HTMLLIElement {
   return li;
 }
 
-const CONTRIBUTING = 'https://github.com/joch/jevman/blob/main/CONTRIBUTING.md#benchmark-your-own-model';
+const CONTRIBUTING = 'https://github.com/opper-ai/jevman-benchmark/blob/main/CONTRIBUTING.md#benchmark-your-own-model';
 
 function renderCommunity(community: Community, top: number): void {
   const how = el('a', 'benchmark your own model and send a pull request');

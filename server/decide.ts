@@ -159,7 +159,7 @@ export function rejectDecideRequest(req: HttpRequest, cfg: AuthConfig, devKey: J
 }
 
 /** A cold Opper-hosted model can take many seconds to answer its first call after being idle. */
-export const WARM_TIMEOUT_MS = 25_000; // under the 35 s shutdown deadline minus the 5 s drain
+export const WARM_TIMEOUT_MS = 15_000; // a warm-up accepted late in the 5 s drain still ends before the 25 s shutdown deadline
 
 /** The fixed question /api/warm sends: the client only picks the model, never the content. */
 const WARM_UP = { state: { note: 'warm-up' }, questions: { warmup: { type: 'choice', instructions: 'Pick one.', criteria: { a: 'Option A', b: 'Option B' } } } };

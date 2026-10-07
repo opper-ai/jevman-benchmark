@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { SESSION_COOKIE, type AuthConfig, type HttpRequest } from '../server/auth';
 import type { JevTarget } from '../server/jev';
+import { SHUTDOWN_DEADLINE_MS, SHUTDOWN_DRAIN_MS } from '../server/app';
 import { handleDecide, handleDecideRequest, JEV_MODEL, rejectDecideRequest, resolveKey, WARM_TIMEOUT_MS, type DecideDeps } from '../server/decide';
 import { sealSession } from '../server/session';
 
@@ -283,7 +284,8 @@ describe('warming a model up', () => {
     const decide: HttpRequest = { ...post, url: '/api/decide' };
     expect((await handleDecideRequest(decide, JSON.stringify(body), cfg, DEV, { fetch: slow, now: () => 0 })).status).toBe(504);
     expect((await handleDecideRequest(post, JSON.stringify({ model: 'opper/clef' }), cfg, DEV, { fetch: slow, now: () => 0 }, { warm: true })).status).toBe(200);
-    expect(WARM_TIMEOUT_MS).toBeLessThan(30_000); // leaves room in the 35 s shutdown deadline after its 5 s drain
+    // A warm-up accepted at the very end of the drain still finishes before the shutdown deadline.
+    expect(SHUTDOWN_DRAIN_MS + WARM_TIMEOUT_MS).toBeLessThan(SHUTDOWN_DEADLINE_MS);
   }, 10_000);
 
   it('still refuses unlisted models and cross-site requests', async () => {

@@ -47,6 +47,11 @@ const SECURITY_HEADERS = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
 };
 
+/** After SIGTERM: keep serving this long so the load balancer stops sending traffic, then wait for open requests. */
+export const SHUTDOWN_DRAIN_MS = 5000;
+/** Then give up on open requests, inside ECS's 30 s stopTimeout. */
+export const SHUTDOWN_DEADLINE_MS = 25_000;
+
 /**
  * The jevman production server: static build, Login with Opper, the jev proxy, /health and /revision.
  * With APP_BASE_PATH (e.g. /jevman-benchmark) all of it lives below that prefix, the prefix itself redirects to
@@ -54,8 +59,8 @@ const SECURITY_HEADERS = {
  */
 export function createApp(opts: AppOptions): App {
   const log: Log = opts.log ?? ((event, details = {}) => console.log(JSON.stringify({ at: new Date().toISOString(), event, ...details })));
-  const drainMs = opts.drainMs ?? 5000;
-  const deadlineMs = opts.deadlineMs ?? 25_000;
+  const drainMs = opts.drainMs ?? SHUTDOWN_DRAIN_MS;
+  const deadlineMs = opts.deadlineMs ?? SHUTDOWN_DEADLINE_MS;
   const root = resolve(opts.distDir);
   const basePath = normalizeBasePath(opts.env.APP_BASE_PATH);
   const env = Object.fromEntries(Object.entries(opts.env).filter((e): e is [string, string] => typeof e[1] === 'string'));

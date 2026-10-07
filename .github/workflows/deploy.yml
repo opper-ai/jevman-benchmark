@@ -141,6 +141,7 @@ jobs:
       # off (media-studio saw it spin silently for 30 minutes on an already-stable service); the next step polls
       # rolloutState instead, bounded and with progress.
       - name: Deploy to ECS
+        id: deploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@c465972ecbd160473f22e683363b422a5412a3de # v2.6.3
         with:
           task-definition: ${{ steps.render.outputs.task-definition }}
@@ -151,16 +152,19 @@ jobs:
       # COMPLETED -> done; FAILED -> the circuit breaker gave up (tasks crash or fail health checks) and is rolling
       # back, so fail the run (the diagnose job then prints why). 40 x 15 s = 10 min, far above a normal rollout.
       - name: Wait for rollout
+        env:
+          # Our deployment by its task definition: a circuit-breaker rollback becomes PRIMARY and would read COMPLETED.
+          TASK_DEF: ${{ steps.deploy.outputs.task-definition-arn }}
         run: |
           for i in $(seq 1 40); do
             read -r STATE RUNNING DESIRED <<< "$(aws ecs describe-services \
               --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE" \
-              --query 'services[0].[deployments[0].rolloutState, deployments[0].runningCount, deployments[0].desiredCount]' \
+              --query "services[0].deployments[?taskDefinition=='$TASK_DEF'] | [0].[rolloutState, runningCount, desiredCount]" \
               --output text)"
             echo "[$((i*15))s] rollout=$STATE running=$RUNNING/$DESIRED"
             case "$STATE" in
               COMPLETED) echo "rollout completed"; exit 0 ;;
-              FAILED)    echo "::error::rollout failed - circuit breaker rolled back"; exit 1 ;;
+              FAILED|None) echo "::error::rollout failed - circuit breaker rolled back (or the deployment is gone)"; exit 1 ;;
             esac
             sleep 15
           done

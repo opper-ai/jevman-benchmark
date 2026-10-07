@@ -5,6 +5,7 @@ OPPER_SSM_PREFIXES='[]' makes the loadsecrets entrypoint skip SSM, as it does ou
 """
 import json
 import os
+import secrets
 import subprocess
 import sys
 import time
@@ -14,8 +15,12 @@ import urllib.request
 sha = os.environ['GITHUB_SHA']
 image_env = json.loads(subprocess.check_output(['docker', 'image', 'inspect', sys.argv[1]]))[0]['Config']['Env'] or []
 base = next((e.split('=', 1)[1] for e in image_env if e.startswith('APP_BASE_PATH=')), '').rstrip('/')
+# Without the https address it is served at, a production image must refuse to start.
+refused = subprocess.run(['docker', 'run', '--rm', '--env', 'OPPER_SSM_PREFIXES=[]', sys.argv[1]], capture_output=True, text=True, timeout=60)
+assert refused.returncode != 0 and 'PUBLIC_BASE_URL' in refused.stderr, (refused.returncode, refused.stderr)
 container = subprocess.check_output([
-    'docker', 'run', '-d', '--publish', '127.0.0.1::3000',
+    'docker', 'run', '-d', '--publish', '127.0.0.1::3000', '--env', 'PUBLIC_BASE_URL=https://opper.ai',
+    '--env', 'SESSION_SECRET=' + secrets.token_hex(32),  # an https deployment needs one; this one is thrown away
     '--env', 'SOURCE_COMMIT=' + sha, '--env', 'OPPER_SSM_PREFIXES=[]', sys.argv[1],
 ], text=True).strip()
 

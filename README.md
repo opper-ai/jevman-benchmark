@@ -193,8 +193,8 @@ Settings, all optional (empty serves the app at the root, as for local developme
 - `PUBLIC_BASE_URL` — the public origin, e.g. `https://opper.ai`. The Login with Opper redirect URI is then
   `${PUBLIC_BASE_URL}${APP_BASE_PATH}/auth/callback`, and requests from that origin count as same-site.
 - `OPPER_OAUTH_REDIRECT_URI` — an explicit redirect URI; wins over `OPPER_REDIRECT_URI` and `PUBLIC_BASE_URL`.
-- `TRUST_PROXY_HOPS` — how many proxies in front of the server may set `X-Forwarded-Host` (2 behind CloudFront and
-  the load balancer; default 0, which uses `Host` only).
+- A production image (`NODE_ENV=production`) refuses to start without an https `PUBLIC_BASE_URL` or
+  `OPPER_OAUTH_REDIRECT_URI`; set `JEVMAN_ALLOW_HTTP=1` to try a production build over plain http.
 
 Secrets live in SSM Parameter Store under `/opper/eu-north/jevman-benchmark/` (`OPPER_CLIENT_ID`,
 `OPPER_CLIENT_SECRET`, `SESSION_SECRET`). The image's entrypoint is Opper's

@@ -97,9 +97,9 @@ describe('redirect URI and deployment settings', () => {
   });
 
   it('reads the base path, proxy hops and public origin', () => {
-    const cfg = authConfigFromEnv({ SESSION_SECRET: SECRET, APP_BASE_PATH: '/jevman-benchmark/', PUBLIC_BASE_URL: 'https://opper.ai', TRUST_PROXY_HOPS: '2' }, vi.fn());
-    expect(cfg).toMatchObject({ basePath: '/jevman-benchmark', trustProxyHops: 2, publicOrigin: 'https://opper.ai', redirectUri: 'https://opper.ai/jevman-benchmark/auth/callback' });
-    expect(authConfigFromEnv({ SESSION_SECRET: SECRET }, vi.fn())).toMatchObject({ basePath: '', trustProxyHops: 0 });
+    const cfg = authConfigFromEnv({ SESSION_SECRET: SECRET, APP_BASE_PATH: '/jevman-benchmark/', PUBLIC_BASE_URL: 'https://opper.ai' }, vi.fn());
+    expect(cfg).toMatchObject({ basePath: '/jevman-benchmark', publicOrigin: 'https://opper.ai', redirectUri: 'https://opper.ai/jevman-benchmark/auth/callback' });
+    expect(authConfigFromEnv({ SESSION_SECRET: SECRET }, vi.fn())).toMatchObject({ basePath: '' });
     expect(authConfigFromEnv({ SESSION_SECRET: SECRET }, vi.fn()).publicOrigin).toBeUndefined();
   });
 
@@ -107,8 +107,6 @@ describe('redirect URI and deployment settings', () => {
     [{ PUBLIC_BASE_URL: 'opper.ai' }, /PUBLIC_BASE_URL/],
     [{ PUBLIC_BASE_URL: 'https://opper.ai/jevman-benchmark' }, /PUBLIC_BASE_URL/],
     [{ PUBLIC_BASE_URL: 'ftp://opper.ai' }, /PUBLIC_BASE_URL/],
-    [{ TRUST_PROXY_HOPS: 'two' }, /TRUST_PROXY_HOPS/],
-    [{ TRUST_PROXY_HOPS: '-1' }, /TRUST_PROXY_HOPS/],
     [{ APP_BASE_PATH: '/a b' }, /APP_BASE_PATH/],
   ])('refuses %j', (env, message) => {
     expect(() => authConfigFromEnv({ SESSION_SECRET: SECRET, ...env }, vi.fn())).toThrow(message);

@@ -33,14 +33,6 @@ function publicOriginFromEnv(env: Record<string, string>): string | undefined {
   return url.origin;
 }
 
-function trustProxyHopsFromEnv(env: Record<string, string>): number {
-  const raw = env.TRUST_PROXY_HOPS?.trim();
-  if (!raw) return 0;
-  const hops = Number(raw);
-  if (!Number.isInteger(hops) || hops < 0 || hops > 10) throw new Error(`TRUST_PROXY_HOPS must be a whole number from 0 to 10, got ${JSON.stringify(raw)}`);
-  return hops;
-}
-
 /**
  * Login with Opper's redirect URI: OPPER_OAUTH_REDIRECT_URI, else OPPER_REDIRECT_URI, else built from
  * PUBLIC_BASE_URL + APP_BASE_PATH, else the Vite dev server's.
@@ -58,6 +50,12 @@ export function authConfigFromEnv(env: Record<string, string>, warn: (msg: strin
   const basePath = normalizeBasePath(env.APP_BASE_PATH);
   const publicOrigin = publicOriginFromEnv(env);
   const redirectUri = redirectUriFromEnv(env, basePath);
+  // A production image (NODE_ENV=production) is a deployment: without an https redirect URI (PUBLIC_BASE_URL or
+  // OPPER_OAUTH_REDIRECT_URI unset) it would run with a localhost callback, insecure cookies and a server key that
+  // pays for every visitor, so refuse to start. JEVMAN_ALLOW_HTTP=1 opts out (a production build tried locally).
+  if (env.NODE_ENV === 'production' && !redirectUri.startsWith('https:') && env.JEVMAN_ALLOW_HTTP !== '1') {
+    throw new Error('[auth] In production, set PUBLIC_BASE_URL (or OPPER_OAUTH_REDIRECT_URI) to the https address the app is served at; JEVMAN_ALLOW_HTTP=1 opts out');
+  }
   let sessionSecret = env.SESSION_SECRET ?? '';
   if (sessionSecret.length < 32) {
     if (redirectUri.startsWith('https:')) throw new Error('[auth] SESSION_SECRET must be set to at least 32 characters when the redirect URI is https');
@@ -71,7 +69,6 @@ export function authConfigFromEnv(env: Record<string, string>, warn: (msg: strin
     opperUrl: env.OPPER_BASE_URL || 'https://api.opper.ai',
     sessionSecret,
     basePath,
-    trustProxyHops: trustProxyHopsFromEnv(env),
     ...(publicOrigin ? { publicOrigin } : {}),
   };
 }

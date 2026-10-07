@@ -14,8 +14,6 @@ export interface AuthConfig {
   sessionSecret: string;
   /** APP_BASE_PATH, normalised ('' at the root): scopes the cookies and prefixes the app's own redirects. */
   basePath?: string;
-  /** How many proxies in front of the server may set X-Forwarded-Host (TRUST_PROXY_HOPS; 0 trusts none). */
-  trustProxyHops?: number;
   /** The public origin (PUBLIC_BASE_URL, e.g. https://opper.ai): an `Origin` with its host is same-site. */
   publicOrigin?: string;
 }
@@ -51,23 +49,12 @@ export const header = (req: HttpRequest, name: string): string => {
 };
 
 /**
- * The host the browser asked for: `Host`, or with `hops` trusted proxies in front, the X-Forwarded-Host entry the
- * outermost of them saw (proxies append, so that is the `hops`-th from the right).
- */
-export function requestHost(req: HttpRequest, hops = 0): string {
-  if (hops > 0) {
-    const forwarded = header(req, 'x-forwarded-host').split(',').map((s) => s.trim()).filter(Boolean);
-    if (forwarded.length) return forwarded[Math.max(0, forwarded.length - hops)];
-  }
-  return header(req, 'host');
-}
-
-/**
  * True when the browser says the request came from another site: `Sec-Fetch-Site` other than `same-origin`,
- * or an `Origin` whose host is neither this request's host (see requestHost) nor PUBLIC_BASE_URL's.
+ * or an `Origin` whose host is neither this request's `Host` nor PUBLIC_BASE_URL's (behind CloudFront and the ALB the
+ * Host is still opper.ai; neither sets X-Forwarded-Host, so that header is never trusted).
  * Requests without either header (curl, old browsers) pass.
  */
-export function crossSite(req: HttpRequest, cfg: Pick<AuthConfig, 'trustProxyHops' | 'publicOrigin'> = {}): boolean {
+export function crossSite(req: HttpRequest, cfg: Pick<AuthConfig, 'publicOrigin'> = {}): boolean {
   const site = header(req, 'sec-fetch-site');
   if (site && site !== 'same-origin') return true;
   const origin = header(req, 'origin');
@@ -75,7 +62,7 @@ export function crossSite(req: HttpRequest, cfg: Pick<AuthConfig, 'trustProxyHop
   try {
     const host = new URL(origin).host;
     if (cfg.publicOrigin && host === new URL(cfg.publicOrigin).host) return false;
-    return host !== requestHost(req, cfg.trustProxyHops);
+    return host !== header(req, 'host');
   } catch {
     return true; // e.g. `Origin: null` from a sandboxed frame
   }

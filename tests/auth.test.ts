@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { crossSite, requestHost, handleCallback, handleLogin, handleLogout, handleMe, opperExchange, sessionFrom, SESSION_COOKIE, STATE_COOKIE, type AuthConfig, type HttpRequest } from '../server/auth';
+import { crossSite, handleCallback, handleLogin, handleLogout, handleMe, opperExchange, sessionFrom, SESSION_COOKIE, STATE_COOKIE, type AuthConfig, type HttpRequest } from '../server/auth';
 import { openSession, sealSession } from '../server/session';
 
 const cfg: AuthConfig = { clientId: 'opper_app_x', clientSecret: 'shh', redirectUri: 'http://localhost:5173/auth/callback', opperUrl: 'https://api.opper.ai', sessionSecret: 's'.repeat(64) };
@@ -198,10 +198,9 @@ describe('below a base path', () => {
 });
 
 describe('crossSite behind proxies', () => {
-  it('trusts X-Forwarded-Host only with TRUST_PROXY_HOPS', () => {
+  it('never trusts X-Forwarded-Host (neither CloudFront nor the ALB sets it)', () => {
     const headers = { origin: 'https://opper.ai', host: 'internal-alb.example', 'x-forwarded-host': 'opper.ai' };
     expect(crossSite(req('/', headers, 'POST'))).toBe(true);
-    expect(crossSite(req('/', headers, 'POST'), { trustProxyHops: 2 })).toBe(false);
   });
   it('accepts the PUBLIC_BASE_URL origin and nothing else', () => {
     const headers = (origin: string) => ({ origin, host: 'internal-alb.example' });
@@ -209,14 +208,5 @@ describe('crossSite behind proxies', () => {
     expect(crossSite(req('/', headers('https://evil.example'), 'POST'), { publicOrigin: 'https://opper.ai' })).toBe(true);
     expect(crossSite(req('/', { ...headers('https://opper.ai'), 'sec-fetch-site': 'cross-site' }, 'POST'), { publicOrigin: 'https://opper.ai' })).toBe(true);
   });
-  it.each([
-    [{ host: 'a' }, 0, 'a'],
-    [{ host: 'a', 'x-forwarded-host': 'b' }, 0, 'a'],
-    [{ host: 'a', 'x-forwarded-host': 'b' }, 1, 'b'],
-    [{ host: 'a', 'x-forwarded-host': 'b' }, 2, 'b'],
-    [{ host: 'a', 'x-forwarded-host': 'spoofed, b, c' }, 2, 'b'],
-    [{ host: 'a', 'x-forwarded-host': 'spoofed, b, c' }, 1, 'c'],
-  ])('requestHost(%j, %i) = %s', (headers, hops, expected) => {
-    expect(requestHost(req('/', headers), hops)).toBe(expected);
-  });
+
 });

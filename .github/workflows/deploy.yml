@@ -29,7 +29,7 @@ env:
   # Baked into the client at build time; the image also sets APP_BASE_PATH for the server.
   APP_BASE_PATH: /jevman-benchmark
   VITE_PUBLIC_URL: https://opper.ai
-  # AWS_DEPLOY_ROLE_ARN is a repository variable. No CloudFront invalidation: opper.ai's default behaviour, which
+  # AWS_DEPLOY_ROLE_ARN is a repository secret. No CloudFront invalidation: opper.ai's default behaviour, which
   # /jevman-benchmark falls under, doesn't cache.
 
 jobs:
@@ -91,7 +91,7 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
         with:
-          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
@@ -204,7 +204,7 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
         with:
-          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Dump ECS rollout, task exit reason and app logs

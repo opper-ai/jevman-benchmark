@@ -16,7 +16,8 @@ it and the running cost. Red entries were not the model's own choice: greedy fal
 could not answer (timeout, error or invalid answer; see
 [How decisions work](#how-decisions-work)).
 
-Source: <https://github.com/joch/jevman>
+Play it at <https://opper.ai/jevman-benchmark/>. Source: <https://github.com/opper-ai/jevman-benchmark>, which
+started as a fork of [joch/jevman](https://github.com/joch/jevman).
 
 ## Run
 
@@ -37,9 +38,11 @@ This is meant for local development: on an https deployment the key is ignored (
 ### Option B — Login with Opper (players pay for their own play)
 
 1. Register an OAuth app with Opper and add the redirect URI `http://localhost:5173/auth/callback`
-   (or your deployment's `https://…/auth/callback`).
+   (or your deployment's `https://…/auth/callback`; below a [base path](#deployment), e.g.
+   `https://opper.ai/jevman-benchmark/auth/callback`).
 2. Set `OPPER_CLIENT_ID`, `OPPER_CLIENT_SECRET`, `OPPER_REDIRECT_URI` and `SESSION_SECRET`
-   (`openssl rand -hex 32`) in `.env`.
+   (`openssl rand -hex 32`) in `.env`. A deployment can set `PUBLIC_BASE_URL` instead of the redirect URI (see
+   [Deployment](#deployment)).
 
 Visitors who aren't signed in watch a **recorded demo** of a jev game. "Sign in with Opper" sends
 them through Opper's sign-in; afterwards jev plays live and every call is billed to **their own
@@ -139,7 +142,7 @@ hour**; with the AI on both sides, about the two together. Lowering the speed ma
 
 ## Benchmark your own model
 
-Any model can join the [leaderboard](https://jevman.apps.chadda.se/leaderboard) as **self-reported**. Put it behind an
+Any model can join the [leaderboard](https://opper.ai/jevman-benchmark/leaderboard) as **self-reported**. Put it behind an
 HTTP endpoint that answers jevman's questions (copy [`scripts/example-endpoint.ts`](scripts/example-endpoint.ts)),
 then:
 
@@ -168,6 +171,39 @@ Pac-Man can also get a second question mid-corridor: when a dangerous ghost is i
 ahead, or can reach the junction at its end before he does, jev is asked whether to keep going or
 turn back right now (`pacman_escape`). Pac-Man keeps moving while it is open, and each situation is
 asked once.
+
+## Deployment
+
+jevman runs on Opper's ECS (eu-north-1) at <https://opper.ai/jevman-benchmark/>, next to apps like
+[media-studio](https://opper.ai/media-studio). CloudFront and the load balancer forward the full path, so the app
+itself lives below the prefix. A green push to `main` builds the image, pushes it to ECR as `:<commit>` and rolls the
+ECS service ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)). The infrastructure (ECR repository, ECS
+service, load balancer rule, IAM roles, CloudFront behaviour) is in
+[opper-ai/terraform](https://github.com/opper-ai/terraform), `environments/eu-north/jevman-benchmark.tf`.
+
+Settings, all optional (empty serves the app at the root, as for local development):
+
+- `APP_BASE_PATH` — the path prefix, e.g. `/jevman-benchmark`. A build argument of the image (Vite's `base`, so the
+  client's assets, requests and links stay below it) and the server's runtime setting: requests below it are served
+  with the prefix removed, `/jevman-benchmark` redirects to `/jevman-benchmark/`, everything else is 404 except
+  `/health`, which answers at the root too for load balancer health checks. The session and sign-in cookies are
+  scoped to the prefix.
+- `VITE_PUBLIC_URL` — build argument: the public origin for share links and social-card tags (default
+  `https://jevman.apps.chadda.se`); CI builds with `https://opper.ai`.
+- `PUBLIC_BASE_URL` — the public origin, e.g. `https://opper.ai`. The Login with Opper redirect URI is then
+  `${PUBLIC_BASE_URL}${APP_BASE_PATH}/auth/callback`, and requests from that origin count as same-site.
+- `OPPER_OAUTH_REDIRECT_URI` — an explicit redirect URI; wins over `OPPER_REDIRECT_URI` and `PUBLIC_BASE_URL`.
+- `TRUST_PROXY_HOPS` — how many proxies in front of the server may set `X-Forwarded-Host` (2 behind CloudFront and
+  the load balancer; default 0, which uses `Host` only).
+
+Secrets live in SSM Parameter Store under `/opper/eu-north/jevman-benchmark/` (`OPPER_CLIENT_ID`,
+`OPPER_CLIENT_SECRET`, `SESSION_SECRET`). The image's entrypoint is Opper's
+[loadsecrets](https://github.com/opper-ai/opper-secrets), which exports every parameter under `OPPER_SSM_PREFIXES`
+into the environment and then starts the server; run the image elsewhere with `OPPER_SSM_PREFIXES='[]'` to skip SSM.
+The loadsecrets image is private, so building the image locally needs `docker login ghcr.io`
+(`gh auth token | docker login ghcr.io -u "$(gh api user -q .login)" --password-stdin`). On SIGTERM the server stops
+reporting healthy, keeps serving for 5 s while the load balancer drains it, and exits within 25 s, before ECS's 30 s
+stop timeout.
 
 ## License
 

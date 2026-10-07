@@ -188,8 +188,8 @@ Settings, all optional (empty serves the app at the root, as for local developme
   with the prefix removed, `/jevman-benchmark` redirects to `/jevman-benchmark/`, everything else is 404 except
   `/health`, which answers at the root too for load balancer health checks. The session and sign-in cookies are
   scoped to the prefix.
-- `VITE_PUBLIC_URL` — build argument: the public origin for share links and social-card tags (default
-  `https://jevman.apps.chadda.se`); CI builds with `https://opper.ai`.
+- `VITE_PUBLIC_URL` — build argument: the public origin for share links and social-card tags; CI builds with
+  `https://opper.ai`. Unset, they point at `https://opper.ai/jevman-benchmark/`.
 - `PUBLIC_BASE_URL` — the public origin, e.g. `https://opper.ai`. The Login with Opper redirect URI is then
   `${PUBLIC_BASE_URL}${APP_BASE_PATH}/auth/callback`, and requests from that origin count as same-site.
 - `OPPER_OAUTH_REDIRECT_URI` — an explicit redirect URI; wins over `OPPER_REDIRECT_URI` and `PUBLIC_BASE_URL`.

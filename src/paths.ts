@@ -13,5 +13,5 @@ export const appPath = (path: string): string => withBase(BASE_URL, path);
 /** The address share links point at: the bare origin at the root (as before), else the app's own address. */
 export const shareUrlFor = (base: string, publicUrl: string, appUrl: string): string => (base === '/' ? publicUrl : appUrl);
 
-/** E.g. https://jevman.apps.chadda.se, or https://opper.ai/jevman-benchmark/ (VITE_PUBLIC_URL + APP_BASE_PATH). */
+/** E.g. https://opper.ai/jevman-benchmark/ (VITE_PUBLIC_URL + APP_BASE_PATH), or just VITE_PUBLIC_URL at the root. */
 export const SHARE_URL: string = shareUrlFor(BASE_URL, import.meta.env.VITE_PUBLIC_URL, import.meta.env.VITE_APP_URL);

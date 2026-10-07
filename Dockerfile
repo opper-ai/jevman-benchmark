@@ -1,7 +1,7 @@
 # Build the static client with the full toolchain, then run the server on a slim Node image.
 FROM node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS build
 # Serve below a path prefix (e.g. /jevman-benchmark; empty = at the root), and the public origin for share links and
-# social-card tags (empty = https://jevman.apps.chadda.se). Both are baked into the client at build time.
+# social-card tags (empty = https://opper.ai/jevman-benchmark/). Both are baked into the client at build time.
 ARG APP_BASE_PATH=
 ARG VITE_PUBLIC_URL=
 WORKDIR /app

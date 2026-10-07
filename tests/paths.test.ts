@@ -21,7 +21,7 @@ describe('client paths', () => {
   });
 
   it('shares the bare origin at the root and the app address below a prefix', () => {
-    expect(shareUrlFor('/', 'https://jevman.apps.chadda.se', 'https://jevman.apps.chadda.se/')).toBe('https://jevman.apps.chadda.se');
+    expect(shareUrlFor('/', 'https://example.com', 'https://example.com/')).toBe('https://example.com');
     expect(shareUrlFor('/jevman-benchmark/', 'https://opper.ai', 'https://opper.ai/jevman-benchmark/')).toBe('https://opper.ai/jevman-benchmark/');
   });
 });

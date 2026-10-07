@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { handleCallback, handleLogin, handleLogout, handleMe, json, loginConfigured, opperExchange, redirect, type AuthConfig, type HttpRequest, type HttpResponse } from './auth.ts';
+import { normalizeBasePath } from './base-path.ts';
 import { handleDecideRequest, rejectDecideRequest } from './decide.ts';
 import { devTargetFromEnv, type JevTarget } from './jev.ts';
 
@@ -16,24 +17,62 @@ export interface RouteLogger {
 
 export type Middleware = (req: IncomingMessage, res: ServerResponse, next: () => void) => void;
 
-const isHttps = (env: Record<string, string>) => (env.OPPER_REDIRECT_URI ?? '').startsWith('https:');
+/** PUBLIC_BASE_URL as a bare origin (`https://opper.ai`), or undefined when unset. */
+function publicOriginFromEnv(env: Record<string, string>): string | undefined {
+  const raw = env.PUBLIC_BASE_URL?.trim();
+  if (!raw) return undefined;
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    throw new Error(`[auth] PUBLIC_BASE_URL must be an origin like https://opper.ai, got ${JSON.stringify(raw)}`);
+  }
+  if ((url.protocol !== 'https:' && url.protocol !== 'http:') || url.pathname.replace(/\/+$/, '') || url.search || url.hash) {
+    throw new Error(`[auth] PUBLIC_BASE_URL must be an origin like https://opper.ai (the path goes in APP_BASE_PATH), got ${JSON.stringify(raw)}`);
+  }
+  return url.origin;
+}
+
+function trustProxyHopsFromEnv(env: Record<string, string>): number {
+  const raw = env.TRUST_PROXY_HOPS?.trim();
+  if (!raw) return 0;
+  const hops = Number(raw);
+  if (!Number.isInteger(hops) || hops < 0 || hops > 10) throw new Error(`TRUST_PROXY_HOPS must be a whole number from 0 to 10, got ${JSON.stringify(raw)}`);
+  return hops;
+}
+
+/**
+ * Login with Opper's redirect URI: OPPER_OAUTH_REDIRECT_URI, else OPPER_REDIRECT_URI, else built from
+ * PUBLIC_BASE_URL + APP_BASE_PATH, else the Vite dev server's.
+ */
+export function redirectUriFromEnv(env: Record<string, string>, basePath = normalizeBasePath(env.APP_BASE_PATH)): string {
+  const explicit = env.OPPER_OAUTH_REDIRECT_URI?.trim() || env.OPPER_REDIRECT_URI?.trim();
+  if (explicit) return explicit;
+  return `${publicOriginFromEnv(env) ?? 'http://localhost:5173'}${basePath}/auth/callback`;
+}
 
 /** Auth settings from the environment. An https redirect URI means a deployment, which needs a real SESSION_SECRET. */
 export function authConfigFromEnv(env: Record<string, string>, warn: (msg: string) => void): AuthConfig {
   const clientId = env.OPPER_CLIENT_ID || undefined;
   const clientSecret = env.OPPER_CLIENT_SECRET || undefined;
+  const basePath = normalizeBasePath(env.APP_BASE_PATH);
+  const publicOrigin = publicOriginFromEnv(env);
+  const redirectUri = redirectUriFromEnv(env, basePath);
   let sessionSecret = env.SESSION_SECRET ?? '';
   if (sessionSecret.length < 32) {
-    if (isHttps(env)) throw new Error('[auth] SESSION_SECRET must be set to at least 32 characters when OPPER_REDIRECT_URI is https');
+    if (redirectUri.startsWith('https:')) throw new Error('[auth] SESSION_SECRET must be set to at least 32 characters when the redirect URI is https');
     if (clientId && clientSecret) warn('[auth] SESSION_SECRET is missing or shorter than 32 characters — using a random one; sign-ins reset on restart');
     sessionSecret = randomBytes(32).toString('hex');
   }
   return {
     clientId,
     clientSecret,
-    redirectUri: env.OPPER_REDIRECT_URI || 'http://localhost:5173/auth/callback',
+    redirectUri,
     opperUrl: env.OPPER_BASE_URL || 'https://api.opper.ai',
     sessionSecret,
+    basePath,
+    trustProxyHops: trustProxyHopsFromEnv(env),
+    ...(publicOrigin ? { publicOrigin } : {}),
   };
 }
 
@@ -46,7 +85,7 @@ export function devKeyFromEnv(env: Record<string, string>, cfg: AuthConfig, warn
   if (!target || !cfg.redirectUri.startsWith('https:')) return target;
   const name = target.provider === 'typesafe' ? 'TYPESAFE_API_KEY' : 'OPPER_API_KEY';
   if (env.JEV_ALLOW_DEV_KEY !== '1') {
-    warn(`[jev] ${name} is ignored because OPPER_REDIRECT_URI is https — a deployed site must not pay for visitors with a server key. Set JEV_ALLOW_DEV_KEY=1 to use it anyway.`);
+    warn(`[jev] ${name} is ignored because the redirect URI is https — a deployed site must not pay for visitors with a server key. Set JEV_ALLOW_DEV_KEY=1 to use it anyway.`);
     return undefined;
   }
   warn(`[jev] JEV_ALLOW_DEV_KEY=1: ${name} pays for every signed-out visitor of this https deployment`);
@@ -115,7 +154,7 @@ export function createJevMiddleware(env: Record<string, string>, logger: RouteLo
     if (path === '/auth/login') return send(res, handleLogin(http, cfg));
     if (path === '/auth/callback') {
       void handleCallback(http, cfg, exchange)
-        .then((r) => send(res, r), () => send(res, redirect('/?auth_error=exchange')))
+        .then((r) => send(res, r), () => send(res, redirect(`${cfg.basePath ?? ''}/?auth_error=exchange`)))
         .catch(() => abort(res));
       return;
     }

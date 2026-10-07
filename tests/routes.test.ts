@@ -2,7 +2,7 @@ import { EventEmitter } from 'node:events';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SESSION_COOKIE } from '../server/auth';
 import { jevPlugin } from '../server/plugin';
-import { authConfigFromEnv, createJevMiddleware, devKeyFromEnv, MAX_BODY_BYTES } from '../server/routes';
+import { authConfigFromEnv, createJevMiddleware, devKeyFromEnv, MAX_BODY_BYTES, redirectUriFromEnv } from '../server/routes';
 import { sealSession } from '../server/session';
 
 const SECRET = 's'.repeat(64);
@@ -57,6 +57,75 @@ describe('jevPlugin', () => {
       (use.mock.calls[0][0] as ReturnType<typeof mount>['handler'])(Object.assign(new EventEmitter(), { method: 'GET', url: '/api/me', headers: {} }) as never, res as never, vi.fn());
       expect(bodyOf(res)).toMatchObject({ mode: 'none' });
     }
+  });
+});
+
+describe('jevPlugin below APP_BASE_PATH', () => {
+  it('serves the routes and the clean leaderboard URL below the prefix only', () => {
+    const plugin = jevPlugin({ SESSION_SECRET: SECRET, APP_BASE_PATH: '/jevman-benchmark' }, { quiet: true });
+    const use = vi.fn();
+    (plugin.configureServer as (s: unknown) => void)({ config: { logger: newLogger() }, middlewares: { use } });
+    const [jev, clean] = use.mock.calls.map((c) => c[0] as (r: unknown, s: unknown, n: () => void) => void);
+    const res = fakeRes();
+    jev(Object.assign(new EventEmitter(), { method: 'GET', url: '/jevman-benchmark/api/me', headers: {} }), res, vi.fn());
+    expect(bodyOf(res)).toMatchObject({ mode: 'none' });
+    const outside = { method: 'GET', url: '/api/me', headers: {} };
+    const next = vi.fn();
+    jev(Object.assign(new EventEmitter(), outside), fakeRes(), next);
+    expect(next).toHaveBeenCalled();
+    expect(outside.url).toBe('/api/me');
+    const page = { url: '/jevman-benchmark/leaderboard?x=1' };
+    clean(page, null, () => {});
+    expect(page.url).toBe('/jevman-benchmark/leaderboard.html?x=1');
+    const rootPage = { url: '/leaderboard' };
+    clean(rootPage, null, () => {});
+    expect(rootPage.url).toBe('/leaderboard');
+  });
+});
+
+describe('redirect URI and deployment settings', () => {
+  it.each([
+    [{}, 'http://localhost:5173/auth/callback'],
+    [{ APP_BASE_PATH: '/jevman-benchmark' }, 'http://localhost:5173/jevman-benchmark/auth/callback'],
+    [{ PUBLIC_BASE_URL: 'https://opper.ai', APP_BASE_PATH: '/jevman-benchmark' }, 'https://opper.ai/jevman-benchmark/auth/callback'],
+    [{ PUBLIC_BASE_URL: 'https://opper.ai/', APP_BASE_PATH: '/jevman-benchmark/' }, 'https://opper.ai/jevman-benchmark/auth/callback'],
+    [{ PUBLIC_BASE_URL: 'https://jevman.example' }, 'https://jevman.example/auth/callback'],
+    [{ OPPER_REDIRECT_URI: 'https://old.example/auth/callback', PUBLIC_BASE_URL: 'https://opper.ai' }, 'https://old.example/auth/callback'],
+    [{ OPPER_OAUTH_REDIRECT_URI: 'https://opper.ai/x/auth/callback', OPPER_REDIRECT_URI: 'https://old.example/auth/callback' }, 'https://opper.ai/x/auth/callback'],
+  ])('%j -> %s', (env, expected) => {
+    expect(redirectUriFromEnv(env)).toBe(expected);
+  });
+
+  it('reads the base path, proxy hops and public origin', () => {
+    const cfg = authConfigFromEnv({ SESSION_SECRET: SECRET, APP_BASE_PATH: '/jevman-benchmark/', PUBLIC_BASE_URL: 'https://opper.ai', TRUST_PROXY_HOPS: '2' }, vi.fn());
+    expect(cfg).toMatchObject({ basePath: '/jevman-benchmark', trustProxyHops: 2, publicOrigin: 'https://opper.ai', redirectUri: 'https://opper.ai/jevman-benchmark/auth/callback' });
+    expect(authConfigFromEnv({ SESSION_SECRET: SECRET }, vi.fn())).toMatchObject({ basePath: '', trustProxyHops: 0 });
+    expect(authConfigFromEnv({ SESSION_SECRET: SECRET }, vi.fn()).publicOrigin).toBeUndefined();
+  });
+
+  it.each([
+    [{ PUBLIC_BASE_URL: 'opper.ai' }, /PUBLIC_BASE_URL/],
+    [{ PUBLIC_BASE_URL: 'https://opper.ai/jevman-benchmark' }, /PUBLIC_BASE_URL/],
+    [{ PUBLIC_BASE_URL: 'ftp://opper.ai' }, /PUBLIC_BASE_URL/],
+    [{ TRUST_PROXY_HOPS: 'two' }, /TRUST_PROXY_HOPS/],
+    [{ TRUST_PROXY_HOPS: '-1' }, /TRUST_PROXY_HOPS/],
+    [{ APP_BASE_PATH: '/a b' }, /APP_BASE_PATH/],
+  ])('refuses %j', (env, message) => {
+    expect(() => authConfigFromEnv({ SESSION_SECRET: SECRET, ...env }, vi.fn())).toThrow(message);
+  });
+
+  it('treats an https PUBLIC_BASE_URL as a deployment: real secret required, dev key ignored', () => {
+    expect(() => authConfigFromEnv({ PUBLIC_BASE_URL: 'https://opper.ai' }, vi.fn())).toThrow(/SESSION_SECRET/);
+    const env = { PUBLIC_BASE_URL: 'https://opper.ai', SESSION_SECRET: SECRET, OPPER_API_KEY: 'op-dev' };
+    expect(devKeyFromEnv(env, authConfigFromEnv(env, vi.fn()), vi.fn())).toBeUndefined();
+  });
+
+  it('sends a failed callback back below the base path', async () => {
+    const { handler } = mount({ APP_BASE_PATH: '/jevman-benchmark', OPPER_CLIENT_ID: 'opper_app_x', OPPER_CLIENT_SECRET: 'shh' });
+    const { res } = call(handler, 'GET', '/auth/callback?code=c&state=x');
+    await vi.waitFor(() => expect(res.end).toHaveBeenCalled());
+    expect(res.statusCode).toBe(302);
+    expect(res.headers.Location).toBe('/jevman-benchmark/?auth_error=state');
   });
 });
 

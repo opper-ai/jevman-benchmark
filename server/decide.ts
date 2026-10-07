@@ -152,7 +152,7 @@ export interface DecideRequestDeps {
  */
 export function rejectDecideRequest(req: HttpRequest, cfg: AuthConfig, devKey: JevTarget | undefined): HttpResponse | null {
   if (req.method !== 'POST') return json(405, { error: 'POST only' }, [], { Allow: 'POST' });
-  if (crossSite(req)) return json(403, { error: 'Cross-site request refused' });
+  if (crossSite(req, cfg)) return json(403, { error: 'Cross-site request refused' });
   if (!header(req, 'content-type').toLowerCase().startsWith('application/json')) return json(415, { error: 'Expected application/json' });
   if (!resolveKey(sessionFrom(req, cfg), devKey, cfg.opperUrl)) return json(401, { error: 'Sign in with Opper to let the AI play', signedOut: true });
   return null;

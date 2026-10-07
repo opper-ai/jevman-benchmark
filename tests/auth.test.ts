@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { crossSite, handleCallback, handleLogin, handleLogout, handleMe, opperExchange, sessionFrom, SESSION_COOKIE, STATE_COOKIE, type AuthConfig, type HttpRequest } from '../server/auth';
+import { crossSite, requestHost, handleCallback, handleLogin, handleLogout, handleMe, opperExchange, sessionFrom, SESSION_COOKIE, STATE_COOKIE, type AuthConfig, type HttpRequest } from '../server/auth';
 import { openSession, sealSession } from '../server/session';
 
 const cfg: AuthConfig = { clientId: 'opper_app_x', clientSecret: 'shh', redirectUri: 'http://localhost:5173/auth/callback', opperUrl: 'https://api.opper.ai', sessionSecret: 's'.repeat(64) };
@@ -165,5 +165,58 @@ describe('crossSite', () => {
     [{ origin: 'http://localhost:5173' }, true],
   ])('%j -> %s', (headers, expected) => {
     expect(crossSite(req('/', headers, 'POST'))).toBe(expected);
+  });
+});
+
+describe('below a base path', () => {
+  const based: AuthConfig = { ...cfg, basePath: '/jevman-benchmark', redirectUri: 'https://opper.ai/jevman-benchmark/auth/callback' };
+  const withState = (url: string) => req(url, { cookie: `${STATE_COOKIE}=st4te` });
+
+  it('scopes the state cookie to the sign-in routes below the prefix', () => {
+    const r = handleLogin(req('/auth/login'), based, () => 'st4te');
+    expect(setCookies(r)[0]).toBe(`${STATE_COOKIE}=st4te; Max-Age=600; Path=/jevman-benchmark/auth; HttpOnly; Secure; SameSite=Lax`);
+    expect(new URL(r.headers.Location as string).searchParams.get('redirect_uri')).toBe('https://opper.ai/jevman-benchmark/auth/callback');
+  });
+
+  it('scopes the session cookie to the app and returns to the app', async () => {
+    const r = await handleCallback(withState('/auth/callback?code=c&state=st4te'), based, async () => ({ apiKey: 'op-player', user: {} }), 10_000);
+    expect(r.headers.Location).toBe('/jevman-benchmark/');
+    const cookies = setCookies(r);
+    expect(cookies.find((c) => c.startsWith(`${SESSION_COOKIE}=`))).toMatch(/; Path=\/jevman-benchmark; HttpOnly; Secure; SameSite=Lax$/);
+    expect(cookies.find((c) => c.startsWith(`${STATE_COOKIE}=`))).toMatch(/Max-Age=0; Path=\/jevman-benchmark\/auth;/);
+  });
+
+  it('sends sign-in errors back to the app', async () => {
+    const r = await handleCallback(withState('/auth/callback?code=c&state=wrong'), based, vi.fn());
+    expect(r.headers.Location).toBe('/jevman-benchmark/?auth_error=state');
+  });
+
+  it('clears the session cookie on the same path at sign-out', () => {
+    const r = handleLogout(req('/auth/logout', { 'content-type': 'application/json' }, 'POST'), based);
+    expect(setCookies(r)).toEqual([`${SESSION_COOKIE}=; Max-Age=0; Path=/jevman-benchmark; HttpOnly; Secure; SameSite=Lax`]);
+  });
+});
+
+describe('crossSite behind proxies', () => {
+  it('trusts X-Forwarded-Host only with TRUST_PROXY_HOPS', () => {
+    const headers = { origin: 'https://opper.ai', host: 'internal-alb.example', 'x-forwarded-host': 'opper.ai' };
+    expect(crossSite(req('/', headers, 'POST'))).toBe(true);
+    expect(crossSite(req('/', headers, 'POST'), { trustProxyHops: 2 })).toBe(false);
+  });
+  it('accepts the PUBLIC_BASE_URL origin and nothing else', () => {
+    const headers = (origin: string) => ({ origin, host: 'internal-alb.example' });
+    expect(crossSite(req('/', headers('https://opper.ai'), 'POST'), { publicOrigin: 'https://opper.ai' })).toBe(false);
+    expect(crossSite(req('/', headers('https://evil.example'), 'POST'), { publicOrigin: 'https://opper.ai' })).toBe(true);
+    expect(crossSite(req('/', { ...headers('https://opper.ai'), 'sec-fetch-site': 'cross-site' }, 'POST'), { publicOrigin: 'https://opper.ai' })).toBe(true);
+  });
+  it.each([
+    [{ host: 'a' }, 0, 'a'],
+    [{ host: 'a', 'x-forwarded-host': 'b' }, 0, 'a'],
+    [{ host: 'a', 'x-forwarded-host': 'b' }, 1, 'b'],
+    [{ host: 'a', 'x-forwarded-host': 'b' }, 2, 'b'],
+    [{ host: 'a', 'x-forwarded-host': 'spoofed, b, c' }, 2, 'b'],
+    [{ host: 'a', 'x-forwarded-host': 'spoofed, b, c' }, 1, 'c'],
+  ])('requestHost(%j, %i) = %s', (headers, hops, expected) => {
+    expect(requestHost(req('/', headers), hops)).toBe(expected);
   });
 });

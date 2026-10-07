@@ -112,11 +112,89 @@ describe('production server', () => {
     expect(events.map((e) => e.event)).toEqual(expect.arrayContaining(['listening', 'ready', 'draining', 'listener-close', 'shutdown-complete']));
   });
 
+  it('finishes shutting down before ECS stops waiting (stopTimeout 30 s)', async () => {
+    dist = makeDist();
+    // The default deadline, with a short drain so the test need not wait for it.
+    app = createApp({ env: { SESSION_SECRET: SECRET }, distDir: dist, commit: 'x', drainMs: 10, log: (event, details = {}) => events.push({ event, ...details }) });
+    await app.listen(0);
+    events.length = 0;
+    const done = app.shutdown();
+    expect((events.find((e) => e.event === 'draining')!.deadlineMs as number)).toBeLessThan(30_000);
+    expect(await done).toBe('clean');
+  });
+
   it('logs structured events without secrets', async () => {
     const url = await start({ OPPER_CLIENT_ID: 'opper_app_x', OPPER_CLIENT_SECRET: 'shh-secret' });
     await fetch(`${url}/auth/callback?code=c&state=x`, { redirect: 'manual' });
     expect(JSON.stringify(events)).not.toContain('shh-secret');
     expect(JSON.stringify(events)).not.toContain(SECRET);
     expect(events[0]).toMatchObject({ event: 'listening' });
+  });
+});
+
+describe('production server below APP_BASE_PATH', () => {
+  const BASE = '/jevman-benchmark';
+  const startBelow = (env: Record<string, string> = {}, opts: { drainMs?: number } = {}) => start({ APP_BASE_PATH: BASE, ...env }, opts);
+
+  it('serves the page, assets, leaderboard, demo and API below the prefix', async () => {
+    const url = await startBelow({ OPPER_CLIENT_ID: 'opper_app_x', OPPER_CLIENT_SECRET: 'shh' });
+    const page = await fetch(`${url}${BASE}/`);
+    expect(page.status).toBe(200);
+    expect(await page.text()).toContain('jevman');
+    const asset = await fetch(`${url}${BASE}/assets/index-abc123.js`);
+    expect(asset.status).toBe(200);
+    expect(asset.headers.get('cache-control')).toBe('public, max-age=31536000, immutable');
+    expect(await (await fetch(`${url}${BASE}/leaderboard`)).text()).toContain('Which AI plays Pac-Man best?');
+    expect(await (await fetch(`${url}${BASE}/leaderboard.json`)).json()).toEqual({ entries: [] });
+    expect(await (await fetch(`${url}${BASE}/demo/jev-demo.json`)).json()).toEqual({ version: 1 });
+    expect(await (await fetch(`${url}${BASE}/api/me`)).json()).toMatchObject({ mode: 'none', loginAvailable: true });
+    expect(await (await fetch(`${url}${BASE}/revision`)).json()).toEqual({ app: 'jevman', commit: 'a'.repeat(40), draining: false });
+    const login = await fetch(`${url}${BASE}/auth/login`, { redirect: 'manual' });
+    expect(login.status).toBe(302);
+    expect(login.headers.get('set-cookie')).toContain(`Path=${BASE}/auth;`);
+    expect(new URL(login.headers.get('location')!).searchParams.get('redirect_uri')).toBe(`http://localhost:5173${BASE}/auth/callback`);
+    expect((await fetch(`${url}${BASE}/nothing-here`)).status).toBe(404);
+  });
+
+  it('redirects the bare prefix to the prefix with a slash, keeping the query', async () => {
+    const url = await startBelow();
+    const bare = await fetch(`${url}${BASE}`, { redirect: 'manual' });
+    expect(bare.status).toBe(308);
+    expect(bare.headers.get('location')).toBe(`${BASE}/`);
+    const linked = await fetch(`${url}${BASE}?pacman=opper%2Fclef`, { redirect: 'manual' });
+    expect(linked.headers.get('location')).toBe(`${BASE}/?pacman=opper%2Fclef`);
+  });
+
+  it('answers 404 outside the prefix, except /health', async () => {
+    const url = await startBelow();
+    for (const path of ['/', '/leaderboard', '/leaderboard.json', '/api/me', '/revision', '/auth/login', '/assets/index-abc123.js', `${BASE}x/`, '/media-studio/']) {
+      expect([path, (await fetch(`${url}${path}`, { redirect: 'manual' })).status]).toEqual([path, 404]);
+    }
+    const decide = await fetch(`${url}/api/decide`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    expect(decide.status).toBe(404);
+  });
+
+  it('reports health at the root and below the prefix, and withdraws both when draining', async () => {
+    const url = await startBelow({}, { drainMs: 300 });
+    expect((await fetch(`${url}/health`)).status).toBe(200);
+    expect((await fetch(`${url}${BASE}/health`)).status).toBe(200);
+    const done = app!.shutdown();
+    expect((await fetch(`${url}/health`)).status).toBe(503);
+    expect((await fetch(`${url}${BASE}/health`)).status).toBe(503);
+    expect(await done).toBe('clean');
+  });
+
+  it('refuses to start with a malformed base path', () => {
+    dist = makeDist();
+    expect(() => createApp({ env: { APP_BASE_PATH: '/../x', SESSION_SECRET: SECRET }, distDir: dist, commit: 'x' })).toThrow(/APP_BASE_PATH/);
+  });
+
+  it('builds the redirect URI from PUBLIC_BASE_URL and the base path, which makes it a deployment', async () => {
+    dist = makeDist();
+    expect(() => createApp({ env: { APP_BASE_PATH: BASE, PUBLIC_BASE_URL: 'https://opper.ai' }, distDir: dist, commit: 'x' })).toThrow(/SESSION_SECRET/);
+    const url = await startBelow({ PUBLIC_BASE_URL: 'https://opper.ai', OPPER_CLIENT_ID: 'opper_app_x', OPPER_CLIENT_SECRET: 'shh' });
+    const login = await fetch(`${url}${BASE}/auth/login`, { redirect: 'manual' });
+    expect(new URL(login.headers.get('location')!).searchParams.get('redirect_uri')).toBe('https://opper.ai/jevman-benchmark/auth/callback');
+    expect(login.headers.get('set-cookie')).toMatch(/Path=\/jevman-benchmark\/auth; HttpOnly; Secure; SameSite=Lax$/);
   });
 });

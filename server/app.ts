@@ -3,6 +3,7 @@ import { stat } from 'node:fs/promises';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { extname, join, resolve, sep } from 'node:path';
+import { mountedUrl, normalizeBasePath } from './base-path.ts';
 import { createJevMiddleware } from './routes.ts';
 
 export type Log = (event: string, details?: Record<string, unknown>) => void;
@@ -11,12 +12,12 @@ export interface AppOptions {
   env: Record<string, string | undefined>;
   /** The `vite build` output. */
   distDir: string;
-  /** The deployed Git commit (Coolify's SOURCE_COMMIT). */
+  /** The deployed Git commit (SOURCE_COMMIT, set at image build time). */
   commit: string;
   log?: Log;
-  /** How long to keep serving after SIGTERM while health checks and Traefik withdraw this container. */
+  /** How long to keep serving after SIGTERM while health checks and the load balancer withdraw this container. */
   drainMs?: number;
-  /** Hard limit from SIGTERM to exit. */
+  /** Hard limit from SIGTERM to exit; below ECS's 30 s stopTimeout, so the process exits before SIGKILL. */
   deadlineMs?: number;
 }
 
@@ -46,12 +47,17 @@ const SECURITY_HEADERS = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
 };
 
-/** The jevman production server: static build, Login with Opper, the jev proxy, /health and /revision. */
+/**
+ * The jevman production server: static build, Login with Opper, the jev proxy, /health and /revision.
+ * With APP_BASE_PATH (e.g. /jevman-benchmark) all of it lives below that prefix, the prefix itself redirects to
+ * `prefix/`, anything else is 404, and /health also answers at the root for load balancer health checks.
+ */
 export function createApp(opts: AppOptions): App {
   const log: Log = opts.log ?? ((event, details = {}) => console.log(JSON.stringify({ at: new Date().toISOString(), event, ...details })));
   const drainMs = opts.drainMs ?? 5000;
-  const deadlineMs = opts.deadlineMs ?? 35_000;
+  const deadlineMs = opts.deadlineMs ?? 25_000;
   const root = resolve(opts.distDir);
+  const basePath = normalizeBasePath(opts.env.APP_BASE_PATH);
   const env = Object.fromEntries(Object.entries(opts.env).filter((e): e is [string, string] => typeof e[1] === 'string'));
   // Throws for an https deployment without a real SESSION_SECRET, before anything listens.
   const jev = createJevMiddleware(env, {
@@ -103,6 +109,15 @@ export function createApp(opts: AppOptions): App {
   }
 
   const server = http.createServer((req, res) => {
+    const mounted = mountedUrl(req.url ?? '/', basePath);
+    if (mounted.kind === 'bare') {
+      res.writeHead(308, { Location: mounted.location, 'Cache-Control': 'no-store', ...SECURITY_HEADERS });
+      res.end();
+      return;
+    }
+    // Outside the base path only /health answers (the load balancer may check either one).
+    if (mounted.kind === 'outside' && (req.url ?? '/').split('?')[0] !== '/health') return notFound(res);
+    if (mounted.kind === 'inside') req.url = mounted.url;
     const path = (req.url ?? '/').split('?')[0];
     if (path === '/health') {
       const healthy = ready && !draining;
@@ -126,7 +141,7 @@ export function createApp(opts: AppOptions): App {
         server.once('error', fail);
         server.listen(port, host, () => {
           const actual = (server.address() as AddressInfo).port;
-          log('listening', { port: actual, commit: opts.commit });
+          log('listening', { port: actual, commit: opts.commit, ...(basePath ? { basePath } : {}) });
           ready = true;
           log('ready');
           done(actual);
@@ -136,7 +151,7 @@ export function createApp(opts: AppOptions): App {
     shutdown() {
       shutdownPromise ??= new Promise((done) => {
         draining = true;
-        log('draining', { drainMs });
+        log('draining', { drainMs, deadlineMs });
         const deadline = setTimeout(() => {
           log('shutdown-deadline');
           done('deadline');

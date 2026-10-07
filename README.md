@@ -40,9 +40,9 @@ This is meant for local development: on an https deployment the key is ignored (
 1. Register an OAuth app with Opper and add the redirect URI `http://localhost:5173/auth/callback`
    (or your deployment's `https://…/auth/callback`; below a [base path](#deployment), e.g.
    `https://opper.ai/jevman-benchmark/auth/callback`).
-2. Set `OPPER_CLIENT_ID`, `OPPER_CLIENT_SECRET`, `OPPER_REDIRECT_URI` and `SESSION_SECRET`
-   (`openssl rand -hex 32`) in `.env`. A deployment can set `PUBLIC_BASE_URL` instead of the redirect URI (see
-   [Deployment](#deployment)).
+2. Set `OPPER_CLIENT_ID`, `OPPER_CLIENT_SECRET` and `SESSION_SECRET` (`openssl rand -hex 32`) in `.env`. The
+   redirect URI defaults to the dev server's; set `OPPER_REDIRECT_URI` for another one, or, for a deployment,
+   `PUBLIC_BASE_URL` (see [Deployment](#deployment)).
 
 Visitors who aren't signed in watch a **recorded demo** of a jev game. "Sign in with Opper" sends
 them through Opper's sign-in; afterwards jev plays live and every call is billed to **their own

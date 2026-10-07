@@ -1,6 +1,7 @@
 import './style.css';
 import type { Community, Leaderboard } from '../shared/leaderboard';
 import { communityRows, leaderboardRows, topScore, verdict, type LeaderboardRow } from './leaderboard-view';
+import { appPath } from './paths';
 
 const $ = (id: string) => document.getElementById(id)!;
 
@@ -88,9 +89,9 @@ function render(board: Leaderboard, community: Community): void {
 const NO_SUBMISSIONS: Community = { generatedAt: '', benchVersion: 0, entries: [] };
 
 Promise.all([
-  fetch('/leaderboard.json').then((r) => (r.ok ? (r.json() as Promise<Leaderboard>) : Promise.reject(new Error(String(r.status))))),
+  fetch(appPath('/leaderboard.json')).then((r) => (r.ok ? (r.json() as Promise<Leaderboard>) : Promise.reject(new Error(String(r.status))))),
   // Missing (a dev server without npm run submissions) or broken, the self-reported list is just empty.
-  fetch('/community.json')
+  fetch(appPath('/community.json'))
     .then((r) => (r.ok ? (r.json() as Promise<Community>) : NO_SUBMISSIONS))
     .catch(() => NO_SUBMISSIONS),
 ])

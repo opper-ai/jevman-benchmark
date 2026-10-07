@@ -10,19 +10,19 @@
     <meta property="og:site_name" content="jevman" />
     <meta property="og:title" content="Which AI plays Pac-Man best?" />
     <meta property="og:description" content="Six AI decision models each played 24 real-time games of Pac-Man against the classic ghosts. Here is how they rank." />
-    <meta property="og:url" content="https://jevman.apps.chadda.se/leaderboard" />
-    <meta property="og:image" content="https://jevman.apps.chadda.se/og-leaderboard.png" />
+    <meta property="og:url" content="%VITE_APP_URL%leaderboard" />
+    <meta property="og:image" content="%VITE_APP_URL%og-leaderboard.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Which AI plays Pac-Man best?" />
     <meta name="twitter:description" content="Six AI decision models each played 24 real-time games of Pac-Man against the classic ghosts. Here is how they rank." />
-    <meta name="twitter:image" content="https://jevman.apps.chadda.se/og-leaderboard.png" />
+    <meta name="twitter:image" content="%VITE_APP_URL%og-leaderboard.png" />
   </head>
   <body>
     <header class="appbar">
       <div class="appbar-inner">
-        <a class="brand" href="/">
+        <a class="brand" href="%BASE_URL%">
           <span class="logo" aria-hidden="true"></span>
           <div>
             <h1>jevman</h1>
@@ -30,8 +30,8 @@
           </div>
         </a>
         <nav class="tabs" aria-label="Site">
-          <a href="/">Play</a>
-          <a href="/leaderboard" aria-current="page">Leaderboard</a>
+          <a href="%BASE_URL%">Play</a>
+          <a href="%BASE_URL%leaderboard" aria-current="page">Leaderboard</a>
         </nav>
         <div class="appbar-end">
           <a class="gh" href="https://github.com/joch/jevman" target="_blank" rel="noopener">GitHub ↗</a>

@@ -19,6 +19,7 @@ import type { ModelPicking } from './picker';
 import { effectiveChoice, ModelWarming } from './warming';
 import { DEFAULT_MODEL, modelName } from '../shared/models';
 import type { Dir } from './types';
+import { appPath, SHARE_URL } from './paths';
 
 const KEYS: Record<string, Dir> = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
@@ -28,7 +29,7 @@ const DEMO_CAPTION = 'recorded game';
 const $ = <T extends HTMLElement = HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
 
 // The recorded demo downloads alongside /api/me; it plays when the page opens, for everyone.
-const recording = loadRecording('/demo/jev-demo.json');
+const recording = loadRecording(appPath('/demo/jev-demo.json'));
 const me = await fetchMe();
 const authError = takeAuthError();
 const rec = await recording;
@@ -146,11 +147,10 @@ function endDemo(): void {
 
 // The leaderboard, to compare a game with (loaded in the background; a game over before it arrives just skips it).
 let board: Leaderboard | null = null;
-const boardLoaded = fetch('/leaderboard.json')
+const boardLoaded = fetch(appPath('/leaderboard.json'))
   .then((r) => (r.ok ? (r.json() as Promise<Leaderboard>) : null))
   .then((b) => void (board = b))
   .catch(() => {});
-const SHARE_URL = 'https://jevman.apps.chadda.se';
 const BEST_KEY = 'jevman.best';
 const readBest = (): number => {
   try {

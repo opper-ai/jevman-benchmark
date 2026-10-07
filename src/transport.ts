@@ -1,5 +1,6 @@
 import type { DecideResponse } from './brain';
 import type { Transport } from './scheduler';
+import { appPath } from './paths';
 
 const TIMEOUT_MS = 2500;
 
@@ -13,7 +14,7 @@ export function createHttpTransport(hooks: TransportHooks = {}): Transport {
     let res: Response;
     let json: Partial<DecideResponse> & { error?: string };
     try {
-      res = await fetch('/api/decide', {
+      res = await fetch(appPath('/api/decide'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -57,7 +58,7 @@ export type WarmResult = { ok: true } | { ok: false; error: string; account: boo
  */
 export async function warmUp(model: string | undefined, hooks: TransportHooks = {}): Promise<WarmResult> {
   try {
-    const res = await fetch('/api/warm', {
+    const res = await fetch(appPath('/api/warm'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(model ? { model } : {}),

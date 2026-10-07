@@ -1,5 +1,6 @@
 import { DECISION_MODELS } from '../shared/models';
 import { jointLeaders, type CommunityEntry, type Leaderboard, type LeaderboardEntry } from '../shared/leaderboard';
+import { appPath } from './paths';
 
 export interface LeaderboardRow {
   rank: number;
@@ -72,7 +73,7 @@ export function leaderboardRows(board: Leaderboard, top = topScore(board.entries
     badges: winners.filter(([, m]) => m === e.model).map(([label]) => label),
     summary: summaryOf(e),
     stats: statsOf(e),
-    link: { href: `/?pacman=${encodeURIComponent(e.model)}`, label: `Watch it play →` },
+    link: { href: appPath(`/?pacman=${encodeURIComponent(e.model)}`), label: `Watch it play →` },
   }));
 }
 

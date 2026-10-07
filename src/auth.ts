@@ -1,3 +1,5 @@
+import { appPath } from './paths';
+
 export interface Me {
   mode: 'player' | 'dev' | 'none';
   user?: { name?: string; email?: string };
@@ -58,7 +60,7 @@ function parseMe(body: unknown): Me | null {
 
 export async function fetchMe(): Promise<Me> {
   try {
-    const res = await fetch('/api/me', { signal: AbortSignal.timeout(ME_TIMEOUT_MS) });
+    const res = await fetch(appPath('/api/me'), { signal: AbortSignal.timeout(ME_TIMEOUT_MS) });
     if (res.ok) return parseMe(await res.json()) ?? fallbackMe();
   } catch {
     // offline, timed out, or bad JSON: behave as signed out
@@ -67,11 +69,11 @@ export async function fetchMe(): Promise<Me> {
 }
 
 export function signIn(): void {
-  window.location.href = '/auth/login';
+  window.location.href = appPath('/auth/login');
 }
 
 export async function signOut(): Promise<void> {
-  await fetch('/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).catch(() => {});
+  await fetch(appPath('/auth/logout'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).catch(() => {});
   window.location.reload();
 }
 

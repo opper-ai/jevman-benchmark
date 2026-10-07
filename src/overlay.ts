@@ -5,6 +5,7 @@ import { modelSelect, type ModelPicking } from './picker';
 import { setGhosts } from './choice';
 import { GHOST_IDS } from './types';
 import { modelName } from '../shared/models';
+import { appPath } from './paths';
 
 type Row = [label: string, value: string];
 
@@ -330,7 +331,7 @@ export function showGameOver(root: HTMLElement, summary: GameSummary, onPlayAgai
       actions.append(share);
     }
     const board = el('a', 'Leaderboard →');
-    board.href = '/leaderboard';
+    board.href = appPath('/leaderboard');
     actions.append(board);
     box.append(actions);
     card.append(box);

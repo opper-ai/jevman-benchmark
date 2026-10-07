@@ -178,7 +178,7 @@ jevman runs on Opper's ECS (eu-north-1) at <https://opper.ai/jevman-benchmark/>,
 [media-studio](https://opper.ai/media-studio). CloudFront and the load balancer forward the full path, so the app
 itself lives below the prefix. A green push to `main` builds the image, pushes it to ECR as `:<commit>` and rolls the
 ECS service ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)). The infrastructure (ECR repository, ECS
-service, load balancer rule, IAM roles, CloudFront behaviour) is in
+service, load balancer rule, IAM roles) is in
 [opper-ai/terraform](https://github.com/opper-ai/terraform), `environments/eu-north/jevman-benchmark.tf`.
 
 Settings, all optional (empty serves the app at the root, as for local development):

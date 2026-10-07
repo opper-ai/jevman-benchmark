@@ -29,7 +29,8 @@ env:
   # Baked into the client at build time; the image also sets APP_BASE_PATH for the server.
   APP_BASE_PATH: /jevman-benchmark
   VITE_PUBLIC_URL: https://opper.ai
-  # CLOUDFRONT_DISTRIBUTION_ID and AWS_DEPLOY_ROLE_ARN are repository variables.
+  # AWS_DEPLOY_ROLE_ARN is a repository variable. No CloudFront invalidation: opper.ai's default behaviour, which
+  # /jevman-benchmark falls under, doesn't cache.
 
 jobs:
   test:
@@ -170,14 +171,6 @@ jobs:
           done
           echo "::error::rollout still IN_PROGRESS after 10 minutes"
           exit 1
-
-      # Flush the edge once the new tasks are stable so the pages serve the new build at once. Hashed assets
-      # re-populate under their own keys, so this is safe and idempotent.
-      - name: Invalidate CloudFront cache
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/jevman-benchmark/*"
 
       # /revision is no-store, so this reads the tasks behind CloudFront: done once they serve this commit.
       - name: Verify the deployed commit

@@ -41,9 +41,9 @@ jobs:
       contents: read
       packages: read # pull ghcr.io/opper-ai/opper-secrets (the loadsecrets layer)
     env:
-      # Pull requests from forks cannot pull the private loadsecrets image, so they build and smoke the image
-      # without it (the `runtime` target: the same server, without the secrets-loading entrypoint).
-      FORK_PR: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+      # Only this repository can pull the private loadsecrets image: forks, and pull requests from them, build and smoke
+      # the image without it (the `runtime` target: the same server, without the secrets-loading entrypoint).
+      NO_LOADSECRETS: ${{ github.repository != 'opper-ai/jevman-benchmark' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -56,7 +56,7 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - name: Log in to GHCR (for the loadsecrets layer)
-        if: env.FORK_PR != 'true'
+        if: env.NO_LOADSECRETS != 'true'
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
@@ -65,7 +65,7 @@ jobs:
       - name: Build the image as deployed
         run: |
           target=()
-          if [ "$FORK_PR" = true ]; then target=(--target runtime); fi
+          if [ "$NO_LOADSECRETS" = true ]; then target=(--target runtime); fi
           docker build "${target[@]}" --tag jevman:ci \
             --build-arg APP_BASE_PATH="$APP_BASE_PATH" \
             --build-arg VITE_PUBLIC_URL="$VITE_PUBLIC_URL" \

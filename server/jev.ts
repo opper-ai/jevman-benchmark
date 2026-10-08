@@ -1,4 +1,4 @@
-import { DEFAULT_MODEL, type ModelId } from '../shared/models.ts';
+import { DECISION_MODELS, DEFAULT_MODEL, type ModelId } from '../shared/models.ts';
 
 /** Where jev calls go: Opper's TypeSafe-compatible endpoint, or TypeSafe's own System One API. */
 export type JevProvider = 'opper' | 'typesafe';
@@ -28,7 +28,10 @@ export const modelFor = (provider: JevProvider, env: Record<string, string | und
 
 /** The id to send for a model the game asked for (one of shared/models.ts). TypeSafe's own API only serves jev. */
 export function requestedModelFor(provider: JevProvider, model: ModelId): string | null {
-  if (provider === 'opper') return model;
+  if (provider === 'opper') {
+    const listed: { id: string; opper?: string } | undefined = DECISION_MODELS.find((m) => m.id === model);
+    return listed?.opper ?? model;
+  }
   return model === DEFAULT_MODEL ? DEFAULTS.typesafe : null;
 }
 

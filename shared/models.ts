@@ -1,11 +1,13 @@
 /**
  * The System One decision models Opper serves (GET https://api.opper.ai/v3/models?type=evaluation, 2026-10).
- * Shared by the game and the server, which only forwards models from this list.
+ * Shared by the game and the server, which only forwards models from this list. `opper` is the id Opper serves a model
+ * under when it differs from the game's own: Opper retired opper/clef and opper/clef-flash (2026-10-08), and the game
+ * keeps its ids so the leaderboard, recordings and high-score boards stay as they are.
  */
 export const DECISION_MODELS = [
   { id: 'typesafe/jev-1.13.0', name: 'jev 1.13', maker: 'TypeSafe' },
-  { id: 'opper/clef', name: 'Clef', maker: 'Cloudflare' },
-  { id: 'opper/clef-flash', name: 'Clef Flash', maker: 'Cloudflare' },
+  { id: 'opper/clef', name: 'Clef', maker: 'Cloudflare', opper: 'sference/clef' },
+  { id: 'opper/clef-flash', name: 'Clef Flash', maker: 'Cloudflare', opper: 'cloudflare:global/clef-flash' },
   { id: 'opper/kev-4b', name: 'Kev 4B', maker: 'Jared Palmer' },
   { id: 'berget/convaiinnovations/laya', name: 'Laya', maker: 'ConvAI Innovations' },
   { id: 'openai/gpt-6-luna-decisions', name: 'GPT-6 Luna', maker: 'OpenAI' },

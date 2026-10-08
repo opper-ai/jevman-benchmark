@@ -30,8 +30,13 @@ describe('decision models', () => {
 describe('handleDecide with a model', () => {
   it('sends the requested model, defaulting to jev', async () => {
     const f1 = ok();
-    await handleDecide({ ...body, model: 'opper/clef' }, deps(f1));
-    expect(sentModel(f1)).toBe('opper/clef');
+    const res = await handleDecide({ ...body, model: 'opper/clef' }, deps(f1));
+    // Opper serves Clef under another id now; the game still hears back its own.
+    expect(sentModel(f1)).toBe('sference/clef');
+    expect((res.body as { model: string }).model).toBe('opper/clef');
+    const f3 = ok();
+    await handleDecide({ ...body, model: 'opper/clef-flash' }, deps(f3));
+    expect(sentModel(f3)).toBe('cloudflare:global/clef-flash');
     const f2 = ok();
     await handleDecide(body, deps(f2));
     expect(sentModel(f2)).toBe('typesafe/jev-1.13.0');
@@ -46,7 +51,7 @@ describe('handleDecide with a model', () => {
       expect((res.body as { model: string }).model).toBe('opper/kev-4b');
       const named = ok();
       await handleDecide({ ...body, model: 'opper/clef' }, deps(named));
-      expect(sentModel(named)).toBe('opper/clef');
+      expect(sentModel(named)).toBe('sference/clef');
     } finally {
       vi.unstubAllEnvs();
     }

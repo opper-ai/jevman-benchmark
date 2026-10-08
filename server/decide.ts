@@ -131,7 +131,7 @@ export async function handleDecide(input: unknown, deps: DecideDeps): Promise<De
     return {
       status: 200,
       body: {
-        model,
+        model: requested ?? model, // the game's id, even when Opper serves the model under another
         answers: json.answers ?? {},
         usage,
         latencyMs,

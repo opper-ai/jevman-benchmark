@@ -268,7 +268,7 @@ describe('warming a model up', () => {
     const r = await handleDecideRequest(post, JSON.stringify({ model: 'opper/clef', questions: { big: 'x'.repeat(5000) } }), cfg, DEV, { fetch: fetchMock, now: () => 0 }, { warm: true });
     expect(r.status).toBe(200);
     const sent = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
-    expect(sent.model).toBe('opper/clef');
+    expect(sent.model).toBe('sference/clef');
     expect(Object.keys(sent.questions)).toEqual(['warmup']);
   });
 

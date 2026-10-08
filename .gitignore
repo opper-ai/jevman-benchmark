@@ -6,3 +6,4 @@ dist/
 !.env.example
 public/community.json
 dist-ssr
+envs/

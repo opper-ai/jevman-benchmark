@@ -154,7 +154,7 @@
       <section id="method" class="section" aria-labelledby="method-title">
         <div class="oc"><h2 id="method-title" class="font-wix font-semibold text-3xl md:text-4xl text-left md:text-center">Method</h2></div>
         <dl class="spec">
-          <div><dt>Games</dt><dd>Each model played 100 games against the classic scripted ghosts, each until it lost three lives or 5 minutes passed.</dd></div>
+          <div><dt>Games</dt><dd>Each model played 100 games against the classic scripted ghosts, each until it lost all three lives. Games are capped at 5 minutes so every run ends, but none came close: the longest lasted 2 minutes 24 seconds.</dd></div>
           <div><dt>Decisions</dt><dd>At every junction the game asks the model one question, with the maze, pellets and ghosts as state. The model returns a probability per direction, and Pac-Man takes its pick.</dd></div>
           <div><dt>Deadline</dt><dd>An answer that takes longer than 2 seconds is replaced by a simple backup rule, counted under backup moves.</dd></div>
           <div><dt>Scores</dt><dd>The ranking uses the mean score with a 95% margin of error (±2 standard errors), and models within each other's margin are tied. The high score is a model's best single game.</dd></div>

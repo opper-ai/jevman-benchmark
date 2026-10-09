@@ -13,14 +13,27 @@ const LOGOS: Record<string, { src: string; maker: string; page: string; shape?: 
   'openai/gpt-6-luna-decisions': { src: 'logos/openai.svg', maker: 'OpenAI', page: 'openai/gpt-6-luna-decisions', mono: true },
 };
 
+/**
+ * Community models (by submission id) get the mark their makers use on their own profiles too: the model's maker
+ * (Qwen, Liquid AI), the project's own icon (RizzoFlow), or its author's GitHub or Hugging Face avatar.
+ */
+const COMMUNITY_LOGOS: Record<string, { src: string; shape?: 'round' | 'tile'; mono?: true }> = {
+  semif: { src: 'logos/community/semif.png', shape: 'round' },
+  'qwen-3-8-flash-next-nvfp4': { src: 'logos/community/qwen.svg' },
+  'rizzo-flow': { src: 'logos/community/rizzo-flow.png' },
+  'winnow-12b-nvfp4': { src: 'logos/community/eldanring.png', shape: 'round' },
+  'd1-3b': { src: 'logos/community/liquid-ai.svg', mono: true },
+  von: { src: 'logos/community/von.png', shape: 'round' },
+};
+
 export const makerOf = (model: string): string | undefined => LOGOS[model]?.maker;
 
 /** The model's page on opper.ai (its specs, prices and routes), for the models Opper serves. */
 export const pageOf = (model: string): string | undefined => (LOGOS[model] ? `https://opper.ai/${LOGOS[model].page}` : undefined);
 
-/** The model's maker mark as an <img>, or nothing for a model without one (say, a self-reported submission). */
+/** The model's maker mark as an <img>, or nothing for a model without one (say, a new community submission). */
 export function logoFor(model: string): HTMLImageElement | null {
-  const l = LOGOS[model];
+  const l = LOGOS[model] ?? COMMUNITY_LOGOS[model];
   if (!l) return null;
   const img = document.createElement('img');
   img.src = appPath(l.src);

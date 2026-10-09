@@ -68,7 +68,8 @@ html.dark {
 }
 html.dark .mono-mark { filter: invert(1); }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scrollbar-gutter: stable; }
+/* Jumps to #leaderboard, #add-model and #method stop below the fixed navbar, not under it. */
+html { scroll-behavior: smooth; scrollbar-gutter: stable; scroll-padding-top: 96px; }
 body { margin: 0; background: var(--j-bg); color: var(--j-text); font: 15px/1.5 var(--j-body); -webkit-font-smoothing: antialiased; }
 a { color: inherit; }
 button { font: inherit; color: inherit; cursor: pointer; }

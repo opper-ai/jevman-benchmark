@@ -32,7 +32,7 @@ export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, boa
   const top = Math.max(1, ...all.map((r) => r.e.meanScore));
   const date = new Date(board.generatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const lead = `${board.settings.gamesPerModel} games per model against the classic ghosts, last run on ${date}`;
-  sub.replaceChildren(community?.entries.length ? `${lead}, ranked together with models the community ran. ` : `${lead}. `, Object.assign(el('a', 'Add your model'), { href: '#add-model' }));
+  sub.replaceChildren(community?.entries.length ? `${lead}, ranked together with models the community ran. ` : `${lead}. `, Object.assign(el('a', 'Add your model'), { href: 'https://github.com/opper-ai/jevman-benchmark/blob/main/CONTRIBUTING.md#benchmark-your-own-model', target: '_blank', rel: 'noopener' }));
 
   const head = el('thead');
   const hr = el('tr');

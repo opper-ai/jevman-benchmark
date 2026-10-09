@@ -15,17 +15,26 @@ import { playAndRecord, TEST_SECRET } from './support/player-game';
 const SECRET = TEST_SECRET;
 const entry = (initials: string, score: number) => ({ initials, score, at: '2026-10-08T00:00:00.000Z', who: 'x' });
 
-/** A store in memory: what it holds, and every text written to it. */
-function memoryStore(initial: string | null): TextStore & { saved: string[] } {
+/** A store in memory, versioned like S3: what it holds, and every text written to it. `write` is another writer. */
+function memoryStore(initial: string | null): TextStore & { saved: string[]; write(t: string): void; current(): string | null } {
   let text = initial;
+  let version = 0;
   const saved: string[] = [];
   return {
     where: 'memory',
     saved,
-    load: async () => text,
-    save: async (t) => {
+    write: (t) => {
       text = t;
+      version += 1;
+    },
+    current: () => text,
+    load: async () => (text === null ? null : { text, version: String(version) }),
+    save: async (t, expected) => {
+      if ((text === null ? null : String(version)) !== expected) return null;
+      text = t;
+      version += 1;
       saved.push(t);
+      return String(version);
     },
   };
 }
@@ -106,7 +115,7 @@ describe('HighScores', () => {
       const store = memoryStore(null);
       let down = true;
       const save = store.save;
-      store.save = async (text) => (down ? Promise.reject(new Error('HTTP 503')) : save(text));
+      store.save = async (text, expected) => (down ? Promise.reject(new Error('HTTP 503')) : save(text, expected));
       const h = new HighScores(store, vi.fn());
       await h.ready();
       h.add('mixed', { ...entry('AAA', 100), who: 'a' });
@@ -118,6 +127,36 @@ describe('HighScores', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("merges in another task's entries instead of writing over them (old and new tasks overlap in a deploy)", async () => {
+    const store = memoryStore(null);
+    const a = new HighScores(store);
+    const b = new HighScores(store);
+    await a.ready();
+    await b.ready();
+    a.add('mixed', { ...entry('AAA', 300), who: 'a' });
+    expect(await a.flush()).toBe(true);
+    b.add('mixed', { ...entry('BBB', 500), who: 'b' });
+    b.add('mixed', { ...entry('AAA', 100), who: 'a' }); // the same account's worse game, from the other task
+    expect(await b.flush()).toBe(true);
+    expect(JSON.parse(store.current()!).mixed.map((e: { initials: string; score: number }) => `${e.initials} ${e.score}`)).toEqual(['BBB 500', 'AAA 300']);
+    expect(b.view().mixed!.map((e) => e.score)).toEqual([500, 300]);
+    expect(b.placeOf('mixed', 'a')).toBe(2);
+    expect(b.placeOf('mixed', 'nobody')).toBeNull();
+  });
+
+  it('gives up on a write it keeps losing, and tries again later', async () => {
+    const store = memoryStore(null);
+    const h = new HighScores(store, vi.fn());
+    await h.ready();
+    const save = store.save;
+    store.save = async (t, expected) => {
+      store.write('{"mixed":[]}'); // someone else writes every time, just before us
+      return save(t, expected);
+    };
+    h.add('mixed', { ...entry('AAA', 300), who: 'a' });
+    expect(await h.flush()).toBe(false);
   });
 
   it('keeps the boards in S3 when JEV_HIGHSCORES_BUCKET is set, else in a file', () => {

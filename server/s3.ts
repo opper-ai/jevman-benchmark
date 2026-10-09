@@ -95,28 +95,42 @@ export function credentialsFromEnv(env: Record<string, string | undefined>, fetc
   };
 }
 
-/** One stored text: what the high-score boards are kept in. `load` gives null when nothing is stored yet. */
+/** A stored text and its version (an S3 ETag). */
+export interface Stored {
+  text: string;
+  version: string;
+}
+
+/**
+ * One stored text: what the high-score boards are kept in. Writes are conditional, so two servers writing at once
+ * (old and new tasks overlap during a deploy) can't silently replace each other's changes.
+ */
 export interface TextStore {
   /** Where, for logs. */
   where: string;
-  load(): Promise<string | null>;
-  save(text: string): Promise<void>;
+  /** The text and its version, or null when nothing is stored yet. */
+  load(): Promise<Stored | null>;
+  /** Writes `text` if the stored version is still `expected` (null: nothing stored yet): the new version, or null if another writer got there first. */
+  save(text: string, expected: string | null): Promise<string | null>;
 }
 
 /** S3's error code from an error response body, e.g. AccessDenied. */
 const errorCode = (body: string): string => /<Code>([^<]+)<\/Code>/.exec(body)?.[1] ?? '';
 
-/** An S3 object as a TextStore. A missing object (404) is "nothing yet"; any other failure throws. */
+/**
+ * An S3 object as a TextStore. A missing object (404) is "nothing yet"; any other failure throws. Writes use S3's
+ * conditional writes: If-Match the ETag that was read, or If-None-Match: * for the first one.
+ */
 export function s3Store(opts: { bucket: string; key: string; region: string; credentials: () => Promise<AwsCredentials>; fetch?: typeof fetch; now?: () => Date }): TextStore {
   const url = new URL(`https://${opts.bucket}.s3.${opts.region}.amazonaws.com/${opts.key.split('/').map(encode).join('/')}`);
   const fetchFn = opts.fetch ?? fetch;
   const now = opts.now ?? (() => new Date());
-  const request = async (method: 'GET' | 'PUT', body?: string) => {
+  const request = async (method: 'GET' | 'PUT', body?: string, extra: Record<string, string> = {}) => {
     const headers = signRequest({
       method,
       url,
       region: opts.region,
-      headers: body === undefined ? {} : { 'content-type': 'application/json' },
+      headers: { ...(body === undefined ? {} : { 'content-type': 'application/json' }), ...extra },
       payloadHash: sha256(body ?? ''),
       credentials: await opts.credentials(),
       now: now(),
@@ -130,11 +144,18 @@ export function s3Store(opts: { bucket: string; key: string; region: string; cre
       const res = await request('GET');
       if (res.status === 404) return null;
       if (!res.ok) throw await failed('reading', res);
-      return res.text();
+      const version = res.headers.get('etag');
+      if (!version) throw new Error(`reading ${url.href}: no ETag`);
+      return { text: await res.text(), version };
     },
-    async save(text) {
-      const res = await request('PUT', text);
+    async save(text, expected) {
+      const res = await request('PUT', text, expected === null ? { 'if-none-match': '*' } : { 'if-match': expected });
+      // 412: the object changed since it was read (or now exists); 409: another conditional write is under way.
+      if (res.status === 412 || res.status === 409) return null;
       if (!res.ok) throw await failed('writing', res);
+      const version = res.headers.get('etag');
+      if (!version) throw new Error(`writing ${url.href}: no ETag`);
+      return version;
     },
   };
 }

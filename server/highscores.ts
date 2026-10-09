@@ -33,18 +33,23 @@ export function accountHash(user: { email?: string; name?: string } | undefined,
 const SAVE_RETRY_MS = 30_000;
 /** A failed load is not tried again sooner than this. */
 const LOAD_RETRY_MS = 5_000;
+/** Writes that lose the race to another writer are merged and tried again this many times. */
+const SAVE_ATTEMPTS = 5;
 
 /**
  * The player high-score boards, one per lineup, top ten each. Kept in memory and saved whole to a store after each
- * entry: in production an S3 object, so they survive deploys and restarts (one task writes it, so desired_count stays
- * 1). Nothing is shown or entered until the store has been read, and a store that can't be read is never written:
- * empty boards must not replace saved ones.
+ * entry: in production an S3 object, so they survive deploys and restarts. A save only replaces the version it read;
+ * if another server wrote in between (old and new tasks overlap during a deploy), its boards are read and merged in
+ * first. Nothing is shown or entered until the store has been read, and a store that can't be read is never
+ * written: empty boards must not replace saved ones.
  */
 export class HighScores {
   private readonly boards: Record<string, ScoreEntry[]> = {};
   private readonly store: TextStore | null;
   private readonly warn: (msg: string) => void;
   private loaded = false;
+  /** The stored version the boards were last read from or written as (null: nothing stored yet). */
+  private version: string | null = null;
   private loading: Promise<void> | null = null;
   private loadFailedAt = Number.NEGATIVE_INFINITY;
   private saving: Promise<boolean> = Promise.resolve(true);
@@ -63,8 +68,9 @@ export class HighScores {
     if (this.loading) return this.loading;
     if (Date.now() - this.loadFailedAt < LOAD_RETRY_MS) return Promise.reject(new Error('the high scores could not be read'));
     this.loading = this.store!.load()
-      .then((text) => {
-        if (text !== null) this.read(text);
+      .then((stored) => {
+        if (stored) this.merge(stored.text);
+        this.version = stored?.version ?? null;
         this.loaded = true;
       })
       .catch((err: unknown) => {
@@ -111,15 +117,35 @@ export class HighScores {
     return place;
   }
 
+  /** The account's place on a board now (1 to 10), or null if it has no line there. */
+  placeOf(board: string, who: string): number | null {
+    const i = this.boards[board]?.findIndex((e) => e.who === who) ?? -1;
+    return i === -1 ? null : i + 1;
+  }
+
   /**
-   * Writes the boards to the store, after any write already under way (so the last one holds the latest boards).
-   * False if it failed: the boards stay in memory, and the write is tried again shortly.
+   * Writes the boards to the store, after any write already under way (so the last one holds the latest boards),
+   * merging in another writer's boards first when it got there in between. False if it failed: the boards stay in
+   * memory, and the write is tried again shortly.
    */
   flush(): Promise<boolean> {
     if (!this.store || !this.loaded) return Promise.resolve(true);
     const store = this.store;
+    const write = async () => {
+      for (let attempt = 0; attempt < SAVE_ATTEMPTS; attempt++) {
+        const next = await store.save(JSON.stringify(this.boards), this.version);
+        if (next !== null) {
+          this.version = next;
+          return;
+        }
+        const theirs = await store.load();
+        if (theirs) this.merge(theirs.text);
+        this.version = theirs?.version ?? null;
+      }
+      throw new Error(`another writer kept changing it (${SAVE_ATTEMPTS} attempts)`);
+    };
     this.saving = this.saving.then(() =>
-      store.save(JSON.stringify(this.boards)).then(
+      write().then(
         () => true,
         (err: unknown) => {
           this.warn(`[highscores] could not save ${store.where}: ${(err as Error)?.message ?? String(err)}`);
@@ -135,36 +161,52 @@ export class HighScores {
     return this.saving;
   }
 
-  private read(text: string): void {
+  /**
+   * Adds stored boards to these: every entry from both, one line per account (its best), top ten. An entry deleted
+   * from the store by hand comes back while a running server still holds it, so restart after editing the object.
+   */
+  private merge(text: string): void {
     const data = JSON.parse(text) as Record<string, unknown>;
     for (const k of BOARD_KEYS) {
-      const list = data[k];
-      if (!Array.isArray(list)) continue;
-      this.boards[k] = list
-        .filter((e): e is ScoreEntry => !!e && typeof e === 'object' && cleanInitials((e as ScoreEntry).initials) !== null && Number.isInteger((e as ScoreEntry).score))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, BOARD_SIZE);
+      const stored = Array.isArray(data[k]) ? (data[k] as unknown[]) : [];
+      const valid = stored.filter((e): e is ScoreEntry => !!e && typeof e === 'object' && cleanInitials((e as ScoreEntry).initials) !== null && Number.isInteger((e as ScoreEntry).score));
+      const best = new Map<string, ScoreEntry>();
+      for (const e of [...this.boards[k]!, ...valid]) {
+        // Entries without an account (put in by hand) count as their own line.
+        const id = e.who || `${e.initials}|${e.score}|${e.at}`;
+        const had = best.get(id);
+        if (!had || e.score > had.score) best.set(id, e);
+      }
+      this.boards[k] = [...best.values()].sort((a, b) => b.score - a.score).slice(0, BOARD_SIZE);
     }
   }
 }
 
-/** A file on the server's own disk as a store (local runs: a redeploy starts it afresh). */
+/** A file on the server's own disk as a store (local runs: a redeploy starts it afresh), versioned by its content's hash. */
 export function fileStore(file: string): TextStore {
+  const versionOf = (text: string) => createHash('sha256').update(text).digest('hex');
+  const read = (): string | null => {
+    try {
+      return readFileSync(file, 'utf8');
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException)?.code === 'ENOENT') return null;
+      throw err;
+    }
+  };
   return {
     where: file,
     async load() {
-      try {
-        return readFileSync(file, 'utf8');
-      } catch (err) {
-        if ((err as NodeJS.ErrnoException)?.code === 'ENOENT') return null;
-        throw err;
-      }
+      const text = read();
+      return text === null ? null : { text, version: versionOf(text) };
     },
-    async save(text) {
+    async save(text, expected) {
+      const now = read();
+      if ((now === null ? null : versionOf(now)) !== expected) return null;
       mkdirSync(dirname(file), { recursive: true });
       const tmp = `${file}.tmp`;
       writeFileSync(tmp, text);
       renameSync(tmp, file); // whole or not at all
+      return versionOf(text);
     },
   };
 }

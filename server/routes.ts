@@ -207,9 +207,13 @@ export function createJevMiddleware(env: Record<string, string>, logger: RouteLo
           logger.warn(`[highscores] refused an entry from ${who}: ${result.ok ? 'played against another lineup' : result.error}`);
           return send(res, json(422, { error: 'That game did not check out' }));
         }
-        const place = scores.add(board, { initials, score: result.score, at: new Date(now).toISOString(), who });
-        // Saved before the answer, so the entry is stored once the player sees it (a failed save is retried).
-        if (place !== null) await scores.flush();
+        let place = scores.add(board, { initials, score: result.score, at: new Date(now).toISOString(), who });
+        // Saved before the answer, so the entry is stored once the player sees it (a failed save is retried). The
+        // save may merge in another server's entries, so the place is read again after it.
+        if (place !== null) {
+          await scores.flush();
+          place = scores.placeOf(board, who);
+        }
         logger.info(`[highscores] ${initials} ${result.score} on ${board}: ${place === null ? 'not in the top ten' : `#${place}`} (${who})`);
         send(res, json(200, { place, score: result.score, boards: scores.view() }));
       })

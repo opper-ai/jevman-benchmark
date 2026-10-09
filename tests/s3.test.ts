@@ -78,9 +78,9 @@ describe('s3Store', () => {
   const creds = async () => EXAMPLE;
   const store = (fetch: typeof globalThis.fetch) => s3Store({ bucket: 'opper-jevman-benchmark-highscores-eu-north', key: 'highscores.json', region: 'eu-north-1', credentials: creds, fetch });
 
-  it('reads the object, and a missing one as no boards yet', async () => {
-    const fetch = vi.fn(async (url: string) => (url.endsWith('/highscores.json') ? new Response('{"mixed":[]}') : new Response('', { status: 500 })));
-    expect(await store(fetch as never).load()).toBe('{"mixed":[]}');
+  it('reads the object with its version, and a missing one as no boards yet', async () => {
+    const fetch = vi.fn(async (url: string) => (url.endsWith('/highscores.json') ? new Response('{"mixed":[]}', { headers: { etag: '"abc"' } }) : new Response('', { status: 500 })));
+    expect(await store(fetch as never).load()).toEqual({ text: '{"mixed":[]}', version: '"abc"' });
     expect(fetch.mock.calls[0]![0]).toBe('https://opper-jevman-benchmark-highscores-eu-north.s3.eu-north-1.amazonaws.com/highscores.json');
     expect(await store((async () => new Response('<Error><Code>NoSuchKey</Code></Error>', { status: 404 })) as never).load()).toBeNull();
   });
@@ -90,16 +90,30 @@ describe('s3Store', () => {
     await expect(store(denied as never).load()).rejects.toThrow('HTTP 403 AccessDenied');
   });
 
-  it('writes the whole object, signed for its body', async () => {
-    const fetch = vi.fn(async () => new Response('', { status: 200 }));
-    await store(fetch as never).save('{"mixed":[]}');
+  it('writes the whole object, signed for its body, only over the version it read', async () => {
+    const fetch = vi.fn(async () => new Response('', { status: 200, headers: { etag: '"new"' } }));
+    expect(await store(fetch as never).save('{"mixed":[]}', '"abc"')).toBe('"new"');
     const [url, init] = fetch.mock.calls[0]! as unknown as [string, RequestInit & { headers: Record<string, string> }];
+    expect(init.headers['if-match']).toBe('"abc"');
     expect(url).toBe('https://opper-jevman-benchmark-highscores-eu-north.s3.eu-north-1.amazonaws.com/highscores.json');
     expect(init.method).toBe('PUT');
     expect(init.body).toBe('{"mixed":[]}');
     expect(init.headers['content-type']).toBe('application/json');
     expect(init.headers['x-amz-content-sha256']).toMatch(/^[0-9a-f]{64}$/);
     expect(init.headers.authorization).toMatch(/^AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE\/\d{8}\/eu-north-1\/s3\/aws4_request,/);
-    await expect(store((async () => new Response('', { status: 503 })) as never).save('{}')).rejects.toThrow('HTTP 503');
+    await expect(store((async () => new Response('', { status: 503 })) as never).save('{}', null)).rejects.toThrow('HTTP 503');
+  });
+
+  it('creates the object only if there is none yet', async () => {
+    const fetch = vi.fn(async () => new Response('', { status: 200, headers: { etag: '"first"' } }));
+    expect(await store(fetch as never).save('{}', null)).toBe('"first"');
+    const init = (fetch.mock.calls[0] as unknown as [string, { headers: Record<string, string> }])[1];
+    expect(init.headers['if-none-match']).toBe('*');
+    expect(init.headers).not.toHaveProperty('if-match');
+  });
+
+  it('says so when another writer got there first', async () => {
+    expect(await store((async () => new Response('<Error><Code>PreconditionFailed</Code></Error>', { status: 412 })) as never).save('{}', '"old"')).toBeNull();
+    expect(await store((async () => new Response('<Error><Code>ConditionalRequestConflict</Code></Error>', { status: 409 })) as never).save('{}', '"old"')).toBeNull();
   });
 });

@@ -182,7 +182,9 @@ game's own code (`src/player-check.ts`, bundled for the server by `vite build --
 replay's score goes on a board. The boards live in memory and are saved whole after each entry:
 - with `JEV_HIGHSCORES_BUCKET` (and `JEV_HIGHSCORES_KEY`, default `highscores.json`), to that S3 object in
   `AWS_REGION`, with the ECS task role's credentials (or `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`), so they
-  survive deploys. On Opper's ECS both come from SSM. One task writes the object, so the service stays at one task.
+  survive deploys. On Opper's ECS both come from SSM. Each save only replaces the version it read (S3 conditional
+  writes); when another task wrote in between, as old and new tasks do during a deploy, its boards are merged in
+  first. An entry deleted from the object by hand comes back from a task still holding it: redeploy after editing.
 - otherwise to `JEV_HIGHSCORES_FILE`, else a file in the system's temp folder (local runs).
 
 Nothing is shown or entered until the boards have been read; if the store can't be read, `/api/highscores`

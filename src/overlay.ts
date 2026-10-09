@@ -165,11 +165,10 @@ function initialsForm(submit: (initials: string) => Promise<string | null>): HTM
 /** What game over says about the boards, if the game was against a lineup's AIs. */
 export type BoardEntryOption =
   | { kind: 'enter'; board: string; place: number; submit: (initials: string) => Promise<{ error: string } | { place: number | null; entries: BoardEntry[] }> }
-  | { kind: 'signin'; board: string; place: number; onSignIn: () => void }
   | { kind: 'custom' }
   | { kind: 'note'; text: string };
 
-/** The "you made the board" block: the place, then the initials form (or the way to sign in for it). */
+/** The "you made the board" block: the place, then the initials form. */
 function boardBlock(o: BoardEntryOption): HTMLElement {
   const box = el('div', undefined, 'made');
   if (o.kind === 'custom' || o.kind === 'note') {
@@ -178,16 +177,6 @@ function boardBlock(o: BoardEntryOption): HTMLElement {
   }
   const label = boardLabel(o.board);
   box.append(el('p', o.place === 1 ? 'New high score!' : `You made the board · #${o.place}`, o.place === 1 ? 'made-title top' : 'made-title'), el('p', `vs ${label}`, 'made-board'));
-  if (o.kind === 'signin') {
-    const b = el('button', undefined, 'press');
-    b.type = 'button';
-    const tri = el('span', undefined, 'tri');
-    tri.setAttribute('aria-hidden', 'true');
-    b.append(tri, el('span', 'Sign in to enter your initials'));
-    b.addEventListener('click', o.onSignIn);
-    box.append(b, el('p', 'An Opper account is free, and your game waits here while you sign in.', 'tap'));
-    return box;
-  }
   box.append(
     initialsForm(async (initials) => {
       const r = await o.submit(initials);
@@ -197,23 +186,6 @@ function boardBlock(o: BoardEntryOption): HTMLElement {
     }),
   );
   return box;
-}
-
-/** After signing in to put a game on a board: the score, the place and the initials form, over the board. */
-export function showInitialsEntry(root: HTMLElement, o: { score: number; entry: BoardEntryOption & { kind: 'enter' }; onDone: () => void }): void {
-  const card = el('div', undefined, 'card arc over');
-  card.setAttribute('role', 'dialog');
-  card.setAttribute('aria-label', 'Enter your initials');
-  const close = el('button', 'X', 'x');
-  close.type = 'button';
-  close.setAttribute('aria-label', 'Close');
-  close.addEventListener('click', o.onDone);
-  card.append(close, el('p', 'Your game', 'over-best'), el('p', o.score.toLocaleString('en-US'), 'over-score'), boardBlock(o.entry));
-  const back = el('button', 'Back to watching', 'back');
-  back.type = 'button';
-  back.addEventListener('click', o.onDone);
-  card.append(back);
-  show(root, card);
 }
 
 /**
@@ -400,7 +372,7 @@ export interface GameOverOptions {
   onShare: () => Promise<'shared' | 'copied' | 'failed' | 'cancelled'>;
   onReview: (() => void) | null;
   onBack: () => void;
-  /** The players' boards: made one (enter initials, or sign in first), or a custom lineup's note. */
+  /** The players' boards: made one (enter initials), or a custom lineup's note. */
   entry?: BoardEntryOption | null;
 }
 

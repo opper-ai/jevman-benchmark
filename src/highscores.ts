@@ -13,9 +13,6 @@ export interface BoardEntry {
 export type Boards = Record<string, BoardEntry[]>;
 
 const BOARD_SIZE = 10;
-const PENDING_KEY = 'jevman.pending-score';
-/** How long a game waits for its player to come back from signing in. */
-const PENDING_MS = 30 * 60_000;
 
 /** "Mixed", "All jev", "All Luna": a board's name as the picker's lineups name it. */
 export const boardLabel = (key: string): string => (key === 'mixed' ? 'Mixed' : `All ${modelName(key).replace(/ 1\.13$/, '').replace(/ 4B$/, '').replace(/^GPT-6 /, '')}`);
@@ -40,54 +37,16 @@ export function placeFor(boards: Boards | null, board: string, score: number): n
   return place <= BOARD_SIZE ? place : null;
 }
 
-export type EntryResult = { ok: true; place: number | null; score: number; boards: Boards } | { ok: false; error: string; signedOut: boolean };
+export type EntryResult = { ok: true; place: number | null; score: number; boards: Boards } | { ok: false; error: string };
 
 /** Sends a finished game for a board: the server replays the recording for the score. */
 export async function enterScore(board: string, initials: string, recording: Recording): Promise<EntryResult> {
   try {
     const res = await fetch(appPath('/api/highscores'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ board, initials, recording }) });
-    const data = (await res.json().catch(() => ({}))) as { place?: number | null; score?: number; boards?: Boards; error?: string; signedOut?: boolean };
+    const data = (await res.json().catch(() => ({}))) as { place?: number | null; score?: number; boards?: Boards; error?: string };
     if (res.ok && data.boards && typeof data.score === 'number') return { ok: true, place: data.place ?? null, score: data.score, boards: data.boards };
-    return { ok: false, error: data.error ?? 'That did not work. Try again.', signedOut: data.signedOut === true };
+    return { ok: false, error: data.error ?? 'That did not work. Try again.' };
   } catch {
-    return { ok: false, error: 'No connection. Try again.', signedOut: false };
-  }
-}
-
-/** A game that made a board, kept while its player goes off to sign in (this tab only). */
-export interface PendingScore {
-  board: string;
-  score: number;
-  recording: Recording;
-  at: number;
-}
-
-export function stashPending(p: Omit<PendingScore, 'at'>): boolean {
-  try {
-    sessionStorage.setItem(PENDING_KEY, JSON.stringify({ ...p, at: Date.now() }));
-    return true;
-  } catch {
-    return false; // too big or storage blocked: the player signs in, the game is lost
-  }
-}
-
-/** The game waiting for initials, if it is recent (it stays saved until clearPending). */
-export function peekPending(now = Date.now()): PendingScore | null {
-  try {
-    const raw = sessionStorage.getItem(PENDING_KEY);
-    const p = raw ? (JSON.parse(raw) as PendingScore) : null;
-    if (p && BOARD_KEYS.includes(p.board) && now - p.at < PENDING_MS) return p;
-    if (raw) sessionStorage.removeItem(PENDING_KEY);
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-export function clearPending(): void {
-  try {
-    sessionStorage.removeItem(PENDING_KEY);
-  } catch {
-    // nothing saved
+    return { ok: false, error: 'No connection. Try again.' };
   }
 }

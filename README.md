@@ -147,7 +147,7 @@ answers.
 
 Arrows/WASD steer Pac-Man when you play him · `J` or the Pac-Man button hands him to the AI or back · `P` pause ·
 `R` restart · `M` sound on/off · the speed slider slows the game down. Space/Enter presses Watch (or Play); Restart and `R` end the game and open the Play dialog, Play again replays the same setup. On a phone,
-swipe on the board or on the swipe pad under it.
+swipe anywhere on the game card: the board, the strips around it or the swipe pad under it.
 
 ## Cost
 
@@ -177,9 +177,10 @@ and answer format, the rules and what "self-reported" means are in
 ## Player high scores
 
 Games against AI ghosts count on a board per lineup (Mixed, and one per model on all four ghosts), top ten each.
-Signed-in players enter three initials; the page sends the game's recording and the server replays it with the
+Players enter three initials, signed in or not; the page sends the game's recording and the server replays it with the
 game's own code (`src/player-check.ts`, bundled for the server by `vite build --ssr` into `dist-ssr`), so only the
-replay's score goes on a board. The boards live in memory and are saved whole after each entry:
+replay's score goes on a board. A board keeps one line per player: per Opper account when signed in, else per address
+and initials. The boards live in memory and are saved whole after each entry:
 - with `JEV_HIGHSCORES_BUCKET` (and `JEV_HIGHSCORES_KEY`, default `highscores.json`), to that S3 object in
   `AWS_REGION`, with the ECS task role's credentials (or `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`), so they
   survive deploys. On Opper's ECS both come from SSM. Each save only replaces the version it read (S3 conditional

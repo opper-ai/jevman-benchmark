@@ -5,15 +5,15 @@ import { normalizeBasePath } from './base-path.ts';
 import { handleDecideRequest, poolLimitRequest, rejectDecideRequest, resolveKey, type PoolAccess } from './decide.ts';
 import { devTargetFromEnv, type JevTarget } from './jev.ts';
 import { answerVerifier } from './answers.ts';
-import { accountHash, cleanInitials, HighScores, highScoresStore } from './highscores.ts';
-import { MAX_POOL_BODY_BYTES, poolFromEnv, trustedProxiesFromEnv, VisitorLimits } from './pool.ts';
+import { accountHash, cleanInitials, HighScores, highScoresStore, visitorHash } from './highscores.ts';
+import { clientIp, MAX_POOL_BODY_BYTES, poolFromEnv, trustedProxiesFromEnv, visitorKey, VisitorLimits } from './pool.ts';
 import { BOARD_KEYS } from '../shared/lineups.ts';
 
 /** Largest /api/decide body read; a game state plus five questions is a few KB. */
 export const MAX_BODY_BYTES = 256 * 1024;
 /** Largest high-score entry read: a half-hour game's recording (its steering and the ghosts' signed answers). */
 export const MAX_SCORE_BODY_BYTES = 1536 * 1024;
-/** Entries one account may send an hour. */
+/** Entries one account (or, signed out, one address) may send an hour. */
 const SCORE_ENTRIES_PER_HOUR = 20;
 
 /** The high-score check (src/player-check.ts): loaded through Vite in development, from the server bundle in production. */
@@ -169,25 +169,30 @@ export function createJevMiddleware(env: Record<string, string>, logger: RouteLo
   scores.ready().catch(() => {});
   const unavailable = () => json(503, { error: 'The high scores are not available right now. Try again in a moment.' }, [], { 'Retry-After': '5' });
   const entriesBy = new Map<string, number[]>();
-  /** Accounts with a check running: one at a time each, so nobody can keep the server busy replaying. */
+  /** Accounts and addresses with a check running: one at a time each, so nobody can keep the server busy replaying. */
   const checking = new Set<string>();
   const verifyAnswer = answerVerifier(cfg.sessionSecret);
+  const trustedProxies = trustedProxiesFromEnv(env);
 
-  /** POST /api/highscores: a signed-in player's initials and their game's recording; the server replays it for the score. */
+  /**
+   * POST /api/highscores: a player's initials and their game's recording; the server replays it for the score. Signed
+   * in or not: the replay checks the game, and a signed-out player is counted by their address.
+   */
   const enterScore = (req: IncomingMessage, res: ServerResponse, http: HttpRequest) => {
     if (crossSite(http, cfg)) return send(res, json(403, { error: 'Cross-site request refused' }));
     if (!String(http.headers['content-type'] ?? '').includes('application/json')) return send(res, json(415, { error: 'Send JSON' }));
     const session = sessionFrom(http, cfg);
-    if (!session) return send(res, json(401, { error: 'Sign in with Opper to enter your initials', signedOut: true }));
-    const who = accountHash(session.user, cfg.sessionSecret);
+    const visitor = visitorKey(clientIp(http, trustedProxies));
+    // Who the rate limit counts: the account, else the address.
+    const sender = session ? accountHash(session.user, cfg.sessionSecret) : `visitor:${visitor}`;
     const now = Date.now();
-    const recent = (entriesBy.get(who) ?? []).filter((t) => now - t < 3_600_000);
-    if (recent.length >= SCORE_ENTRIES_PER_HOUR || checking.has(who)) return send(res, json(429, { error: 'Too many entries for now. Try again later.' }));
+    const recent = (entriesBy.get(sender) ?? []).filter((t) => now - t < 3_600_000);
+    if (recent.length >= SCORE_ENTRIES_PER_HOUR || checking.has(sender)) return send(res, json(429, { error: 'Too many entries for now. Try again later.' }));
     if (!opts.loadPlayerCheck) return send(res, json(503, { error: 'High scores are not available here' }));
     const check = opts.loadPlayerCheck;
     // Every attempt counts (refused ones too), before the body is read.
-    entriesBy.set(who, [...recent, now]);
-    checking.add(who);
+    entriesBy.set(sender, [...recent, now]);
+    checking.add(sender);
     readBody(req, MAX_SCORE_BODY_BYTES)
       .then(async (raw) => {
         if (raw === null) return send(res, json(413, { error: 'Request body too large' }, [], { Connection: 'close' }));
@@ -200,6 +205,8 @@ export function createJevMiddleware(env: Record<string, string>, logger: RouteLo
         const board = typeof body.board === 'string' && BOARD_KEYS.includes(body.board) ? body.board : null;
         const initials = cleanInitials(body.initials);
         if (!board || !initials) return send(res, json(400, { error: 'Pick a lineup board and three letters' }));
+        // One line per board each: per account, or per address and initials.
+        const who = session ? sender : visitorHash(visitor, initials, cfg.sessionSecret);
         // Never put an entry on boards that weren't read: saving them would replace the stored ones.
         if (!(await scores.ready().then(() => true, () => false))) return send(res, unavailable());
         const result = (await check())(body.recording, verifyAnswer);
@@ -223,7 +230,7 @@ export function createJevMiddleware(env: Record<string, string>, logger: RouteLo
         if (!res.headersSent) send(res, json(500, { error: 'internal error' }));
         else abort(res);
       })
-      .finally(() => checking.delete(who));
+      .finally(() => checking.delete(sender));
   };
 
   return (req, res, next) => {

@@ -29,6 +29,14 @@ export function accountHash(user: { email?: string; name?: string } | undefined,
   return createHash('sha256').update(`${secret}:${user?.email ?? user?.name ?? 'unknown'}`).digest('hex').slice(0, 16);
 }
 
+/**
+ * A signed-out player as a short hash: their address (counted as the free credits count visitors) and their initials,
+ * so players who share an address (a phone network, an office) each keep their own line.
+ */
+export function visitorHash(visitor: string, initials: string, secret: string): string {
+  return createHash('sha256').update(`${secret}:visitor:${visitor}:${initials}`).digest('hex').slice(0, 16);
+}
+
 /** A failed save is tried again after this long (the next entry also saves). */
 const SAVE_RETRY_MS = 30_000;
 /** A failed load is not tried again sooner than this. */

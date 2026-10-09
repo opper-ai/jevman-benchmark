@@ -4,8 +4,8 @@ import { initialChoice, modelOptions, requestModel, type ModelChoice } from './c
 import { DemoPlayer, loadRecording } from './demo';
 import { greedyChoice, optionFeatures } from './features';
 import { logoFor } from './logos';
-import { boardLabel, clearPending, enterScore, fetchBoards, peekPending, placeFor, stashPending, type Boards } from './highscores';
-import { aiShareText, defaultLineup, GHOST_NAMES, hideOverlay, lineupNames, showGameOver, showHighScores, showInitialsEntry, showPicker, type BoardEntryOption, type Lineup, type Picker } from './overlay';
+import { boardLabel, enterScore, fetchBoards, placeFor, type Boards } from './highscores';
+import { aiShareText, defaultLineup, GHOST_NAMES, hideOverlay, lineupNames, showGameOver, showHighScores, showPicker, type BoardEntryOption, type Lineup, type Picker } from './overlay';
 import { appPath, SHARE_URL } from './paths';
 import { drawGame, FRUIT_EMOJI, TILE } from './render';
 import { renderLeaderboard } from './results';
@@ -93,6 +93,7 @@ const chipsEl = $('#watch-chips');
 const thinking = new Thinking();
 const LOG_KEY = 'jevman.log';
 const tvEl = $('#tv');
+const tvGameEl = $('.tv-game');
 const logTab = $<HTMLButtonElement>('#log-tab');
 /** The activity log is a drawer: its tab pulls it out beside the card (below it on narrower screens); remembered. */
 const log = new ActivityLog($('#activity'), {
@@ -337,7 +338,7 @@ const setPaused = (p: boolean) => {
 /** The button under the board: "Play vs AI" while watching; "New game" while your own game is paused; else out of the way. */
 function syncPlayCta(): void {
   const midGame = mode.kind === 'play' && live && !gameOverShown;
-  playCta.hidden = picker !== null || entryOpen || scoresOpen || (mode.kind === 'play' && !(midGame && paused));
+  playCta.hidden = picker !== null || scoresOpen || (mode.kind === 'play' && !(midGame && paused));
   playLabel.textContent = midGame ? 'New game' : 'Play vs AI';
 }
 const dim = (on: boolean) => boardEl.classList.toggle('dim', on);
@@ -436,8 +437,6 @@ function startGame(next: Exclude<Mode, { kind: 'recording' }>): void {
 
 /** Bumped whenever the board changes, so a recording that finishes downloading late doesn't take over. */
 let watchToken = 0;
-/** The initials card after signing in is open: like the picker, nothing else takes the board until it closes. */
-let entryOpen = false;
 /** The high-score boards are open over the board (from HIGH SCORE). */
 let scoresOpen = false;
 
@@ -446,7 +445,6 @@ let scoresOpen = false;
  * showing does nothing; in the middle of your own game it asks first.
  */
 function watch(model: string, confirmed = false): void {
-  if (entryOpen) return; // finish (or close) the initials first
   if (scoresOpen) closeScores();
   if (mode.kind === 'recording' && mode.model === model) return;
   if (!confirmed && mode.kind === 'play' && live && !gameOverShown) return askToLeave(model);
@@ -488,7 +486,7 @@ const costNote = (): string => {
 
 /** "▶ Play against the AIs": who plays the ghosts, then Start. */
 function openPicker(): void {
-  if (picker || entryOpen || scoresOpen) return;
+  if (picker || scoresOpen) return;
   watchToken += 1; // a recording still loading must not replace the picker when it arrives
   setPlate();
   held = true;
@@ -650,7 +648,7 @@ function highScore(): { score: number; who: string } {
 
 /** HIGH SCORE, clicked: the players' boards over the board, opened on the lineup last picked; the game waits meanwhile. */
 function openScores(): void {
-  if (picker || entryOpen || scoresOpen || !overlayEl.hidden) return;
+  if (picker || scoresOpen || !overlayEl.hidden) return;
   watchToken += 1; // a recording still loading must not replace the boards when it arrives
   setPlate();
   scoresOpen = true;
@@ -697,7 +695,7 @@ hiCell.addEventListener('keydown', (e) => {
   }
 });
 
-/** Game over against a lineup: on its board's top ten, enter initials (signed in) or sign in for it; or a custom mix's note. */
+/** Game over against a lineup: on its board's top ten, enter initials (signed in or not); or a custom mix's note. */
 function boardEntry(l: Lineup, score: number): BoardEntryOption | null {
   const key = boardOf(l);
   if (!key) return { kind: 'custom' };
@@ -709,26 +707,15 @@ function boardEntry(l: Lineup, score: number): BoardEntryOption | null {
   const rec = recorder ? { ...recorder.finish(state, 'player', { pacmanControl: 'keyboard', ghostsByAI: true, lineup: l }), fixedStep: FIXED_STEP, steps: recSteps, final: { score: state.score, lives: state.lives, level: state.level, frames: recSteps } } : undefined;
   if (place === null || !rec) return null;
   // The server's check, run here first (all but the signatures, which only the server can verify): a game it would
-  // refuse (the AIs answered too slowly too often) says so now, not after signing in.
+  // refuse (the AIs answered too slowly too often) says so now, not after typing initials.
   const precheck = checkPlayerGame(rec, () => true);
   if (!precheck.ok) return { kind: 'note', text: "The AIs answered too slowly too often this game, so it can't go on the board. Try another one!" };
-  if (account.kind !== 'player') {
-    return {
-      kind: 'signin',
-      board: key,
-      place,
-      onSignIn: () => {
-        stashPending({ board: key, score, recording: rec });
-        signIn();
-      },
-    };
-  }
   return { kind: 'enter', board: key, place, submit: (initials) => submitScore(key, initials, rec) };
 }
 
 async function submitScore(key: string, initials: string, rec: Recording): Promise<{ error: string } | { place: number | null; entries: Boards[string] }> {
   const r = await enterScore(key, initials, rec);
-  if (!r.ok) return { error: r.signedOut ? 'Sign in again to enter your initials' : r.error };
+  if (!r.ok) return { error: r.error };
   boards = r.boards;
   return { place: r.place, entries: r.boards[key] ?? [] };
 }
@@ -772,7 +759,7 @@ document.addEventListener('visibilitychange', () => {
 const steer = (dir: Dir) => {
   if (live && state.pacmanControl === 'keyboard') state.keyDir = dir;
 };
-attachTouch([boardEl, swipePad], steer, () => live && state.pacmanControl === 'keyboard' && overlayEl.hidden === true);
+attachTouch(tvGameEl, steer, () => live && state.pacmanControl === 'keyboard' && overlayEl.hidden === true);
 
 window.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey || typeof e.key !== 'string') return;
@@ -904,7 +891,7 @@ function frame(now: number): void {
   // The pad shows your last swipe: where Pac-Man is heading, or the turn he takes at the next opening.
   const swiped = steering ? (state.keyDir ?? '') : '';
   if (swipePad.dataset.dir !== swiped) swipePad.dataset.dir = swiped;
-  boardEl.classList.toggle('steering', steering);
+  tvGameEl.classList.toggle('steering', steering);
   requestAnimationFrame(frame);
 }
 
@@ -912,48 +899,4 @@ function frame(now: number): void {
 const linked = new URLSearchParams(location.search).get('pacman');
 showRecording();
 if (linked && RECORDINGS[linked] !== undefined) watch(linked);
-// Back from signing in with a game that made a board: its initials now, once the boards say its place. The game
-// stays saved until it is on the board or set aside (a failed sign-in keeps it for another try).
-const waiting = account.kind === 'player' ? peekPending() : null;
-if (waiting) {
-  entryOpen = true;
-  held = true;
-  dim(true);
-  syncPlayCta();
-  void fetchBoards().then((b) => {
-    if (b) boards = b;
-    if (!b) {
-      // The boards can't be read right now: keep the stashed game for the next visit instead of dropping it.
-      entryOpen = false;
-      held = false;
-      dim(false);
-      syncPlayCta();
-      return;
-    }
-    const place = placeFor(boards, waiting.board, waiting.score);
-    const close = () => {
-      clearPending();
-      entryOpen = false;
-      held = false;
-      hideOverlay(overlayEl);
-      dim(false);
-      syncPlayCta();
-    };
-    if (place === null) return close(); // someone beat it while they signed in
-    showInitialsEntry(overlayEl, {
-      score: waiting.score,
-      entry: {
-        kind: 'enter',
-        board: waiting.board,
-        place,
-        submit: async (initials) => {
-          const r = await submitScore(waiting.board, initials, waiting.recording);
-          if (!('error' in r)) clearPending();
-          return r;
-        },
-      },
-      onDone: close,
-    });
-  });
-}
 requestAnimationFrame(frame);

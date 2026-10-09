@@ -183,9 +183,9 @@ describe('/api/highscores', () => {
     const handler = createJevMiddleware({ SESSION_SECRET: SECRET, OPPER_BASE_URL: 'https://api.opper.ai' }, { info: vi.fn(), warn: vi.fn(), error: vi.fn() }, { quiet: true, highScores, loadPlayerCheck: async () => checkPlayerGame });
     return { handler, highScores };
   };
-  const call = async (handler: ReturnType<typeof mount>['handler'], method: string, headers: Record<string, string>, payload?: unknown) => {
+  const call = async (handler: ReturnType<typeof mount>['handler'], method: string, headers: Record<string, string>, payload?: unknown, ip = '203.0.113.7') => {
     const res = { statusCode: 200, headersSent: false, headers: {} as Record<string, unknown>, setHeader(k: string, v: unknown) { this.headers[k] = v; }, end: vi.fn() };
-    const req = Object.assign(new EventEmitter(), { method, url: '/api/highscores', headers });
+    const req = Object.assign(new EventEmitter(), { method, url: '/api/highscores', headers, socket: { remoteAddress: ip } });
     handler(req as never, res as never, vi.fn());
     if (payload !== undefined) {
       req.emit('data', JSON.stringify(payload));
@@ -204,11 +204,25 @@ describe('/api/highscores', () => {
     expect(Object.keys(r.body.boards)).toContain('mixed');
   });
 
-  it('asks a signed-out player to sign in', async () => {
+  const signedOut = { 'content-type': 'application/json' };
+
+  it("puts a signed-out player's checked game on the board: one line per address and initials", async () => {
+    const { handler, highScores } = mount();
+    const r = await call(handler, 'POST', signedOut, { board: 'mixed', initials: 'ann', recording });
+    expect(r.status).toBe(200);
+    expect(r.body).toMatchObject({ place: 1, score: state.score });
+    // Someone else at the same address (a phone network, an office) gets a line of their own; the same player doesn't.
+    expect((await call(handler, 'POST', signedOut, { board: 'mixed', initials: 'bob', recording })).body).toMatchObject({ place: 2 });
+    expect((await call(handler, 'POST', signedOut, { board: 'mixed', initials: 'ann', recording })).body).toMatchObject({ place: 1 });
+    expect(highScores.view().mixed!.map((e) => e.initials)).toEqual(['ANN', 'BOB']);
+  });
+
+  it('counts signed-out entries per address', async () => {
     const { handler } = mount();
-    const r = await call(handler, 'POST', { 'content-type': 'application/json' }, { board: 'mixed', initials: 'ABC', recording });
-    expect(r.status).toBe(401);
-    expect(r.body.signedOut).toBe(true);
+    const bad = { board: 'mixed', initials: '!', recording: null };
+    for (let i = 0; i < 20; i++) expect((await call(handler, 'POST', signedOut, bad)).status).toBe(400);
+    expect((await call(handler, 'POST', signedOut, bad)).status).toBe(429);
+    expect((await call(handler, 'POST', signedOut, bad, '198.51.100.9')).status).toBe(400);
   });
 
   it("puts a signed-in player's checked game on the board, with the replay's score", async () => {

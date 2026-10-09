@@ -15,7 +15,8 @@ const LOGOS: Record<string, { src: string; maker: string; page: string; shape?: 
 
 /**
  * Community models (by submission id) get the mark their makers use on their own profiles too: the model's maker
- * (Qwen, Liquid AI), the project's own icon (RizzoFlow), or its author's GitHub or Hugging Face avatar.
+ * (Qwen, Liquid AI), the project's own icon (RizzoFlow), or its author's GitHub or Hugging Face avatar. The random
+ * baseline gets a die.
  */
 const COMMUNITY_LOGOS: Record<string, { src: string; shape?: 'round' | 'tile'; mono?: true }> = {
   semif: { src: 'logos/community/semif.png', shape: 'round' },
@@ -24,6 +25,7 @@ const COMMUNITY_LOGOS: Record<string, { src: string; shape?: 'round' | 'tile'; m
   'winnow-12b-nvfp4': { src: 'logos/community/eldanring.png', shape: 'round' },
   'd1-3b': { src: 'logos/community/liquid-ai.svg', mono: true },
   von: { src: 'logos/community/von.png', shape: 'round' },
+  'random-dice': { src: 'logos/community/dice.svg' },
 };
 
 export const makerOf = (model: string): string | undefined => LOGOS[model]?.maker;

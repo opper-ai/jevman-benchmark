@@ -179,9 +179,14 @@ and answer format, the rules and what "self-reported" means are in
 Games against AI ghosts count on a board per lineup (Mixed, and one per model on all four ghosts), top ten each.
 Signed-in players enter three initials; the page sends the game's recording and the server replays it with the
 game's own code (`src/player-check.ts`, bundled for the server by `vite build --ssr` into `dist-ssr`), so only the
-replay's score goes on a board. The boards live in memory and in one file on the server's disk
-(`JEV_HIGHSCORES_FILE`, else the system's temp folder): enough for the single task the service runs, but a
-redeploy starts them afresh until they move to a bucket.
+replay's score goes on a board. The boards live in memory and are saved whole after each entry:
+- with `JEV_HIGHSCORES_BUCKET` (and `JEV_HIGHSCORES_KEY`, default `highscores.json`), to that S3 object in
+  `AWS_REGION`, with the ECS task role's credentials (or `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`), so they
+  survive deploys. On Opper's ECS both come from SSM. One task writes the object, so the service stays at one task.
+- otherwise to `JEV_HIGHSCORES_FILE`, else a file in the system's temp folder (local runs).
+
+Nothing is shown or entered until the boards have been read; if the store can't be read, `/api/highscores`
+answers 503 and nothing is written over what it holds.
 
 ## How decisions work
 

@@ -5,7 +5,7 @@ import { normalizeBasePath } from './base-path.ts';
 import { handleDecideRequest, poolLimitRequest, rejectDecideRequest, resolveKey, type PoolAccess } from './decide.ts';
 import { devTargetFromEnv, type JevTarget } from './jev.ts';
 import { answerVerifier } from './answers.ts';
-import { accountHash, cleanInitials, HighScores, highScoresFile } from './highscores.ts';
+import { accountHash, cleanInitials, HighScores, highScoresStore } from './highscores.ts';
 import { MAX_POOL_BODY_BYTES, poolFromEnv, trustedProxiesFromEnv, VisitorLimits } from './pool.ts';
 import { BOARD_KEYS } from '../shared/lineups.ts';
 
@@ -164,7 +164,10 @@ export function createJevMiddleware(env: Record<string, string>, logger: RouteLo
     }
   };
 
-  const scores = opts.highScores ?? new HighScores(highScoresFile(env), (m) => logger.warn(m));
+  const scores = opts.highScores ?? new HighScores(highScoresStore(env), (m) => logger.warn(m));
+  // Read the boards now, so the first visitor doesn't wait for it (a failure is logged and tried again on use).
+  scores.ready().catch(() => {});
+  const unavailable = () => json(503, { error: 'The high scores are not available right now. Try again in a moment.' }, [], { 'Retry-After': '5' });
   const entriesBy = new Map<string, number[]>();
   /** Accounts with a check running: one at a time each, so nobody can keep the server busy replaying. */
   const checking = new Set<string>();
@@ -197,12 +200,16 @@ export function createJevMiddleware(env: Record<string, string>, logger: RouteLo
         const board = typeof body.board === 'string' && BOARD_KEYS.includes(body.board) ? body.board : null;
         const initials = cleanInitials(body.initials);
         if (!board || !initials) return send(res, json(400, { error: 'Pick a lineup board and three letters' }));
+        // Never put an entry on boards that weren't read: saving them would replace the stored ones.
+        if (!(await scores.ready().then(() => true, () => false))) return send(res, unavailable());
         const result = (await check())(body.recording, verifyAnswer);
         if (!result.ok || result.board !== board) {
           logger.warn(`[highscores] refused an entry from ${who}: ${result.ok ? 'played against another lineup' : result.error}`);
           return send(res, json(422, { error: 'That game did not check out' }));
         }
         const place = scores.add(board, { initials, score: result.score, at: new Date(now).toISOString(), who });
+        // Saved before the answer, so the entry is stored once the player sees it (a failed save is retried).
+        if (place !== null) await scores.flush();
         logger.info(`[highscores] ${initials} ${result.score} on ${board}: ${place === null ? 'not in the top ten' : `#${place}`} (${who})`);
         send(res, json(200, { place, score: result.score, boards: scores.view() }));
       })
@@ -218,7 +225,13 @@ export function createJevMiddleware(env: Record<string, string>, logger: RouteLo
     const path = (req.url ?? '').split('?')[0];
     const http = toHttp(req);
     if (path === '/api/highscores') {
-      if (http.method === 'GET') return send(res, json(200, { boards: scores.view() }, [], { 'Cache-Control': 'no-store' }));
+      if (http.method === 'GET') {
+        void scores.ready().then(
+          () => send(res, json(200, { boards: scores.view() }, [], { 'Cache-Control': 'no-store' })),
+          () => send(res, unavailable()),
+        );
+        return;
+      }
       if (http.method === 'POST') return enterScore(req, res, http);
       return send(res, json(405, { error: 'Method not allowed' }, [], { Allow: 'GET, POST' }));
     }

@@ -135,8 +135,8 @@ than one of our questions), `openai/gpt-6-luna-decisions` (OpenAI's GPT-6 Luna D
 to System One) and `empiriolabs/aplomb-1` (EmpirioLabs' Aplomb 1). The server forwards only these. Through Opper any of them can play; a
 TypeSafe key (option C) reaches jev only.
 
-Any other model can join the leaderboard as **self-reported**: its makers run the benchmark against their own
-endpoint and send the recorded games in a pull request, which CI replays. See
+Any other model can join the leaderboard as **self-reported**: anyone can run the benchmark against an endpoint and
+send the recorded games in a pull request, which CI replays. See
 [CONTRIBUTING.md](CONTRIBUTING.md#benchmark-your-own-model).
 
 In the game, pick the models in the Play dialog: one for Pac-Man (the chips) and one for all the ghosts. Each card on the

@@ -11,6 +11,7 @@ const LOGOS: Record<string, { src: string; maker: string; page: string; shape?: 
   'opper/kev-4b': { src: 'logos/jared-palmer.webp', maker: 'Jared Palmer', page: 'community/kev-4b', shape: 'round' },
   'berget/convaiinnovations/laya': { src: 'logos/convai.webp', maker: 'Convai Innovations', page: 'community/laya', shape: 'tile' },
   'openai/gpt-6-luna-decisions': { src: 'logos/openai.svg', maker: 'OpenAI', page: 'openai/gpt-6-luna-decisions', mono: true },
+  'empiriolabs/aplomb-1': { src: 'logos/empiriolabs.png', maker: 'EmpirioLabs', page: 'empiriolabs/aplomb-1', shape: 'round' },
 };
 
 /**

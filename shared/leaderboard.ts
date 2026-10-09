@@ -98,11 +98,17 @@ export function tooCloseToCall(a: LeaderboardEntry, b: LeaderboardEntry): boolea
   return Math.abs(a.meanScore - b.meanScore) < 2 * Math.hypot(a.scoreStdError, b.scoreStdError);
 }
 
-/** The models tied for first: the leader and every other model within the margin of error of it. */
+/**
+ * The models tied for first (entries best first): the leader, every model within the margin of error of it, and any
+ * model scoring between them. A 24-game run has a wider margin than a 100-game one, so it can tie the leader while a
+ * better score with a narrower margin doesn't; ranking that better score below it would read wrong.
+ */
 export function jointLeaders(entries: LeaderboardEntry[]): LeaderboardEntry[] {
-  if (entries.length < 2) return [];
-  const tied = [entries[0], ...entries.slice(1).filter((e) => tooCloseToCall(entries[0], e))];
-  return tied.length > 1 ? tied : [];
+  let last = 0;
+  entries.forEach((e, i) => {
+    if (i > 0 && tooCloseToCall(entries[0], e)) last = i;
+  });
+  return last > 0 ? entries.slice(0, last + 1) : [];
 }
 
 export const rank = (entries: LeaderboardEntry[]): LeaderboardEntry[] => [...entries].sort((a, b) => b.meanScore - a.meanScore);

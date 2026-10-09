@@ -12,15 +12,17 @@ const margin = (e: LeaderboardEntry) => (e.scoreStdError === undefined ? '' : `Â
 
 /**
  * The leaderboard table on the main page: rank (=1 for models tied within the margin of error), model and maker, mean
- * score with its margin, then survival, latency, backup moves and cost. Watch plays that model; self-reported
- * submissions follow, marked as such.
+ * score with its margin, then survival, latency, backup moves and cost. Watch plays that model. Self-reported
+ * submissions are ranked with our runs by mean score, marked as such.
  */
 export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, board: Leaderboard, community: Community | null, onWatch: (model: string) => void, canWatch: (model: string) => boolean): void {
-  const tied = new Set(jointLeaders(board.entries).map((e) => e.model));
-  const all = [...board.entries, ...(community?.entries ?? [])];
-  const top = Math.max(1, ...all.map((e) => e.meanScore));
+  // One ranking: our runs and the self-reported ones by mean score (ours first on an equal score).
+  const all: { e: LeaderboardEntry; by?: string }[] = [...board.entries.map((e) => ({ e })), ...(community?.entries ?? []).map((e) => ({ e, by: e.by }))];
+  all.sort((a, b) => b.e.meanScore - a.e.meanScore);
+  const tied = new Set(jointLeaders(all.map((r) => r.e)));
+  const top = Math.max(1, ...all.map((r) => r.e.meanScore));
   const date = new Date(board.generatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  sub.textContent = `${board.settings.gamesPerModel} games per model against the classic ghosts, last run on ${date}.`;
+  sub.textContent = `${board.settings.gamesPerModel} games per model against the classic ghosts, last run on ${date}.${community?.entries.length ? ' Self-reported models are ranked alongside: their makers ran the games, and CI replayed each one.' : ''}`;
 
   const head = el('thead');
   const hr = el('tr');
@@ -77,8 +79,7 @@ export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, boa
   };
 
   const body = el('tbody');
-  board.entries.forEach((e, i) => body.append(row(e, tied.has(e.model) ? '=1' : String(i + 1), { tie: tied.has(e.model) })));
-  for (const e of community?.entries ?? []) body.append(row(e, 'Â·', { tie: false, by: e.by, self: true }));
+  all.forEach(({ e, by }, i) => body.append(row(e, tied.has(e) ? '=1' : String(i + 1), { tie: tied.has(e), by, self: by !== undefined })));
   // The "Mean score" column hides on narrow screens; the score then sits under the model's name.
   head.querySelector('th:nth-child(3)')!.className = 'hide-n';
   table.replaceChildren(head, body);

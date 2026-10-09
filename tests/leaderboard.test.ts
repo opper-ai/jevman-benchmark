@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { rank, summarize, tooCloseToCall, type GameResult } from '../shared/leaderboard';
+import { jointLeaders, rank, summarize, tooCloseToCall, type GameResult, type LeaderboardEntry } from '../shared/leaderboard';
 
 const game = (over: Partial<GameResult>): GameResult => ({
   survived: 60, score: 2000, pellets: 200, deaths: 3, level: 1, calls: 100, decisions: 90, fallbacks: 0,
@@ -29,6 +29,16 @@ describe('leaderboard', () => {
     const far = summarize('opper/kev-4b', [100, 200, 150, 150].map((score) => game({ score })));
     expect(tooCloseToCall(a, close)).toBe(true);
     expect(tooCloseToCall(a, far)).toBe(false);
+  });
+
+  it('ties for first without ranking a better score below a worse one', () => {
+    const e = (name: string, meanScore: number, scoreStdError: number) => ({ name, meanScore, scoreStdError }) as LeaderboardEntry;
+    // A 24-game run (wide margin) is too close to call with the leader; the better 100-game score above it isn't.
+    const board = [e('SemIf', 3210, 134), e('jev', 2750, 109), e('Qwen 3.8', 2725, 216), e('RizzoFlow', 2675, 110), e('Luna', 2568, 75)];
+    expect(jointLeaders(board).map((x) => x.name)).toEqual(['SemIf', 'jev', 'Qwen 3.8']);
+    // Our own board as published: jev, Luna and Clef Flash tied, Clef not.
+    expect(jointLeaders([e('jev', 2750, 109), e('Luna', 2568, 75), e('Clef Flash', 2538, 60), e('Clef', 2476, 65)]).map((x) => x.name)).toEqual(['jev', 'Luna', 'Clef Flash']);
+    expect(jointLeaders([e('SemIf', 3210, 134), e('Von', 984, 20)])).toEqual([]);
   });
 
   it('reports no latency for a model that never answered', () => {

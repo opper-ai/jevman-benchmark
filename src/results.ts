@@ -1,5 +1,6 @@
 import { jointLeaders, type Community, type Leaderboard, type LeaderboardEntry } from '../shared/leaderboard';
 import { logoFor, makerOf, pageOf } from './logos';
+import { tag } from './track';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, cls?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
@@ -14,10 +15,10 @@ const margin = (e: LeaderboardEntry) => (e.scoreStdError === undefined ? '' : `Â
 const outLink = (href: string, text: string, cls?: string) => Object.assign(el('a', text, cls), { href, target: '_blank', rel: 'noopener nofollow ugc' });
 
 /** Who ran a community model: their GitHub profile (submissions come by pull request, `--by <github-handle>`). */
-const runBy = (by: string) => (/^[A-Za-z0-9][A-Za-z0-9-]{0,38}$/.test(by) ? outLink(`https://github.com/${by}`, `@${by}`) : el('span', by));
+const runBy = (by: string) => (/^[A-Za-z0-9][A-Za-z0-9-]{0,38}$/.test(by) ? tag(outLink(`https://github.com/${by}`, `@${by}`), 'click_github', { source: 'leaderboard_run_by' }) : el('span', by));
 
 /** Our own runs: run by this repo's benchmark. */
-const ranByUs = () => Object.assign(el('a', '@opper-ai'), { href: 'https://github.com/opper-ai/jevman-benchmark', target: '_blank', rel: 'noopener' });
+const ranByUs = () => tag(Object.assign(el('a', '@opper-ai'), { href: 'https://github.com/opper-ai/jevman-benchmark', target: '_blank', rel: 'noopener' }), 'click_github', { source: 'leaderboard_run_by' });
 
 /**
  * The leaderboard table on the main page: rank (=1 for models tied within the margin of error), model and maker, mean
@@ -32,7 +33,7 @@ export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, boa
   const top = Math.max(1, ...all.map((r) => r.e.meanScore));
   const date = new Date(board.generatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const lead = `${board.settings.gamesPerModel} games per model against the classic ghosts, last run on ${date}`;
-  sub.replaceChildren(community?.entries.length ? `${lead}, ranked together with models the community ran. ` : `${lead}. `, Object.assign(el('a', 'Add your model'), { href: 'https://github.com/opper-ai/jevman-benchmark/blob/main/CONTRIBUTING.md#benchmark-your-own-model', target: '_blank', rel: 'noopener' }));
+  sub.replaceChildren(community?.entries.length ? `${lead}, ranked together with models the community ran. ` : `${lead}. `, tag(Object.assign(el('a', 'Add your model'), { href: 'https://github.com/opper-ai/jevman-benchmark/blob/main/CONTRIBUTING.md#benchmark-your-own-model', target: '_blank', rel: 'noopener' }), 'click_add_model', { source: 'leaderboard' }));
 
   const head = el('thead');
   const hr = el('tr');
@@ -53,7 +54,11 @@ export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, boa
     // its submitter gave, if any.
     const page = self ? undefined : pageOf(e.model);
     const own = self && opts.url && /^https?:\/\//.test(opts.url) ? opts.url : undefined;
-    const name = page ? Object.assign(el('a', undefined, 'mname'), { href: page }) : own ? outLink(own, '', 'mname') : el('span', undefined, 'mname');
+    const name = page
+      ? tag(Object.assign(el('a', undefined, 'mname'), { href: page }), 'click_view_model', { source: 'leaderboard', model: e.model })
+      : own
+        ? tag(outLink(own, '', 'mname'), 'click_community_model', { source: 'leaderboard', model: e.model })
+        : el('span', undefined, 'mname');
     name.append(el('b', e.name));
     const small = el('small', self ? undefined : (makerOf(e.model) ?? ''));
     if (self) {

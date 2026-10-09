@@ -1,3 +1,4 @@
+import { tag } from './track';
 import { appPath } from './paths';
 
 export interface Me {
@@ -167,7 +168,7 @@ function loginButton(me: Me, label = 'Login'): HTMLButtonElement {
   b.disabled = !me.loginAvailable;
   b.title = me.loginAvailable ? 'Play on your own Opper account' : 'Login with Opper is not configured on this server';
   b.addEventListener('click', signIn);
-  return b;
+  return tag(b, 'click_login', { source: 'navbar' });
 }
 
 /** Sign up goes where opper.ai's does: an Opper account. */
@@ -175,7 +176,7 @@ function signUpLink(): HTMLAnchorElement {
   const a = el('a', undefined, SIGNUP_CLASS);
   a.href = 'https://opper.ai/sign-up/free';
   a.append(...buttonFace('Sign up'));
-  return a;
+  return tag(a, 'click_get_api_key', { source: 'navbar_signup' });
 }
 
 /**
@@ -206,6 +207,8 @@ export function renderDrawerAccount(root: HTMLElement, view: AccountView): void 
   login.type = 'button';
   login.disabled = !me.loginAvailable;
   login.addEventListener('click', signIn);
+  tag(signUp, 'click_get_api_key', { source: 'mobile_navbar_signup' });
+  tag(login, 'click_login', { source: 'mobile_navbar' });
   root.replaceChildren(signUp, login);
   const amount = view.kind === 'pool' ? poolAmount(me.pool?.remainingUsd ?? null) : null;
   if (amount) root.append(foot('Free credits', el('b', amount, 'credits')));

@@ -18,6 +18,7 @@ import { Recorder, roundDt, type Recording } from './replay';
 import { GameStats } from './stats';
 import { Thinking } from './thinking';
 import { attachTouch } from './touch';
+import { tag, track, trackClicks } from './track';
 import { createHttpTransport, warmUp, type TransportHooks } from './transport';
 import { GHOST_IDS, type Dir } from './types';
 import { shareText, versus } from './versus';
@@ -25,6 +26,11 @@ import { ModelWarming } from './warming';
 import type { Community, Leaderboard } from '../shared/leaderboard';
 import { BOARD_KEYS, boardOf, MIXED_LINEUP } from '../shared/lineups';
 import { DEFAULT_MODEL, modelName } from '../shared/models';
+
+trackClicks(appPath('/'));
+/** A game's props for Plausible: AI ghosts (and which lineup) or the classic ghosts. */
+const gameProps = (l: Lineup | null) => ({ game: 'jevman', mode: l ? 'ai_ghosts' : 'classic', lineup: l ? (boardOf(l) ?? 'custom') : 'classic' });
+const scoreBand = (score: number) => (score < 1000 ? '0-999' : score < 3000 ? '1000-2999' : score < 6000 ? '3000-5999' : '6000+');
 
 const KEYS: Record<string, Dir> = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
@@ -325,6 +331,7 @@ function renderChips(): void {
       if (logo) chip.append(logo);
       chip.append(modelName(m));
       chip.title = `${modelName(m)}'s recorded benchmark game`;
+      tag(chip, 'click_watch', { source: 'chips', model: m });
       chip.addEventListener('click', () => watch(m));
       return chip;
     }),
@@ -417,6 +424,7 @@ function startGame(next: Exclude<Mode, { kind: 'recording' }>): void {
   picker = null;
   overlayAction = null;
   mode = next;
+  track('game_start', gameProps(next.lineup));
   choice = next.lineup ? { ...base, ...next.lineup } : { ...base };
   state = createGame({ pacmanControl: 'keyboard', ghostsByAI: next.lineup !== null });
   recorder = next.lineup ? new Recorder() : null;
@@ -526,7 +534,10 @@ function openPicker(): void {
       });
     },
     onClassic: () => startGame({ kind: 'play', lineup: null }),
-    onLogin: signIn,
+    onLogin: () => {
+      track('click_login', { source: 'picker' });
+      signIn();
+    },
     onBack: closePicker,
     boards: () => boards,
   });
@@ -605,6 +616,7 @@ function gameOver(): void {
   const summary = stats.summary(state);
   if (mode.kind !== 'play') return;
   const l = mode.lineup;
+  track('game_over', { ...gameProps(l), score: scoreBand(summary.score) });
   let newBest = false;
   if (!l) {
     // The classic ghosts are the benchmark's own game: a personal best counts there.
@@ -620,7 +632,11 @@ function gameOver(): void {
     newBest,
     entry: l ? boardEntry(l, summary.score) : null,
     onPlayAgain: again,
-    onShare: () => shareScore(l ? aiShareText(summary, l, SHARE_URL) : board ? shareText(versus(board, summary.score), SHARE_URL) : `I scored ${summary.score} at jevman 🟡 ${SHARE_URL}`),
+    onShare: async () => {
+      const result = await shareScore(l ? aiShareText(summary, l, SHARE_URL) : board ? shareText(versus(board, summary.score), SHARE_URL) : `I scored ${summary.score} at jevman 🟡 ${SHARE_URL}`);
+      track('click_share', { source: 'game_over', result });
+      return result;
+    },
     onReview: l
       ? () => {
           log.setOpen(true); // the drawer slides out; the page stays where it is
@@ -716,6 +732,7 @@ function boardEntry(l: Lineup, score: number): BoardEntryOption | null {
 async function submitScore(key: string, initials: string, rec: Recording): Promise<{ error: string } | { place: number | null; entries: Boards[string] }> {
   const r = await enterScore(key, initials, rec);
   if (!r.ok) return { error: r.error };
+  track('highscore_entered', { board: key, place: r.place === null ? 'none' : String(r.place) });
   boards = r.boards;
   return { place: r.place, entries: r.boards[key] ?? [] };
 }
@@ -745,6 +762,7 @@ boardEl.addEventListener('click', (e) => {
   if (!t.isConnected || t.closest('.overlay, .play-cta, .board-notice, .sound-btn')) return;
   togglePause();
 });
+tag(playCta, 'click_play', { source: 'board' });
 playCta.addEventListener('click', openPicker);
 // A click anywhere outside the picker's card closes it, on the board or the page. (It runs after the board's own
 // handler, which leaves clicks on the overlay alone; a target no longer in the page was a card the picker replaced.)

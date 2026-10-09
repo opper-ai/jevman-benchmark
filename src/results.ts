@@ -117,19 +117,30 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
   // Phones: rank, model, maker (or Community) and mean score per row; a tap opens the rest, one row at a time.
   const setOpen = (item: HTMLElement, open: boolean) => {
     item.classList.toggle('open', open);
-    item.querySelector('.lbl-head')!.setAttribute('aria-expanded', String(open));
+    item.querySelector('.lbl-toggle')!.setAttribute('aria-expanded', String(open));
     item.querySelector<HTMLElement>('.lbl-d')!.hidden = !open;
   };
   const listItem = (e: LeaderboardEntry, rank: string, i: number, opts: { tie: boolean; by?: string; url?: string }) => {
     const self = opts.by !== undefined;
     const item = el('div', undefined, opts.tie ? 'lbl-row tie' : 'lbl-row');
-    const toggle = tag(el('button', undefined, 'lbl-head'), 'click_leaderboard_row', { source: 'mobile', model: e.model });
+    // The name links where the table's does; a tap anywhere else on the row (or its chevron button) opens the numbers.
+    const page = self ? undefined : pageOf(e.model);
+    const own = self && opts.url && /^https?:\/\//.test(opts.url) ? opts.url : undefined;
+    const name = page
+      ? tag(Object.assign(el('a', e.name, 'mname'), { href: page }), 'click_view_model', { source: 'leaderboard_mobile', model: e.model })
+      : own
+        ? tag(outLink(own, e.name, 'mname'), 'click_community_model', { source: 'leaderboard_mobile', model: e.model })
+        : el('b', e.name, 'mname');
+    const who = el('span', undefined, 'who');
+    who.append(name, el('small', self ? 'Community' : (makerOf(e.model) ?? '')));
+    const toggle = el('button', undefined, 'lbl-toggle');
     toggle.type = 'button';
     toggle.setAttribute('aria-expanded', 'false');
     toggle.setAttribute('aria-controls', `lbl-${i}`);
-    const who = el('span', undefined, 'who');
-    who.append(el('b', e.name), el('small', self ? 'Community' : (makerOf(e.model) ?? '')));
-    toggle.append(el('span', rank, 'rk'), logoFor(e.model) ?? el('span', e.name.trim().charAt(0).toUpperCase(), 'logo initial'), who, el('span', e.meanScore.toLocaleString('en-US'), 'n'), chevron());
+    toggle.setAttribute('aria-label', `${e.name}: all numbers`);
+    toggle.append(chevron());
+    const head = tag(el('div', undefined, 'lbl-head'), 'click_leaderboard_row', { source: 'mobile', model: e.model });
+    head.append(el('span', rank, 'rk'), logoFor(e.model) ?? el('span', e.name.trim().charAt(0).toUpperCase(), 'logo initial'), who, el('span', e.meanScore.toLocaleString('en-US'), 'n'), toggle);
     const details = el('dl', undefined, 'lbl-d');
     details.id = `lbl-${i}`;
     details.hidden = true;
@@ -145,16 +156,13 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
     add('Backup moves', `${(e.fallbackRate * 100).toFixed(1)}%`);
     add('Cost / game', e.costPerGame > 0 ? `$${e.costPerGame.toFixed(4)}` : '–');
     add('Run by', self ? runBy(opts.by!) : ranByUs());
-    const page = self ? undefined : pageOf(e.model);
-    const own = self && opts.url && /^https?:\/\//.test(opts.url) ? opts.url : undefined;
-    if (page) add('Model page', tag(Object.assign(el('a', 'opper.ai'), { href: page }), 'click_view_model', { source: 'leaderboard_mobile', model: e.model }));
-    else if (own) add('Model page', tag(outLink(own, new URL(own).hostname), 'click_community_model', { source: 'leaderboard_mobile', model: e.model }));
-    toggle.addEventListener('click', () => {
+    head.addEventListener('click', (ev) => {
+      if (ev.target instanceof Element && ev.target.closest('a')) return; // the name's link
       const open = !item.classList.contains('open');
       for (const other of list.querySelectorAll<HTMLElement>('.lbl-row.open')) setOpen(other, false);
       setOpen(item, open);
     });
-    item.append(toggle, details);
+    item.append(head, details);
     return item;
   };
   const cols = el('div', undefined, 'lbl-cols');

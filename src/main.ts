@@ -88,7 +88,7 @@ const toggleSound = () => {
 };
 soundBtn.addEventListener('click', toggleSound);
 for (const ev of ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'] as const) window.addEventListener(ev, () => sound.unlock(), { passive: true });
-const dpad = $('#dpad');
+const swipePad = $('#swipe-pad');
 const chipsEl = $('#watch-chips');
 const thinking = new Thinking();
 const LOG_KEY = 'jevman.log';
@@ -768,7 +768,7 @@ document.addEventListener('visibilitychange', () => {
 const steer = (dir: Dir) => {
   if (live && state.pacmanControl === 'keyboard') state.keyDir = dir;
 };
-attachTouch(boardEl, dpad, steer, () => live && state.pacmanControl === 'keyboard' && overlayEl.hidden === true);
+attachTouch([boardEl, swipePad], steer, () => live && state.pacmanControl === 'keyboard' && overlayEl.hidden === true);
 
 window.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey || typeof e.key !== 'string') return;
@@ -896,7 +896,10 @@ function frame(now: number): void {
     livesEl.replaceChildren(...Array.from({ length: Math.max(0, state.lives) }, () => Object.assign(document.createElement('span'), { className: 'pac' })));
   }
   const steering = live && state.pacmanControl === 'keyboard' && overlayEl.hidden === true;
-  if (dpad.hidden === (touchScreen && steering)) dpad.hidden = !(touchScreen && steering);
+  if (swipePad.hidden === (touchScreen && steering)) swipePad.hidden = !(touchScreen && steering);
+  // The pad shows your last swipe: where Pac-Man is heading, or the turn he takes at the next opening.
+  const swiped = steering ? (state.keyDir ?? '') : '';
+  if (swipePad.dataset.dir !== swiped) swipePad.dataset.dir = swiped;
   boardEl.classList.toggle('steering', steering);
   requestAnimationFrame(frame);
 }

@@ -271,18 +271,24 @@ main { display: block; padding-bottom: 96px; }
 .board-notice button + button { border-color: var(--j-maze); color: #fff; }
 .board-notice button:hover { background: var(--j-arc-yellow); color: #000; }
 .board-notice button + button:hover { background: var(--j-maze); color: #fff; }
-.dpad { display: grid; grid-template-columns: repeat(3, 64px); grid-template-rows: repeat(2, 54px); gap: 6px; justify-content: center; }
-.dpad button { position: relative; font-size: 0; border: 2px solid var(--j-maze); border-radius: 4px; background: #000; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
-.dpad button::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 9px solid transparent; }
-.dpad button:active { background: #0b0b2a; }
-.dpad [data-dir='up']::after { border-bottom-color: var(--j-arc-yellow); margin-top: -5px; }
-.dpad [data-dir='down']::after { border-top-color: var(--j-arc-yellow); margin-top: 5px; }
-.dpad [data-dir='left']::after { border-right-color: var(--j-arc-yellow); margin-left: -5px; }
-.dpad [data-dir='right']::after { border-left-color: var(--j-arc-yellow); margin-left: 5px; }
-.dpad [data-dir='up'] { grid-column: 2; grid-row: 1; }
-.dpad [data-dir='left'] { grid-column: 1; grid-row: 2; }
-.dpad [data-dir='down'] { grid-column: 2; grid-row: 2; }
-.dpad [data-dir='right'] { grid-column: 3; grid-row: 2; }
+/* Phones: a strip under the board to swipe on (the board takes swipes too, but there the thumb covers the maze). */
+.swipe-pad { display: flex; align-items: center; justify-content: center; gap: 16px; height: 96px; border: 2px solid var(--j-maze); border-radius: 4px; background: #000; touch-action: none; user-select: none; -webkit-user-select: none; }
+.swipe-label { color: #fff; font: 10px/1.8 var(--j-pixel); text-transform: uppercase; }
+/* Pac-Man between four arrows; he and the lit arrow face your last swipe. */
+.swipe-compass { display: grid; grid-template-columns: repeat(3, 16px); grid-template-rows: repeat(3, 16px); place-items: center; }
+.swipe-compass i { width: 0; height: 0; border: 6px solid transparent; transition: border-color 120ms; }
+.swipe-compass [data-dir='up'] { grid-column: 2; grid-row: 1; border-top-width: 0; border-bottom-color: var(--j-maze); }
+.swipe-compass [data-dir='left'] { grid-column: 1; grid-row: 2; border-left-width: 0; border-right-color: var(--j-maze); }
+.swipe-compass [data-dir='right'] { grid-column: 3; grid-row: 2; border-right-width: 0; border-left-color: var(--j-maze); }
+.swipe-compass [data-dir='down'] { grid-column: 2; grid-row: 3; border-bottom-width: 0; border-top-color: var(--j-maze); }
+.swipe-compass .pac { grid-column: 2; grid-row: 2; width: 14px; height: 14px; transition: transform 120ms; }
+.swipe-pad[data-dir='up'] [data-dir='up'] { border-bottom-color: var(--j-arc-yellow); }
+.swipe-pad[data-dir='left'] [data-dir='left'] { border-right-color: var(--j-arc-yellow); }
+.swipe-pad[data-dir='right'] [data-dir='right'] { border-left-color: var(--j-arc-yellow); }
+.swipe-pad[data-dir='down'] [data-dir='down'] { border-top-color: var(--j-arc-yellow); }
+.swipe-pad[data-dir='up'] .pac { transform: rotate(-90deg); }
+.swipe-pad[data-dir='left'] .pac { transform: scaleX(-1); }
+.swipe-pad[data-dir='down'] .pac { transform: rotate(90deg); }
 .watch { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px; max-width: 760px; }
 .watch-label { font-size: 13px; color: var(--j-muted); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }

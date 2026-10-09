@@ -102,11 +102,10 @@
               <button id="play-cta" class="play-cta" type="button" hidden><span class="tri" aria-hidden="true">▶</span><span id="play-label">Play vs AI</span></button>
               <span id="fruit" class="fruits" aria-label="Bonus fruit, one per level reached"></span>
             </div>
-            <div class="dpad" id="dpad" hidden aria-label="Steer Pac-Man">
-              <button type="button" data-dir="up" aria-label="Up">▲</button>
-              <button type="button" data-dir="left" aria-label="Left">◀</button>
-              <button type="button" data-dir="down" aria-label="Down">▼</button>
-              <button type="button" data-dir="right" aria-label="Right">▶</button>
+            <!-- Phones: a strip to swipe on, so the thumb needn't cover the maze. Pac-Man and the lit arrow face your last swipe. -->
+            <div class="swipe-pad" id="swipe-pad" hidden>
+              <span class="swipe-compass" aria-hidden="true"><i data-dir="up"></i><i data-dir="left"></i><span class="pac"></span><i data-dir="right"></i><i data-dir="down"></i></span>
+              <span class="swipe-label">Swipe here to steer</span>
             </div>
           </div>
           <button id="log-tab" class="drawer-tab" type="button" aria-controls="activity" aria-expanded="false"><span class="tpac" aria-hidden="true"></span>Activity</button>

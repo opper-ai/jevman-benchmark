@@ -147,7 +147,7 @@ answers.
 
 Arrows/WASD steer Pac-Man when you play him · `J` or the Pac-Man button hands him to the AI or back · `P` pause ·
 `R` restart · `M` sound on/off · the speed slider slows the game down. Space/Enter presses Watch (or Play); Restart and `R` end the game and open the Play dialog, Play again replays the same setup. On a phone,
-swipe on the board or use the on-screen pad.
+swipe on the board or on the swipe pad under it.
 
 ## Cost
 

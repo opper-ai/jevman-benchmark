@@ -37,7 +37,7 @@ const KEYS: Record<string, Dir> = {
   w: 'up', s: 'down', a: 'left', d: 'right',
 };
 /** Chip order under the board: jev first (its recorded benchmark game plays when the page opens), then by rank. */
-const WATCH_ORDER = ['typesafe/jev-1.13.0', 'opper/clef', 'opper/clef-flash', 'openai/gpt-6-luna-decisions', 'opper/kev-4b', 'berget/convaiinnovations/laya'];
+const WATCH_ORDER = ['typesafe/jev-1.13.0', 'opper/clef', 'opper/clef-flash', 'openai/gpt-6-luna-decisions', 'empiriolabs/aplomb-1', 'opper/kev-4b', 'berget/convaiinnovations/laya'];
 const LINEUP_KEY = 'jevman.ghosts';
 const BEST_KEY = 'jevman.best';
 const $ = <T extends HTMLElement = HTMLElement>(sel: string) => document.querySelector<T>(sel)!;

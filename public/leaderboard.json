@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-07T21:59:28.050Z",
+  "generatedAt": "2026-10-09T16:05:08.798Z",
   "settings": {
     "gamesPerModel": 100,
     "maxSeconds": 300,
@@ -93,6 +93,28 @@
         "at/near junction": 200,
         "ghost ahead in corridor": 64,
         "waiting at junction": 36
+      }
+    },
+    {
+      "model": "empiriolabs/aplomb-1",
+      "name": "Aplomb 1",
+      "games": 100,
+      "meanScore": 1693,
+      "bestScore": 3520,
+      "scoreStdError": 63,
+      "meanSurvivedSeconds": 39.1,
+      "meanPellets": 140,
+      "pelletsPerLife": 47,
+      "meanGhostsEaten": 0.4,
+      "fruitEaten": "108/120",
+      "bestLevel": 1,
+      "fallbackRate": 0.032,
+      "meanLatencyMs": 308,
+      "costPerGame": 0.00138,
+      "deathsBy": {
+        "ghost ahead in corridor": 177,
+        "at/near junction": 104,
+        "waiting at junction": 19
       }
     },
     {

@@ -118,7 +118,7 @@ export interface TextStore {
 const errorCode = (body: string): string => /<Code>([^<]+)<\/Code>/.exec(body)?.[1] ?? '';
 
 /**
- * An S3 object as a TextStore. A missing object (404) is "nothing yet"; any other failure throws. Writes use S3's
+ * An S3 object as a TextStore. A missing object (404 NoSuchKey) is "nothing yet"; any other failure throws. Writes use S3's
  * conditional writes: If-Match the ETag that was read, or If-None-Match: * for the first one.
  */
 export function s3Store(opts: { bucket: string; key: string; region: string; credentials: () => Promise<AwsCredentials>; fetch?: typeof fetch; now?: () => Date }): TextStore {
@@ -142,7 +142,12 @@ export function s3Store(opts: { bucket: string; key: string; region: string; cre
     where: `s3://${opts.bucket}/${opts.key}`,
     async load() {
       const res = await request('GET');
-      if (res.status === 404) return null;
+      // Only a missing object is "nothing yet": a missing bucket (NoSuchBucket) is a broken setup.
+      if (res.status === 404) {
+        const body = await res.text();
+        if (errorCode(body) === 'NoSuchKey') return null;
+        throw new Error(`reading s3://${opts.bucket}/${opts.key}: HTTP 404 ${errorCode(body)}`.trim());
+      }
       if (!res.ok) throw await failed('reading', res);
       const version = res.headers.get('etag');
       if (!version) throw new Error(`reading ${url.href}: no ETag`);

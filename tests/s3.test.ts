@@ -86,6 +86,8 @@ describe('s3Store', () => {
   });
 
   it('fails loudly on anything else, so the boards are never started empty over saved ones', async () => {
+    const noBucket = async () => new Response('<Error><Code>NoSuchBucket</Code></Error>', { status: 404 });
+    await expect(store(noBucket as never).load()).rejects.toThrow('HTTP 404 NoSuchBucket');
     const denied = async () => new Response('<Error><Code>AccessDenied</Code><Message>no</Message></Error>', { status: 403 });
     await expect(store(denied as never).load()).rejects.toThrow('HTTP 403 AccessDenied');
   });

@@ -33,8 +33,9 @@ export async function fetchBoards(): Promise<Boards | null> {
 
 /** The place a score would take on a board (1 to 10), or null; with no boards yet, the first place. */
 export function placeFor(boards: Boards | null, board: string, score: number): number | null {
-  if (score <= 0) return null;
-  const list = boards?.[board] ?? [];
+  // Boards that couldn't be loaded give no place: the server takes no entries then either.
+  if (score <= 0 || !boards) return null;
+  const list = boards[board] ?? [];
   const place = list.filter((e) => e.score >= score).length + 1;
   return place <= BOARD_SIZE ? place : null;
 }

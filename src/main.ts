@@ -701,6 +701,10 @@ hiCell.addEventListener('keydown', (e) => {
 function boardEntry(l: Lineup, score: number): BoardEntryOption | null {
   const key = boardOf(l);
   if (!key) return { kind: 'custom' };
+  // Not loaded (the server couldn't read them): no entry this game, and try again for the next one.
+  if (!boards) void fetchBoards().then((b) => {
+    if (b) boards = b;
+  });
   const place = placeFor(boards, key, score);
   const rec = recorder ? { ...recorder.finish(state, 'player', { pacmanControl: 'keyboard', ghostsByAI: true, lineup: l }), fixedStep: FIXED_STEP, steps: recSteps, final: { score: state.score, lives: state.lives, level: state.level, frames: recSteps } } : undefined;
   if (place === null || !rec) return null;
@@ -915,6 +919,14 @@ if (waiting) {
   syncPlayCta();
   void fetchBoards().then((b) => {
     if (b) boards = b;
+    if (!b) {
+      // The boards can't be read right now: keep the stashed game for the next visit instead of dropping it.
+      entryOpen = false;
+      held = false;
+      dim(false);
+      syncPlayCta();
+      return;
+    }
     const place = placeFor(boards, waiting.board, waiting.score);
     const close = () => {
       clearPending();

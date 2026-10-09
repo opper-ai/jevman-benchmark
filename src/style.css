@@ -110,6 +110,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 
 /* ---------- page column: opper.ai's (10 of 12 columns, at most 1280px) ---------- */
+/*
+ * The footer (opper.ai's markup) lays its blocks out on a 12-column grid with 32px gaps. Below 1024px every block spans
+ * all 12 columns, so those 11 gaps only add width: 352px of them, more than a 360px phone has, and the page scrolled
+ * sideways. Without them it fits.
+ */
+@media (max-width: 1023px) { .oc-footer .grid-cols-12.gap-8 { column-gap: 0; } }
 main { display: block; padding-bottom: 96px; }
 .col { width: calc(min(100%, 1280px) * 10 / 12); margin-inline: auto; }
 .col h1 { text-wrap: balance; }
@@ -461,7 +467,13 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 /* Run by: a GitHub handle, ours (@opper-ai) or the community submitter's. */
 .lbt .run { font-size: 13px; }
 .lbt .run a, .lbt .mdl small a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
-.lbt .show-n { display: none; }
+.lbt .show-m { display: none; }
+/* Narrower than a laptop the full table doesn't fit: Survival and Run by go, and long model names wrap. */
+@media (max-width: 1279px) {
+  .lbt .hide-m { display: none; }
+  .lbt .show-m { display: inline; }
+  .lbt td:nth-child(2) { white-space: normal; }
+}
 /* Method as a spec sheet: one row per rule, the full width of the section, in the leaderboard's card. */
 .spec { margin: 0; border: 1px solid var(--j-line); border-radius: 16px; background: var(--j-card); overflow: hidden; }
 .spec > div { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 24px; padding: 16px 20px; }
@@ -489,10 +501,7 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
   .lg-head { flex-wrap: wrap; }
   .section { margin-top: 64px; }
   .lbt .hide-n { display: none; }
-  .lbt .show-n { display: inline; }
   .lbt .mdl .score-m { display: block; }
-  /* Only rank, model and Watch are left: a long model name wraps instead of widening the table. */
-  .lbt td:nth-child(2) { white-space: normal; }
 }
 @media (max-width: 520px) {
   .user-menu .name { display: none; }

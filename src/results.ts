@@ -37,8 +37,9 @@ export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, boa
 
   const head = el('thead');
   const hr = el('tr');
-  // On narrow screens only the rank and model stay: the score and who ran it sit under the model's name.
-  for (const [label, cls] of [['#', ''], ['Model', ''], ['Mean score ± 95%', 'hide-n'], ['High score', 'r hide-n'], ['Survival', 'r hide-n'], ['Latency', 'r hide-n'], ['Backup moves', 'r hide-n'], ['Cost / game', 'r hide-n'], ['Run by', 'hide-n']]) {
+  // Narrower than a laptop, Survival and Run by go (who ran it sits under the model's name); on phones only the rank
+  // and model stay, with the score under the name too.
+  for (const [label, cls] of [['#', ''], ['Model', ''], ['Mean score ± 95%', 'hide-n'], ['High score', 'r hide-n'], ['Survival', 'r hide-m'], ['Latency', 'r hide-n'], ['Backup moves', 'r hide-n'], ['Cost / game', 'r hide-n'], ['Run by', 'hide-m']]) {
     hr.append(el('th', label, cls || undefined));
   }
   head.append(hr);
@@ -62,13 +63,13 @@ export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, boa
     name.append(el('b', e.name));
     const small = el('small', self ? undefined : (makerOf(e.model) ?? ''));
     if (self) {
-      const runM = el('span', 'Run by ', 'show-n');
+      const runM = el('span', 'Run by ', 'show-m');
       runM.append(runBy(opts.by!));
-      small.append(el('span', 'Community', 'hide-n'), runM);
+      small.append(el('span', 'Community', 'hide-m'), runM);
     }
     who.append(name, small, el('span', `${e.meanScore.toLocaleString('en-US')} ${margin(e)}`, 'score-m'));
     mdl.append(who);
-    const run = el('td', undefined, 'run hide-n');
+    const run = el('td', undefined, 'run hide-m');
     run.append(self ? runBy(opts.by!) : ranByUs());
     const scw = el('div', undefined, 'scw');
     const bar = el('span', undefined, 'bar');
@@ -88,7 +89,7 @@ export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, boa
       tdModel,
       tdScore,
       cell(e.bestScore === undefined ? '–' : e.bestScore.toLocaleString('en-US')), // the best single game; the ranking uses the mean
-      cell(`${e.meanSurvivedSeconds.toFixed(1)} s`),
+      cell(`${e.meanSurvivedSeconds.toFixed(1)} s`, 'n r hide-m'),
       cell(e.meanLatencyMs === null ? '–' : `${e.meanLatencyMs} ms`),
       cell(`${(e.fallbackRate * 100).toFixed(1)}%`),
       cell(`$${e.costPerGame.toFixed(4)}`),

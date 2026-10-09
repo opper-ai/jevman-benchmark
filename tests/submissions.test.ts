@@ -91,4 +91,11 @@ describe('checkSubmission', () => {
     expect(checkSubmission(folder({ manifest: { by: 'not a handle!' } }), 'acme-pac', RULES)).toMatchObject({ error: expect.stringMatching(/GitHub handle/) });
     expect(checkSubmission(folder({ manifest: { url: 'javascript:alert(1)' } }), 'acme-pac', RULES)).toMatchObject({ error: expect.stringMatching(/https/) });
   });
+
+  it('marks our own reference chat-model runs, and only ours', () => {
+    expect(checkSubmission(folder({ manifest: { by: 'opper-ai', kind: 'reference' } }), 'acme-pac', RULES)).toMatchObject({ entry: { by: 'opper-ai', reference: true } });
+    expect(checkSubmission(folder({ manifest: { kind: 'reference' } }), 'acme-pac', RULES)).toMatchObject({ error: expect.stringMatching(/reference/) });
+    expect(checkSubmission(folder({ manifest: { by: 'opper-ai', kind: 'official' } }), 'acme-pac', RULES)).toMatchObject({ error: expect.stringMatching(/reference/) });
+    expect(checkSubmission(folder(), 'acme-pac', RULES)).not.toHaveProperty('entry.reference');
+  });
 });

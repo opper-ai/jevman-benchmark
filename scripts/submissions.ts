@@ -16,6 +16,8 @@ interface Manifest {
   name: string;
   by: string;
   url?: string;
+  /** "reference": a regular chat model (not a decision model) we ran ourselves for comparison; only by opper-ai. */
+  kind?: 'reference';
   benchVersion: number;
   games: number;
 }
@@ -39,6 +41,7 @@ export function checkSubmission(dir: string, id: string, rules: SubmissionRules 
   if (typeof manifest.name !== 'string' || !/^[\p{L}\p{N}\p{P}\p{Zs}\p{S}]{1,40}$/u.test(manifest.name) || !manifest.name.trim()) return { error: 'name must be 1 to 40 printable characters' };
   if (typeof manifest.by !== 'string' || !/^[A-Za-z0-9-]{1,39}$/.test(manifest.by)) return { error: 'by must be a GitHub handle' };
   if (manifest.url !== undefined && (typeof manifest.url !== 'string' || !/^https:\/\/\S+$/.test(manifest.url))) return { error: 'url must start with https://' };
+  if (manifest.kind !== undefined && (manifest.kind !== 'reference' || manifest.by !== 'opper-ai')) return { error: 'kind can only be "reference", for our own reference runs (by opper-ai)' };
   // A submitted model must not pass for one we benchmark ourselves.
   if (DECISION_MODELS.some((m) => m.id === id || m.name.toLowerCase() === manifest.name.trim().toLowerCase())) return { error: `${manifest.name} is on the main leaderboard already` };
   const v = manifest.benchVersion;
@@ -72,6 +75,7 @@ export function checkSubmission(dir: string, id: string, rules: SubmissionRules 
     ...summarize(id, results, manifest.name.trim()),
     by: manifest.by,
     ...(manifest.url ? { url: manifest.url } : {}),
+    ...(manifest.kind === 'reference' ? { reference: true as const } : {}),
     selfReported: true,
   };
   return { entry };

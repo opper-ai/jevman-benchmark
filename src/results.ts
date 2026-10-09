@@ -39,7 +39,7 @@ function chevron(): SVGSVGElement {
  */
 export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, sub: HTMLElement, board: Leaderboard, community: Community | null): void {
   // One ranking: our runs and the self-reported ones by mean score (ours first on an equal score).
-  const all: { e: LeaderboardEntry; by?: string; url?: string }[] = [...board.entries.map((e) => ({ e })), ...(community?.entries ?? []).map((e) => ({ e, by: e.by, url: e.url }))];
+  const all: { e: LeaderboardEntry; by?: string; url?: string; reference?: boolean }[] = [...board.entries.map((e) => ({ e })), ...(community?.entries ?? []).map((e) => ({ e, by: e.by, url: e.url, reference: e.reference }))];
   all.sort((a, b) => b.e.meanScore - a.e.meanScore);
   const tied = new Set(jointLeaders(all.map((r) => r.e)));
   const top = Math.max(1, ...all.map((r) => r.e.meanScore));
@@ -56,7 +56,7 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
   }
   head.append(hr);
 
-  const row = (e: LeaderboardEntry, rank: string, opts: { tie: boolean; by?: string; url?: string }) => {
+  const row = (e: LeaderboardEntry, rank: string, opts: { tie: boolean; by?: string; url?: string; reference?: boolean }) => {
     const self = opts.by !== undefined;
     const tr = el('tr', undefined, [opts.tie ? 'tie' : '', self ? 'self' : ''].filter(Boolean).join(' ') || undefined);
     const mdl = el('div', undefined, 'mdl');
@@ -65,8 +65,10 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
     const who = el('div');
     // The name links to the model's page on opper.ai (specs, prices, routes), or for a self-reported model to the page
     // its submitter gave, if any.
-    const page = self ? undefined : pageOf(e.model);
-    const own = self && opts.url && /^https?:\/\//.test(opts.url) ? opts.url : undefined;
+    // A reference chat model's page is on opper.ai too: linked as ours are, not as a submitter's page.
+    const ourPage = opts.reference && opts.url?.startsWith('https://opper.ai/') ? opts.url : undefined;
+    const page = self ? ourPage : pageOf(e.model);
+    const own = self && !ourPage && opts.url && /^https?:\/\//.test(opts.url) ? opts.url : undefined;
     const name = page
       ? tag(Object.assign(el('a', undefined, 'mname'), { href: page }), 'click_view_model', { source: 'leaderboard', model: e.model })
       : own
@@ -76,13 +78,14 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
     const small = el('small', self ? undefined : (makerOf(e.model) ?? ''));
     if (self) {
       const runM = el('span', 'Run by ', 'show-m');
-      runM.append(runBy(opts.by!));
-      small.append(el('span', 'Community', 'hide-m'), runM);
+      // A reference chat model is one we ran ourselves: Run by is this repo, as for our own runs.
+      runM.append(opts.reference ? ranByUs() : runBy(opts.by!));
+      small.append(el('span', opts.reference ? 'Chat model (reference)' : 'Community', 'hide-m'), runM);
     }
     who.append(name, small, el('span', `${e.meanScore.toLocaleString('en-US')} ${margin(e)}`, 'score-m'));
     mdl.append(who);
     const run = el('td', undefined, 'run hide-m');
-    run.append(self ? runBy(opts.by!) : ranByUs());
+    run.append(self && !opts.reference ? runBy(opts.by!) : ranByUs());
     const scw = el('div', undefined, 'scw');
     const bar = el('span', undefined, 'bar');
     const fill = el('i');
@@ -111,7 +114,7 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
   };
 
   const body = el('tbody');
-  all.forEach(({ e, by, url }, i) => body.append(row(e, tied.has(e) ? '=1' : String(i + 1), { tie: tied.has(e), by, url })));
+  all.forEach(({ e, by, url, reference }, i) => body.append(row(e, tied.has(e) ? '=1' : String(i + 1), { tie: tied.has(e), by, url, reference })));
   table.replaceChildren(head, body);
 
   // Phones: rank, model, maker (or Community) and mean score per row; a tap opens the rest, one row at a time.
@@ -120,19 +123,20 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
     item.querySelector('.lbl-toggle')!.setAttribute('aria-expanded', String(open));
     item.querySelector<HTMLElement>('.lbl-d')!.hidden = !open;
   };
-  const listItem = (e: LeaderboardEntry, rank: string, i: number, opts: { tie: boolean; by?: string; url?: string }) => {
+  const listItem = (e: LeaderboardEntry, rank: string, i: number, opts: { tie: boolean; by?: string; url?: string; reference?: boolean }) => {
     const self = opts.by !== undefined;
     const item = el('div', undefined, opts.tie ? 'lbl-row tie' : 'lbl-row');
     // The name links where the table's does; a tap anywhere else on the row (or its chevron button) opens the numbers.
-    const page = self ? undefined : pageOf(e.model);
-    const own = self && opts.url && /^https?:\/\//.test(opts.url) ? opts.url : undefined;
+    const ourPage = opts.reference && opts.url?.startsWith('https://opper.ai/') ? opts.url : undefined;
+    const page = self ? ourPage : pageOf(e.model);
+    const own = self && !ourPage && opts.url && /^https?:\/\//.test(opts.url) ? opts.url : undefined;
     const name = page
       ? tag(Object.assign(el('a', e.name, 'mname'), { href: page }), 'click_view_model', { source: 'leaderboard_mobile', model: e.model })
       : own
         ? tag(outLink(own, e.name, 'mname'), 'click_community_model', { source: 'leaderboard_mobile', model: e.model })
         : el('b', e.name, 'mname');
     const who = el('span', undefined, 'who');
-    who.append(name, el('small', self ? 'Community' : (makerOf(e.model) ?? '')));
+    who.append(name, el('small', self ? (opts.reference ? 'Chat model (reference)' : 'Community') : (makerOf(e.model) ?? '')));
     const toggle = el('button', undefined, 'lbl-toggle');
     toggle.type = 'button';
     toggle.setAttribute('aria-expanded', 'false');
@@ -155,7 +159,7 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
     add('Latency', e.meanLatencyMs === null ? '–' : `${e.meanLatencyMs} ms`);
     add('Backup moves', `${(e.fallbackRate * 100).toFixed(1)}%`);
     add('Cost / game', e.costPerGame > 0 ? `$${e.costPerGame.toFixed(4)}` : '–');
-    add('Run by', self ? runBy(opts.by!) : ranByUs());
+    add('Run by', self && !opts.reference ? runBy(opts.by!) : ranByUs());
     head.addEventListener('click', (ev) => {
       if (ev.target instanceof Element && ev.target.closest('a')) return; // the name's link
       const open = !item.classList.contains('open');
@@ -167,5 +171,5 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
   };
   const cols = el('div', undefined, 'lbl-cols');
   cols.append(el('span', '#', 'rk'), el('span', 'Model', 'grow'), el('span', 'Mean score'));
-  list.replaceChildren(cols, ...all.map(({ e, by, url }, i) => listItem(e, tied.has(e) ? '=1' : String(i + 1), i, { tie: tied.has(e), by, url })));
+  list.replaceChildren(cols, ...all.map(({ e, by, url, reference }, i) => listItem(e, tied.has(e) ? '=1' : String(i + 1), i, { tie: tied.has(e), by, url, reference })));
 }

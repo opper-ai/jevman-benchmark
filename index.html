@@ -121,7 +121,7 @@
         <div class="oc"><h2 id="leaderboard-title" class="font-wix font-semibold text-3xl md:text-4xl text-left md:text-center">Leaderboard</h2></div>
         <p id="leaderboard-sub" class="sub">100 games per model against the classic ghosts.</p>
         <div class="tablecard"><div class="table-scroll"><table class="lbt" id="leaderboard-table"></table></div><div class="lbl" id="leaderboard-list"></div></div>
-        <p class="foot">=1 means tied: those scores are within each other's margin of error. Run by @opper-ai means we played the games through Opper. Community models were run by their makers: CI replayed every game they sent in to check its score, and the latency and cost are as they reported.</p>
+        <p class="foot">=1 means tied: those scores are within each other's margin of error. Run by @opper-ai means we played the games through Opper. Community models were run by their makers: CI replayed every game they sent in to check its score, and the latency and cost are as they reported. Chat models (reference) are regular LLMs, not decision models, that we ran the same way for comparison: they answer each question with one word, so they have no odds. A slower one, Claude Haiku 5.5 (about 0.9 seconds an answer), missed the 2 second deadline on two thirds of its moves, so it isn't ranked.</p>
       </section>
 
       <section id="add-model" class="section" aria-labelledby="add-model-title">

@@ -20,6 +20,21 @@ const runBy = (by: string) => (/^[A-Za-z0-9][A-Za-z0-9-]{0,38}$/.test(by) ? tag(
 /** Our own runs: run by this repo's benchmark. */
 const ranByUs = () => tag(Object.assign(el('a', '@opper-ai'), { href: 'https://github.com/opper-ai/jevman-benchmark', target: '_blank', rel: 'noopener' }), 'click_github', { source: 'leaderboard_run_by' });
 
+/**
+ * A model's mark (or, without one, its initial, so every name lines up). When the name links somewhere, the mark links
+ * there too: a copy of the name's link, left out of the tab order and screen readers, where the name is the link.
+ */
+function markOf(e: LeaderboardEntry, name: HTMLElement): HTMLElement {
+  const mark = logoFor(e.model) ?? el('span', e.name.trim().charAt(0).toUpperCase(), 'logo initial');
+  if (!(name instanceof HTMLAnchorElement)) return mark;
+  const a = name.cloneNode(false) as HTMLAnchorElement;
+  a.className = 'logo-link';
+  a.tabIndex = -1;
+  a.setAttribute('aria-hidden', 'true');
+  a.append(mark);
+  return a;
+}
+
 /** The chevron on a phone row: down when closed, turned up when open. */
 function chevron(): SVGSVGElement {
   const ns = 'http://www.w3.org/2000/svg';
@@ -60,8 +75,6 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
     const self = opts.by !== undefined;
     const tr = el('tr', undefined, [opts.tie ? 'tie' : '', self ? 'self' : ''].filter(Boolean).join(' ') || undefined);
     const mdl = el('div', undefined, 'mdl');
-    // A model without a maker mark (a self-reported one) gets its initial, so every name lines up.
-    mdl.append(logoFor(e.model) ?? el('span', e.name.trim().charAt(0).toUpperCase(), 'logo initial'));
     const who = el('div');
     // The name links to the model's page on opper.ai (specs, prices, routes), or for a self-reported model to the page
     // its submitter gave, if any.
@@ -75,6 +88,7 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
         ? tag(outLink(own, '', 'mname'), 'click_community_model', { source: 'leaderboard', model: e.model })
         : el('span', undefined, 'mname');
     name.append(el('b', e.name));
+    mdl.append(markOf(e, name));
     const small = el('small', self ? undefined : (makerOf(e.model) ?? ''));
     if (self) {
       const runM = el('span', 'Run by ', 'show-m');
@@ -144,7 +158,7 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
     toggle.setAttribute('aria-label', `${e.name}: all numbers`);
     toggle.append(chevron());
     const head = tag(el('div', undefined, 'lbl-head'), 'click_leaderboard_row', { source: 'mobile', model: e.model });
-    head.append(el('span', rank, 'rk'), logoFor(e.model) ?? el('span', e.name.trim().charAt(0).toUpperCase(), 'logo initial'), who, el('span', e.meanScore.toLocaleString('en-US'), 'n'), toggle);
+    head.append(el('span', rank, 'rk'), markOf(e, name), who, el('span', e.meanScore.toLocaleString('en-US'), 'n'), toggle);
     const details = el('dl', undefined, 'lbl-d');
     details.id = `lbl-${i}`;
     details.hidden = true;

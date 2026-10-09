@@ -433,31 +433,34 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 /* Each section's line under its heading: the body colour and size, as the hero's. */
 .section .sub { max-width: 680px; margin: -4px 0 6px; color: var(--j-text); font: 500 17px/1.5 var(--j-display); text-align: left; }
 @media (min-width: 768px) { .section .sub { margin-inline: auto; text-align: center; } }
+.section .sub a { text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
 .section .foot { margin: 0; font-size: 12.5px; color: var(--j-muted); }
 .tablecard { border: 1px solid var(--j-line); border-radius: 16px; overflow: hidden; }
 .table-scroll { overflow-x: auto; }
 .lbt { width: 100%; border-collapse: collapse; font-size: 14px; }
-.lbt th { text-align: left; font-weight: 500; font-size: 12px; padding: 10px 14px; white-space: nowrap; color: var(--j-muted); background: var(--j-soft); }
-.lbt td { padding: 12px 14px; vertical-align: middle; white-space: nowrap; border-top: 1px solid var(--j-line); }
+.lbt th { text-align: left; font-weight: 500; font-size: 12px; padding: 10px 12px; white-space: nowrap; color: var(--j-muted); background: var(--j-soft); }
+.lbt td { padding: 12px 12px; vertical-align: middle; white-space: nowrap; border-top: 1px solid var(--j-line); }
 .lbt .r { text-align: right; }
 .lbt .rk { font: 600 13px var(--j-mono); width: 3.2em; color: var(--j-muted); }
 .lbt tr.tie .rk { color: var(--j-text); }
 .lbt .mdl { display: flex; align-items: center; gap: 10px; }
 .lbt .mdl .logo { width: 20px; height: 20px; }
+.lbt .mdl .initial { display: grid; place-items: center; border-radius: 50%; background: var(--j-soft); border: 1px solid var(--j-line); color: var(--j-muted); font: 600 10px/1 var(--j-mono); }
 .lbt .mdl b { display: block; font-weight: 600; }
 .lbt .mname { display: block; color: inherit; text-decoration: none; }
 .lbt a.mname:hover b { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
 .lbt .mdl small { font-size: 12px; color: var(--j-muted); }
 .lbt .mdl .score-m { display: none; font: 500 12px var(--j-mono); }
-.lbt .scw { display: grid; grid-template-columns: minmax(80px, 1fr) auto; gap: 10px; align-items: center; min-width: 210px; }
+.lbt .scw { display: grid; grid-template-columns: minmax(80px, 1fr) auto; gap: 10px; align-items: center; min-width: 170px; }
 .lbt .bar { height: 6px; border-radius: 99px; background: var(--j-track); overflow: hidden; }
 .lbt .bar i { display: block; height: 100%; border-radius: 99px; background: var(--j-bar); }
 .lbt tr.tie .bar i { background: var(--j-text); }
 .lbt .n { font-family: var(--j-mono); font-variant-numeric: tabular-nums; }
 .lbt .pm { font-size: 11px; color: var(--j-muted); }
-.lbt .act { text-align: right; }
-.lbt .act button { border: 0; background: none; padding: 2px 4px; font-weight: 600; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
-.lbt .self td { color: var(--j-muted); }
+/* Run by: a GitHub handle, ours (@opper-ai) or the community submitter's. */
+.lbt .run { font-size: 13px; }
+.lbt .run a, .lbt .mdl small a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
+.lbt .show-n { display: none; }
 /* Method as a spec sheet: one row per rule, the full width of the section, in the leaderboard's card. */
 .spec { margin: 0; border: 1px solid var(--j-line); border-radius: 16px; background: var(--j-card); overflow: hidden; }
 .spec > div { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 24px; padding: 16px 20px; }
@@ -485,7 +488,10 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
   .lg-head { flex-wrap: wrap; }
   .section { margin-top: 64px; }
   .lbt .hide-n { display: none; }
+  .lbt .show-n { display: inline; }
   .lbt .mdl .score-m { display: block; }
+  /* Only rank, model and Watch are left: a long model name wraps instead of widening the table. */
+  .lbt td:nth-child(2) { white-space: normal; }
 }
 @media (max-width: 520px) {
   .user-menu .name { display: none; }

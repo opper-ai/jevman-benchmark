@@ -10,39 +10,61 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, cls?: 
 
 const margin = (e: LeaderboardEntry) => (e.scoreStdError === undefined ? '' : `± ${Math.round(2 * e.scoreStdError).toLocaleString('en-US')}`);
 
+/** A link someone submitted (their model's page, their profile): opened in a new tab and marked as user-submitted. */
+const outLink = (href: string, text: string, cls?: string) => Object.assign(el('a', text, cls), { href, target: '_blank', rel: 'noopener nofollow ugc' });
+
+/** Who ran a community model: their GitHub profile (submissions come by pull request, `--by <github-handle>`). */
+const runBy = (by: string) => (/^[A-Za-z0-9][A-Za-z0-9-]{0,38}$/.test(by) ? outLink(`https://github.com/${by}`, `@${by}`) : el('span', by));
+
+/** Our own runs: run by this repo's benchmark. */
+const ranByUs = () => Object.assign(el('a', '@opper-ai'), { href: 'https://github.com/opper-ai/jevman-benchmark', target: '_blank', rel: 'noopener' });
+
 /**
  * The leaderboard table on the main page: rank (=1 for models tied within the margin of error), model and maker, mean
- * score with its margin, then survival, latency, backup moves and cost. Watch plays that model. Self-reported
- * submissions are ranked with our runs by mean score, marked as such.
+ * score with its margin, then survival, latency, backup moves, cost and who ran the games. Community models
+ * (self-reported submissions) are ranked with our runs by mean score.
  */
-export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, board: Leaderboard, community: Community | null, onWatch: (model: string) => void, canWatch: (model: string) => boolean): void {
+export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, board: Leaderboard, community: Community | null): void {
   // One ranking: our runs and the self-reported ones by mean score (ours first on an equal score).
-  const all: { e: LeaderboardEntry; by?: string }[] = [...board.entries.map((e) => ({ e })), ...(community?.entries ?? []).map((e) => ({ e, by: e.by }))];
+  const all: { e: LeaderboardEntry; by?: string; url?: string }[] = [...board.entries.map((e) => ({ e })), ...(community?.entries ?? []).map((e) => ({ e, by: e.by, url: e.url }))];
   all.sort((a, b) => b.e.meanScore - a.e.meanScore);
   const tied = new Set(jointLeaders(all.map((r) => r.e)));
   const top = Math.max(1, ...all.map((r) => r.e.meanScore));
   const date = new Date(board.generatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  sub.textContent = `${board.settings.gamesPerModel} games per model against the classic ghosts, last run on ${date}.${community?.entries.length ? ' Self-reported models are ranked alongside: their makers ran the games, and CI replayed each one.' : ''}`;
+  const lead = `${board.settings.gamesPerModel} games per model against the classic ghosts, last run on ${date}`;
+  sub.replaceChildren(community?.entries.length ? `${lead}, ranked together with models the community ran. ` : `${lead}. `, Object.assign(el('a', 'Add your model'), { href: '#add-model' }));
 
   const head = el('thead');
   const hr = el('tr');
-  for (const [label, cls] of [['#', ''], ['Model', ''], ['Mean score ± 95%', ''], ['High score', 'r hide-n'], ['Survival', 'r hide-n'], ['Latency', 'r hide-n'], ['Backup moves', 'r hide-n'], ['Cost / game', 'r hide-n'], ['', '']]) {
+  // On narrow screens only the rank and model stay: the score and who ran it sit under the model's name.
+  for (const [label, cls] of [['#', ''], ['Model', ''], ['Mean score ± 95%', 'hide-n'], ['High score', 'r hide-n'], ['Survival', 'r hide-n'], ['Latency', 'r hide-n'], ['Backup moves', 'r hide-n'], ['Cost / game', 'r hide-n'], ['Run by', 'hide-n']]) {
     hr.append(el('th', label, cls || undefined));
   }
   head.append(hr);
 
-  const row = (e: LeaderboardEntry, rank: string, opts: { tie: boolean; by?: string; self?: boolean }) => {
-    const tr = el('tr', undefined, [opts.tie ? 'tie' : '', opts.self ? 'self' : ''].filter(Boolean).join(' ') || undefined);
+  const row = (e: LeaderboardEntry, rank: string, opts: { tie: boolean; by?: string; url?: string }) => {
+    const self = opts.by !== undefined;
+    const tr = el('tr', undefined, [opts.tie ? 'tie' : '', self ? 'self' : ''].filter(Boolean).join(' ') || undefined);
     const mdl = el('div', undefined, 'mdl');
-    const logo = logoFor(e.model);
-    if (logo) mdl.append(logo);
+    // A model without a maker mark (a self-reported one) gets its initial, so every name lines up.
+    mdl.append(logoFor(e.model) ?? el('span', e.name.trim().charAt(0).toUpperCase(), 'logo initial'));
     const who = el('div');
-    // The name links to the model's page on opper.ai (specs, prices, routes); a self-reported model has none.
-    const page = opts.self ? undefined : pageOf(e.model);
-    const name = page ? Object.assign(el('a', undefined, 'mname'), { href: page }) : el('span', undefined, 'mname');
+    // The name links to the model's page on opper.ai (specs, prices, routes), or for a self-reported model to the page
+    // its submitter gave, if any.
+    const page = self ? undefined : pageOf(e.model);
+    const own = self && opts.url && /^https?:\/\//.test(opts.url) ? opts.url : undefined;
+    const name = page ? Object.assign(el('a', undefined, 'mname'), { href: page }) : own ? outLink(own, '', 'mname') : el('span', undefined, 'mname');
     name.append(el('b', e.name));
-    who.append(name, el('small', opts.self ? `Self-reported by ${opts.by}` : (makerOf(e.model) ?? '')), el('span', `${e.meanScore.toLocaleString('en-US')} ${margin(e)}`, 'score-m'));
+    const small = el('small', self ? undefined : (makerOf(e.model) ?? ''));
+    if (self) {
+      const runM = el('span', 'Run by ', 'show-n');
+      runM.append(runBy(opts.by!));
+      small.append(el('span', 'Community', 'hide-n'), runM);
+    }
+    who.append(name, small, el('span', `${e.meanScore.toLocaleString('en-US')} ${margin(e)}`, 'score-m'));
     mdl.append(who);
+    const run = el('td', undefined, 'run hide-n');
+    run.append(self ? runBy(opts.by!) : ranByUs());
     const scw = el('div', undefined, 'scw');
     const bar = el('span', undefined, 'bar');
     const fill = el('i');
@@ -52,14 +74,6 @@ export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, boa
     n.append(el('span', margin(e), 'pm'));
     scw.append(bar, n);
     const cell = (text: string, cls = 'n r hide-n') => el('td', text, cls);
-    const act = el('td', undefined, 'act');
-    if (canWatch(e.model)) {
-      const watch = el('button', 'Watch');
-      watch.type = 'button';
-      watch.setAttribute('aria-label', `Watch ${e.name} play`);
-      watch.addEventListener('click', () => onWatch(e.model));
-      act.append(watch);
-    }
     const tdModel = el('td');
     tdModel.append(mdl);
     const tdScore = el('td', undefined, 'hide-n');
@@ -73,14 +87,12 @@ export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, boa
       cell(e.meanLatencyMs === null ? '–' : `${e.meanLatencyMs} ms`),
       cell(`${(e.fallbackRate * 100).toFixed(1)}%`),
       cell(`$${e.costPerGame.toFixed(4)}`),
-      act,
+      run,
     );
     return tr;
   };
 
   const body = el('tbody');
-  all.forEach(({ e, by }, i) => body.append(row(e, tied.has(e) ? '=1' : String(i + 1), { tie: tied.has(e), by, self: by !== undefined })));
-  // The "Mean score" column hides on narrow screens; the score then sits under the model's name.
-  head.querySelector('th:nth-child(3)')!.className = 'hide-n';
+  all.forEach(({ e, by, url }, i) => body.append(row(e, tied.has(e) ? '=1' : String(i + 1), { tie: tied.has(e), by, url })));
   table.replaceChildren(head, body);
 }

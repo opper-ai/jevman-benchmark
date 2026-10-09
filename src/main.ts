@@ -441,7 +441,7 @@ let watchToken = 0;
 let scoresOpen = false;
 
 /**
- * A chip under the board (or Watch in the leaderboard): that model's recorded benchmark game. The chip already
+ * A chip under the board: that model's recorded benchmark game. The chip already
  * showing does nothing; in the middle of your own game it asks first.
  */
 function watch(model: string, confirmed = false): void {
@@ -802,17 +802,7 @@ void Promise.all([
     board = b;
     // The cabinet's HIGH SCORE: the best single game any model played in the benchmark.
     topAiScore = Math.max(TOP_RECORDED_SCORE, ...b.entries.map((e) => e.bestScore ?? 0));
-    renderLeaderboard(
-      $<HTMLTableElement>('#leaderboard-table'),
-      $('#leaderboard-sub'),
-      b,
-      community,
-      (model) => {
-        watch(model);
-        window.scrollTo({ top: 0, behavior: 'smooth' }); // back up to the board, hero and all
-      },
-      (model) => RECORDINGS[model] !== undefined,
-    );
+    renderLeaderboard($<HTMLTableElement>('#leaderboard-table'), $('#leaderboard-sub'), b, community);
   })
   .catch(() => {
     $('#leaderboard-sub').textContent = 'The leaderboard could not be loaded. Try again in a moment.';

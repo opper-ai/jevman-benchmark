@@ -443,6 +443,29 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .section .sub a { text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
 .section .foot { margin: 0; font-size: 12.5px; color: var(--j-muted); }
 .tablecard { border: 1px solid var(--j-line); border-radius: 16px; overflow: hidden; }
+/* Phones: the leaderboard as a list instead of the table (see the 900px rules); a row opens its numbers. */
+.lbl { display: none; }
+.lbl-cols { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--j-soft); font-size: 12px; color: var(--j-muted); }
+.lbl-cols .rk { width: 26px; }
+.lbl-cols .grow { flex: 1; }
+.lbl-cols span:last-child { padding-right: 26px; }
+.lbl-row { border-top: 1px solid var(--j-line); }
+.lbl-row.open { background: var(--j-keyrow); }
+.lbl-head { width: 100%; min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 0; background: none; text-align: left; }
+.lbl-head .rk { width: 26px; flex: none; font: 600 13px var(--j-mono); color: var(--j-muted); }
+.lbl-row.tie .rk { color: var(--j-text); }
+.lbl-head .logo { width: 22px; height: 22px; }
+.lbl-head .initial { display: grid; place-items: center; border-radius: 50%; background: var(--j-soft); border: 1px solid var(--j-line); color: var(--j-muted); font: 600 10px/1 var(--j-mono); }
+.lbl-head .who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.lbl-head .who b { font-size: 15px; font-weight: 600; line-height: 1.3; }
+.lbl-head .who small { font-size: 12.5px; color: var(--j-muted); }
+.lbl-head .n { font: 600 15px var(--j-mono); font-variant-numeric: tabular-nums; }
+.lbl-head .chev { flex: none; color: var(--j-muted); transition: transform 160ms; }
+.lbl-row.open .chev { transform: rotate(180deg); }
+.lbl-d { margin: 0; padding: 2px 14px 14px 72px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 13px; }
+.lbl-d dt { color: var(--j-muted); }
+.lbl-d dd { margin: 0; text-align: right; font-family: var(--j-mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.lbl-d a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
 .table-scroll { overflow-x: auto; }
 .lbt { width: 100%; border-collapse: collapse; font-size: 14px; }
 .lbt th { text-align: left; font-weight: 500; font-size: 12px; padding: 10px 12px; white-space: nowrap; color: var(--j-muted); background: var(--j-soft); }
@@ -502,6 +525,8 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
   .section { margin-top: 64px; }
   .lbt .hide-n { display: none; }
   .lbt .mdl .score-m { display: block; }
+  .tablecard .table-scroll { display: none; }
+  .lbl { display: block; }
 }
 @media (max-width: 520px) {
   .user-menu .name { display: none; }

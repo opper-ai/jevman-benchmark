@@ -20,12 +20,24 @@ const runBy = (by: string) => (/^[A-Za-z0-9][A-Za-z0-9-]{0,38}$/.test(by) ? tag(
 /** Our own runs: run by this repo's benchmark. */
 const ranByUs = () => tag(Object.assign(el('a', '@opper-ai'), { href: 'https://github.com/opper-ai/jevman-benchmark', target: '_blank', rel: 'noopener' }), 'click_github', { source: 'leaderboard_run_by' });
 
+/** The chevron on a phone row: down when closed, turned up when open. */
+function chevron(): SVGSVGElement {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  for (const [k, v] of Object.entries({ class: 'chev', width: '16', height: '16', viewBox: '0 0 16 16', fill: 'none', 'aria-hidden': 'true' })) svg.setAttribute(k, v);
+  const path = document.createElementNS(ns, 'path');
+  for (const [k, v] of Object.entries({ d: 'M4 6l4 4 4-4', stroke: 'currentColor', 'stroke-width': '1.6', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })) path.setAttribute(k, v);
+  svg.append(path);
+  return svg;
+}
+
 /**
- * The leaderboard table on the main page: rank (=1 for models tied within the margin of error), model and maker, mean
+ * The leaderboard on the main page: rank (=1 for models tied within the margin of error), model and maker, mean
  * score with its margin, then survival, latency, backup moves, cost and who ran the games. Community models
- * (self-reported submissions) are ranked with our runs by mean score.
+ * (self-reported submissions) are ranked with our runs by mean score. `table` is the full table; `list` is the same
+ * ranking for phones, a row per model that opens its numbers when tapped.
  */
-export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, board: Leaderboard, community: Community | null): void {
+export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, sub: HTMLElement, board: Leaderboard, community: Community | null): void {
   // One ranking: our runs and the self-reported ones by mean score (ours first on an equal score).
   const all: { e: LeaderboardEntry; by?: string; url?: string }[] = [...board.entries.map((e) => ({ e })), ...(community?.entries ?? []).map((e) => ({ e, by: e.by, url: e.url }))];
   all.sort((a, b) => b.e.meanScore - a.e.meanScore);
@@ -101,4 +113,51 @@ export function renderLeaderboard(table: HTMLTableElement, sub: HTMLElement, boa
   const body = el('tbody');
   all.forEach(({ e, by, url }, i) => body.append(row(e, tied.has(e) ? '=1' : String(i + 1), { tie: tied.has(e), by, url })));
   table.replaceChildren(head, body);
+
+  // Phones: rank, model, maker (or Community) and mean score per row; a tap opens the rest, one row at a time.
+  const setOpen = (item: HTMLElement, open: boolean) => {
+    item.classList.toggle('open', open);
+    item.querySelector('.lbl-head')!.setAttribute('aria-expanded', String(open));
+    item.querySelector<HTMLElement>('.lbl-d')!.hidden = !open;
+  };
+  const listItem = (e: LeaderboardEntry, rank: string, i: number, opts: { tie: boolean; by?: string; url?: string }) => {
+    const self = opts.by !== undefined;
+    const item = el('div', undefined, opts.tie ? 'lbl-row tie' : 'lbl-row');
+    const toggle = tag(el('button', undefined, 'lbl-head'), 'click_leaderboard_row', { source: 'mobile', model: e.model });
+    toggle.type = 'button';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-controls', `lbl-${i}`);
+    const who = el('span', undefined, 'who');
+    who.append(el('b', e.name), el('small', self ? 'Community' : (makerOf(e.model) ?? '')));
+    toggle.append(el('span', rank, 'rk'), logoFor(e.model) ?? el('span', e.name.trim().charAt(0).toUpperCase(), 'logo initial'), who, el('span', e.meanScore.toLocaleString('en-US'), 'n'), chevron());
+    const details = el('dl', undefined, 'lbl-d');
+    details.id = `lbl-${i}`;
+    details.hidden = true;
+    const add = (label: string, value: string | Node) => {
+      const dd = el('dd');
+      dd.append(value);
+      details.append(el('dt', label), dd);
+    };
+    add('Mean score ± 95%', `${e.meanScore.toLocaleString('en-US')} ${margin(e)}`);
+    add('Best game', e.bestScore === undefined ? '–' : e.bestScore.toLocaleString('en-US'));
+    add('Survival', `${e.meanSurvivedSeconds.toFixed(1)} s`);
+    add('Latency', e.meanLatencyMs === null ? '–' : `${e.meanLatencyMs} ms`);
+    add('Backup moves', `${(e.fallbackRate * 100).toFixed(1)}%`);
+    add('Cost / game', e.costPerGame > 0 ? `$${e.costPerGame.toFixed(4)}` : '–');
+    add('Run by', self ? runBy(opts.by!) : ranByUs());
+    const page = self ? undefined : pageOf(e.model);
+    const own = self && opts.url && /^https?:\/\//.test(opts.url) ? opts.url : undefined;
+    if (page) add('Model page', tag(Object.assign(el('a', 'opper.ai'), { href: page }), 'click_view_model', { source: 'leaderboard_mobile', model: e.model }));
+    else if (own) add('Model page', tag(outLink(own, new URL(own).hostname), 'click_community_model', { source: 'leaderboard_mobile', model: e.model }));
+    toggle.addEventListener('click', () => {
+      const open = !item.classList.contains('open');
+      for (const other of list.querySelectorAll<HTMLElement>('.lbl-row.open')) setOpen(other, false);
+      setOpen(item, open);
+    });
+    item.append(toggle, details);
+    return item;
+  };
+  const cols = el('div', undefined, 'lbl-cols');
+  cols.append(el('span', '#', 'rk'), el('span', 'Model', 'grow'), el('span', 'Mean score'));
+  list.replaceChildren(cols, ...all.map(({ e, by, url }, i) => listItem(e, tied.has(e) ? '=1' : String(i + 1), i, { tie: tied.has(e), by, url })));
 }

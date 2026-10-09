@@ -211,7 +211,8 @@ export function createJevMiddleware(env: Record<string, string>, logger: RouteLo
         // Saved before the answer, so the entry is stored once the player sees it (a failed save is retried). The
         // save may merge in another server's entries, so the place is read again after it.
         if (place !== null) {
-          await scores.flush();
+          // Not stored: say so, so the player tries again (the same game again is the same line, so that's safe).
+          if (!(await scores.flush())) return send(res, json(503, { error: 'Your score could not be saved. Try again in a moment.' }, [], { 'Retry-After': '5' }));
           place = scores.placeOf(board, who);
         }
         logger.info(`[highscores] ${initials} ${result.score} on ${board}: ${place === null ? 'not in the top ten' : `#${place}`} (${who})`);

@@ -238,6 +238,21 @@ describe('/api/highscores', () => {
     expect((await call(restarted.handler, 'GET', {})).body.boards.mixed[0]).toMatchObject({ initials: 'JEV', score: state.score });
   });
 
+  it("doesn't say an entry was taken while it isn't stored, and stores it when the player tries again", async () => {
+    const store = memoryStore(null);
+    const save = store.save;
+    let down = true;
+    store.save = async (t, expected) => (down ? Promise.reject(new Error('HTTP 403 AccessDenied')) : save(t, expected));
+    const { handler } = mount(new HighScores(store, vi.fn()));
+    const failed = await call(handler, 'POST', signedIn, { board: 'mixed', initials: 'jev', recording });
+    expect(failed.status).toBe(503);
+    expect(failed.body.error).toMatch(/could not be saved/);
+    down = false;
+    const retried = await call(handler, 'POST', signedIn, { board: 'mixed', initials: 'jev', recording });
+    expect(retried.status).toBe(200);
+    expect(JSON.parse(store.current()!).mixed[0]).toMatchObject({ initials: 'JEV', score: state.score });
+  });
+
   it('says the boards are unavailable while they cannot be read, and takes no entries', async () => {
     const store = { ...memoryStore(null), load: async () => Promise.reject(new Error('HTTP 403 AccessDenied')) };
     const { handler } = mount(new HighScores(store, vi.fn()));

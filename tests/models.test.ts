@@ -12,7 +12,7 @@ const sentModel = (f: ReturnType<typeof ok>) => JSON.parse((f.mock.calls[0][1] a
 
 describe('decision models', () => {
   it('lists the System One models Opper serves, jev first and default', () => {
-    expect(DECISION_MODELS.map((m) => m.id)).toEqual(['typesafe/jev-1.13.0', 'opper/clef', 'opper/clef-flash', 'opper/kev-4b', 'berget/convaiinnovations/laya', 'openai/gpt-6-luna-decisions', 'empiriolabs/aplomb-1']);
+    expect(DECISION_MODELS.map((m) => m.id)).toEqual(['typesafe/jev-1.13.0', 'opper/clef', 'opper/clef-flash', 'opper/kev-4b', 'berget/convaiinnovations/laya', 'openai/gpt-6-luna-decisions', 'empiriolabs/aplomb-1', 'microsoft/decision-1']);
     expect(DEFAULT_MODEL).toBe('typesafe/jev-1.13.0');
     expect(isModelId('opper/kev-4b')).toBe(true);
     expect(isModelId('openai/gpt-5')).toBe(false);
@@ -23,6 +23,9 @@ describe('decision models', () => {
     expect(requestedModelFor('opper', 'opper/kev-4b')).toBe('opper/kev-4b');
     expect(requestedModelFor('typesafe', 'typesafe/jev-1.13.0')).toBe('jev-1.13.0');
     expect(requestedModelFor('typesafe', 'opper/kev-4b')).toBeNull();
+    // Opper serves Microsoft Decision 1 under its Azure route.
+    expect(requestedModelFor('opper', 'microsoft/decision-1')).toBe('azure:global/microsoft-decision-1');
+    expect(requestedModelFor('typesafe', 'microsoft/decision-1')).toBeNull();
     expect(modelFor('opper', {})).toBe('typesafe/jev-1.13.0');
   });
 });

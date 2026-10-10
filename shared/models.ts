@@ -12,6 +12,7 @@ export const DECISION_MODELS = [
   { id: 'berget/convaiinnovations/laya', name: 'Laya', maker: 'ConvAI Innovations' },
   { id: 'openai/gpt-6-luna-decisions', name: 'GPT-6 Luna', maker: 'OpenAI' },
   { id: 'empiriolabs/aplomb-1', name: 'Aplomb 1', maker: 'EmpirioLabs' },
+  { id: 'microsoft/decision-1', name: 'Microsoft Decision 1', maker: 'Microsoft', opper: 'azure:global/microsoft-decision-1' },
 ] as const;
 
 export type ModelId = (typeof DECISION_MODELS)[number]['id'];

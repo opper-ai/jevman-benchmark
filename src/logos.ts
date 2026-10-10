@@ -29,8 +29,6 @@ const COMMUNITY_LOGOS: Record<string, { src: string; shape?: 'round' | 'tile'; m
   'd1-3b': { src: 'logos/community/liquid-ai.svg', mono: true },
   von: { src: 'logos/community/von.png', shape: 'round' },
   'random-dice': { src: 'logos/community/dice.svg' },
-  // Reference chat models (submissions by opper-ai): their makers' marks.
-  'qwen-3-8-27b-chat': { src: 'logos/community/qwen.svg' },
 };
 
 export const makerOf = (model: string): string | undefined => LOGOS[model]?.maker;

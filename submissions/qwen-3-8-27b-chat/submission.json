@@ -1,9 +1,0 @@
-{
-  "name": "Qwen 3.8 27B",
-  "by": "opper-ai",
-  "url": "https://opper.ai/alibaba/qwen3-8-27b",
-  "kind": "reference",
-  "benchVersion": 1,
-  "recordedAt": "2026-10-09T21:23:24.584Z",
-  "games": 100
-}

@@ -124,8 +124,6 @@ export interface CommunityEntry extends LeaderboardEntry {
    * are as reported by the submitter.
    */
   selfReported: true;
-  /** A regular chat model (not a decision model) that we ran ourselves through scripts/chat-endpoint.ts, for comparison. */
-  reference?: true;
 }
 
 export interface Community {

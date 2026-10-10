@@ -116,9 +116,6 @@ names explicitly (`--pacman-model`, `npm run leaderboard`) must be one of the
 - `npm run bench -- --endpoint http://…` — plays Pac-Man with any model behind your own HTTP endpoint; with
   `--submit submissions/<id> --name … --by …` it records the leaderboard's games as a submission. See
   [CONTRIBUTING.md](CONTRIBUTING.md#benchmark-your-own-model).
-- `scripts/chat-endpoint.ts` — a regular chat model (not a decision model) through Opper's chat API behind `--endpoint`,
-  answering each question with one word. The leaderboard's reference chat models were run this way, as submissions by
-  opper-ai with `"kind": "reference"` in their submission.json.
 - `npm run submissions` — replays every submitted game in [`submissions/`](submissions) and writes
   `public/community.json`, the leaderboard's **self-reported** list. The image build runs it too, so a submission that
   doesn't check out fails CI.

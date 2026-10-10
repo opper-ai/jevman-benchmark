@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T16:05:08.798Z",
+  "generatedAt": "2026-10-10T07:49:48.287Z",
   "settings": {
     "gamesPerModel": 100,
     "maxSeconds": 300,
@@ -93,6 +93,28 @@
         "at/near junction": 200,
         "ghost ahead in corridor": 64,
         "waiting at junction": 36
+      }
+    },
+    {
+      "model": "microsoft/decision-1",
+      "name": "Microsoft Decision 1",
+      "games": 100,
+      "meanScore": 2390,
+      "bestScore": 4420,
+      "scoreStdError": 79,
+      "meanSurvivedSeconds": 48.4,
+      "meanPellets": 183,
+      "pelletsPerLife": 61,
+      "meanGhostsEaten": 1.3,
+      "fruitEaten": "104/157",
+      "bestLevel": 2,
+      "fallbackRate": 0.021,
+      "meanLatencyMs": 301,
+      "costPerGame": 0.00264,
+      "deathsBy": {
+        "at/near junction": 158,
+        "waiting at junction": 43,
+        "ghost ahead in corridor": 99
       }
     },
     {

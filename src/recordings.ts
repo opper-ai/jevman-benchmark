@@ -9,6 +9,7 @@ export const RECORDINGS: Record<string, { path: string; score: number }> = {
   'opper/clef': { path: '/demo/clef-demo.json', score: 3340 },
   'opper/clef-flash': { path: '/demo/clef-flash-demo.json', score: 2840 },
   'openai/gpt-6-luna-decisions': { path: '/demo/gpt-6-luna-demo.json', score: 2870 },
+  'microsoft/decision-1': { path: '/demo/microsoft-decision-1-demo.json', score: 2700 },
   'empiriolabs/aplomb-1': { path: '/demo/aplomb-1-demo.json', score: 1810 },
   'opper/kev-4b': { path: '/demo/kev-4b-demo.json', score: 1480 },
   'berget/convaiinnovations/laya': { path: '/demo/laya-demo.json', score: 590 },

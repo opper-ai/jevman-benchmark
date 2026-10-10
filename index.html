@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>jevman: a Pac-Man benchmark for decision models | Opper AI</title>
-    <meta name="description" content="Eight AI decision models played Pac-Man in real time against the classic arcade ghosts. See the leaderboard, watch their games, or play against them." />
+    <meta name="description" content="The jevman benchmark ranks AI decision models on 100 real-time games of Pac-Man against the classic arcade ghosts. See who leads, watch them play or play against them." />
     <link rel="canonical" href="%VITE_APP_URL%" />
     <link rel="icon" href="https://opper.ai/favicon.ico" sizes="48x48 96x96 192x192" />
     <link rel="icon" href="https://opper.ai/images/icon-dark.png" media="(prefers-color-scheme: light)" />
@@ -14,14 +14,14 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Opper AI" />
     <meta property="og:title" content="jevman: a Pac-Man benchmark for decision models | Opper AI" />
-    <meta property="og:description" content="Eight AI decision models played Pac-Man in real time against the classic arcade ghosts. See the leaderboard, watch their games, or play against them." />
+    <meta property="og:description" content="The jevman benchmark ranks AI decision models on 100 real-time games of Pac-Man against the classic arcade ghosts. See who leads, watch them play or play against them." />
     <meta property="og:url" content="%VITE_APP_URL%" />
     <meta property="og:image" content="%VITE_APP_URL%og.png?v=2" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="jevman: a Pac-Man benchmark for decision models | Opper AI" />
-    <meta name="twitter:description" content="Eight AI decision models played Pac-Man in real time against the classic arcade ghosts. See the leaderboard, watch their games, or play against them." />
+    <meta name="twitter:description" content="The jevman benchmark ranks AI decision models on 100 real-time games of Pac-Man against the classic arcade ghosts. See who leads, watch them play or play against them." />
     <meta name="twitter:image" content="%VITE_APP_URL%og.png?v=2" />
     <!-- The theme before the first paint, as on opper.ai: the visitor's choice there (same origin), else the system's. -->
     <script>
@@ -74,8 +74,8 @@
       <!-- opper.ai's list-page hero (ListPageHero), class for class -->
       <div class="oc col">
         <section class="hero flex flex-col items-center justify-center text-center gap-8 pt-24 pb-10 md:pt-32 md:pb-12">
-          <h1 class="hero-h1 font-wix font-semibold text-3xl md:text-4xl text-left md:text-center">jevman: AI decision models play Pac-Man</h1>
-          <p class="hero-sub font-wix font-medium text-left md:text-center text-lg md:text-xl">Eight of them played 100 games each against the arcade ghosts. See how they rank, watch their games or play against them.</p>
+          <h1 class="hero-h1 font-wix font-semibold text-3xl md:text-4xl text-left md:text-center">jevman: the Pac-Man benchmark for AI decision models</h1>
+          <p class="hero-sub font-wix font-medium text-left md:text-center text-lg md:text-xl">Every model plays 100 real-time games against the classic arcade ghosts, and you can play against them.</p>
         </section>
       </div>
 
@@ -120,8 +120,8 @@
       <section id="leaderboard" class="section" aria-labelledby="leaderboard-title">
         <div class="oc"><h2 id="leaderboard-title" class="font-wix font-semibold text-3xl md:text-4xl text-left md:text-center">Leaderboard</h2></div>
         <p id="leaderboard-sub" class="sub">100 games per model against the classic ghosts.</p>
-        <div class="tablecard"><div class="table-scroll"><table class="lbt" id="leaderboard-table"></table></div></div>
-        <p class="foot">=1 means tied: those scores are within each other's margin of error. Run by @opper-ai means we played the games through Opper. Community models were run by their makers: CI replayed every game they sent in to check its score, and the latency and cost are as they reported.</p>
+        <div class="tablecard"><div class="table-scroll"><table class="lbt" id="leaderboard-table"></table></div><div class="lbl" id="leaderboard-list"></div></div>
+        <p class="foot">=1 means tied: those scores are within each other's margin of error. Run by @opper-ai means we played the games through Opper. Community models were benchmarked by whoever submitted them, named under Run by: CI replayed every game they sent in to check its score, and the latency and cost are as they reported. Chat models, regular LLMs rather than decision models, can play too, and Qwen 3.8 Flash Next NVFP4 from the community is one of them. Claude Haiku 5.5, which we ran ourselves, was too slow: two thirds of its answers came too late, so backup moves played instead and it isn't ranked.</p>
       </section>
 
       <section id="add-model" class="section" aria-labelledby="add-model-title">

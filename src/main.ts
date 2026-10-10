@@ -820,7 +820,7 @@ void Promise.all([
     board = b;
     // The cabinet's HIGH SCORE: the best single game any model played in the benchmark.
     topAiScore = Math.max(TOP_RECORDED_SCORE, ...b.entries.map((e) => e.bestScore ?? 0));
-    renderLeaderboard($<HTMLTableElement>('#leaderboard-table'), $('#leaderboard-sub'), b, community);
+    renderLeaderboard($<HTMLTableElement>('#leaderboard-table'), $('#leaderboard-list'), $('#leaderboard-sub'), b, community);
   })
   .catch(() => {
     $('#leaderboard-sub').textContent = 'The leaderboard could not be loaded. Try again in a moment.';

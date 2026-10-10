@@ -110,6 +110,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 
 /* ---------- page column: opper.ai's (10 of 12 columns, at most 1280px) ---------- */
+/*
+ * The footer (opper.ai's markup) lays its blocks out on a 12-column grid with 32px gaps. Below 1024px every block spans
+ * all 12 columns, so those 11 gaps only add width: 352px of them, more than a 360px phone has, and the page scrolled
+ * sideways. Without them it fits.
+ */
+@media (max-width: 1023px) { .oc-footer .grid-cols-12.gap-8 { column-gap: 0; } }
 main { display: block; padding-bottom: 96px; }
 .col { width: calc(min(100%, 1280px) * 10 / 12); margin-inline: auto; }
 .col h1 { text-wrap: balance; }
@@ -437,6 +443,32 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .section .sub a { text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
 .section .foot { margin: 0; font-size: 12.5px; color: var(--j-muted); }
 .tablecard { border: 1px solid var(--j-line); border-radius: 16px; overflow: hidden; }
+/* A model's mark links where its name does. */
+.logo-link { display: inline-flex; flex: none; line-height: 0; }
+/* Phones: the leaderboard as a list instead of the table (see the 900px rules); a row opens its numbers. */
+.lbl { display: none; }
+.lbl-cols { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--j-soft); font-size: 12px; color: var(--j-muted); }
+.lbl-cols .rk { width: 26px; }
+.lbl-cols .grow { flex: 1; }
+.lbl-cols span:last-child { padding-right: 46px; }
+.lbl-row { border-top: 1px solid var(--j-line); }
+.lbl-row.open { background: var(--j-keyrow); }
+.lbl-head { min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 8px 6px 8px 14px; cursor: pointer; }
+.lbl-head .rk { width: 26px; flex: none; font: 600 13px var(--j-mono); color: var(--j-muted); }
+.lbl-row.tie .rk { color: var(--j-text); }
+.lbl-head .logo { width: 22px; height: 22px; }
+.lbl-head .initial { display: grid; place-items: center; border-radius: 50%; background: var(--j-soft); border: 1px solid var(--j-line); color: var(--j-muted); font: 600 10px/1 var(--j-mono); }
+.lbl-head .who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.lbl-head .mname { font-size: 15px; font-weight: 600; line-height: 1.3; color: inherit; text-decoration: none; }
+.lbl-head .who small { font-size: 12.5px; color: var(--j-muted); }
+.lbl-head .n { font: 600 15px var(--j-mono); font-variant-numeric: tabular-nums; }
+.lbl-toggle { flex: none; width: 36px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--j-muted); }
+.lbl-head .chev { transition: transform 160ms; }
+.lbl-row.open .chev { transform: rotate(180deg); }
+.lbl-d { margin: 0; padding: 2px 14px 14px 72px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 13px; }
+.lbl-d dt { color: var(--j-muted); }
+.lbl-d dd { margin: 0; text-align: right; font-family: var(--j-mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.lbl-d a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
 .table-scroll { overflow-x: auto; }
 .lbt { width: 100%; border-collapse: collapse; font-size: 14px; }
 .lbt th { text-align: left; font-weight: 500; font-size: 12px; padding: 10px 12px; white-space: nowrap; color: var(--j-muted); background: var(--j-soft); }
@@ -461,7 +493,13 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 /* Run by: a GitHub handle, ours (@opper-ai) or the community submitter's. */
 .lbt .run { font-size: 13px; }
 .lbt .run a, .lbt .mdl small a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
-.lbt .show-n { display: none; }
+.lbt .show-m { display: none; }
+/* Narrower than a laptop the full table doesn't fit: Survival and Run by go, and long model names wrap. */
+@media (max-width: 1279px) {
+  .lbt .hide-m { display: none; }
+  .lbt .show-m { display: inline; }
+  .lbt td:nth-child(2) { white-space: normal; }
+}
 /* Method as a spec sheet: one row per rule, the full width of the section, in the leaderboard's card. */
 .spec { margin: 0; border: 1px solid var(--j-line); border-radius: 16px; background: var(--j-card); overflow: hidden; }
 .spec > div { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 24px; padding: 16px 20px; }
@@ -489,10 +527,9 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
   .lg-head { flex-wrap: wrap; }
   .section { margin-top: 64px; }
   .lbt .hide-n { display: none; }
-  .lbt .show-n { display: inline; }
   .lbt .mdl .score-m { display: block; }
-  /* Only rank, model and Watch are left: a long model name wraps instead of widening the table. */
-  .lbt td:nth-child(2) { white-space: normal; }
+  .tablecard .table-scroll { display: none; }
+  .lbl { display: block; }
 }
 @media (max-width: 520px) {
   .user-menu .name { display: none; }

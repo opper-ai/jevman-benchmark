@@ -4,7 +4,7 @@ import { appPath } from './paths';
  * Each decision model's maker mark, as the maker shows it on its own profiles (site, GitHub, Hugging Face). Jared
  * Palmer publishes Kev as himself, so Kev's mark is his avatar; Convai Innovations uses its brain-and-circuit logo.
  */
-const LOGOS: Record<string, { src: string; maker: string; page: string; shape?: 'round' | 'tile'; mono?: true }> = {
+const LOGOS: Record<string, { src: string; maker: string; page?: string; shape?: 'round' | 'tile'; mono?: true }> = {
   'typesafe/jev-1.13.0': { src: 'logos/typesafe.png', maker: 'TypeSafe', page: 'typesafe/jev-1-13-0', shape: 'tile' },
   'opper/clef': { src: 'logos/cloudflare.svg', maker: 'Cloudflare', page: 'cloudflare/clef' },
   'opper/clef-flash': { src: 'logos/cloudflare.svg', maker: 'Cloudflare', page: 'cloudflare/clef-flash' },
@@ -12,6 +12,8 @@ const LOGOS: Record<string, { src: string; maker: string; page: string; shape?: 
   'berget/convaiinnovations/laya': { src: 'logos/convai.webp', maker: 'Convai Innovations', page: 'community/laya', shape: 'tile' },
   'openai/gpt-6-luna-decisions': { src: 'logos/openai.svg', maker: 'OpenAI', page: 'openai/gpt-6-luna-decisions', mono: true },
   'empiriolabs/aplomb-1': { src: 'logos/empiriolabs.png', maker: 'EmpirioLabs', page: 'empiriolabs/aplomb-1', shape: 'round' },
+  // No page on opper.ai yet (2026-10-10).
+  'microsoft/decision-1': { src: 'logos/microsoft.svg', maker: 'Microsoft' },
 };
 
 /**
@@ -34,7 +36,7 @@ const COMMUNITY_LOGOS: Record<string, { src: string; shape?: 'round' | 'tile'; m
 export const makerOf = (model: string): string | undefined => LOGOS[model]?.maker;
 
 /** The model's page on opper.ai (its specs, prices and routes), for the models Opper serves. */
-export const pageOf = (model: string): string | undefined => (LOGOS[model] ? `https://opper.ai/${LOGOS[model].page}` : undefined);
+export const pageOf = (model: string): string | undefined => (LOGOS[model]?.page ? `https://opper.ai/${LOGOS[model].page}` : undefined);
 
 /** The model's maker mark as an <img>, or nothing for a model without one (say, a new community submission). */
 export function logoFor(model: string): HTMLImageElement | null {

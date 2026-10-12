@@ -443,35 +443,18 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .section .sub a { text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
 .section .foot { margin: 0; font-size: 12.5px; color: var(--j-muted); }
 .tablecard { border: 1px solid var(--j-line); border-radius: 16px; overflow: hidden; }
-/* The leaderboard's sections: decision models ranked, then chat models and rules apart, each with a heading. */
-.lb-sections { display: grid; gap: 32px; }
-.lb-sec { display: grid; gap: 10px; }
-.lb-sec-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
-.lb-sec-head h3 { margin: 0; font: 600 20px/1.3 var(--j-display); }
-.lb-sec-head span { font-size: 14px; color: var(--j-muted); }
-/* The sections' tables share their column widths (sized for the decision models), so their columns line up. */
-.lb-sec .lbt { table-layout: fixed; }
-.lb-sec .lbt td:nth-child(2) { white-space: normal; }
-.lb-sec .lbt th:nth-child(1) { width: 4%; }
-.lb-sec .lbt th:nth-child(2) { width: 19.5%; }
-.lb-sec .lbt th:nth-child(3) { width: 20.5%; }
-.lb-sec .lbt th:nth-child(4) { width: 8.7%; }
-.lb-sec .lbt th:nth-child(5), .lb-sec .lbt th:nth-child(6) { width: 7.7%; }
-.lb-sec .lbt th:nth-child(7) { width: 11%; }
-.lb-sec .lbt th:nth-child(8) { width: 9.7%; }
-.lb-sec .lbt th:nth-child(9) { width: 11.2%; }
 /* A model's mark links where its name does. */
 .logo-link { display: inline-flex; flex: none; line-height: 0; }
 /* Phones: the leaderboard as a list instead of the table (see the 900px rules); a row opens its numbers. */
 .lbl { display: none; }
 .lbl-cols { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--j-soft); font-size: 12px; color: var(--j-muted); }
-.lbl-cols .rk { width: 26px; }
+.lbl-cols .rk { width: 40px; }
 .lbl-cols .grow { flex: 1; }
 .lbl-cols span:last-child { padding-right: 46px; }
 .lbl-row { border-top: 1px solid var(--j-line); }
 .lbl-row.open { background: var(--j-keyrow); }
 .lbl-head { min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 8px 6px 8px 14px; cursor: pointer; }
-.lbl-head .rk { width: 26px; flex: none; font: 600 13px var(--j-mono); color: var(--j-muted); }
+.lbl-head .rk { width: 40px; flex: none; font: 600 13px var(--j-mono); color: var(--j-muted); }
 .lbl-row.tie .rk { color: var(--j-text); }
 .lbl-head .logo { width: 22px; height: 22px; }
 .lbl-head .initial { display: grid; place-items: center; border-radius: 50%; background: var(--j-soft); border: 1px solid var(--j-line); color: var(--j-muted); font: 600 10px/1 var(--j-mono); }
@@ -482,7 +465,7 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .lbl-toggle { flex: none; width: 36px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--j-muted); }
 .lbl-head .chev { transition: transform 160ms; }
 .lbl-row.open .chev { transform: rotate(180deg); }
-.lbl-d { margin: 0; padding: 2px 14px 14px 72px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 13px; }
+.lbl-d { margin: 0; padding: 2px 14px 14px 86px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 13px; }
 .lbl-d dt { color: var(--j-muted); }
 .lbl-d dd { margin: 0; text-align: right; font-family: var(--j-mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .lbl-d a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
@@ -505,6 +488,15 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .lbt .bar { height: 6px; border-radius: 99px; background: var(--j-track); overflow: hidden; }
 .lbt .bar i { display: block; height: 100%; border-radius: 99px; background: var(--j-bar); }
 .lbt tr.tie .bar i { background: var(--j-text); }
+/* A reference row (a chat model or rules): in the table at its score, not ranked, marked where the rank would be. */
+.kind-tag { display: inline-block; padding: 1px 5px; border: 1px solid var(--j-strong-line); border-radius: 999px; background: var(--j-card); color: var(--j-text); font: 600 10px/1.3 var(--j-mono); }
+.lbt tr.ref td { background: var(--j-keyrow); border-top: 1px dashed var(--j-strong-line); }
+.lbt tr.ref + tr td { border-top: 1px dashed var(--j-strong-line); }
+.lbl-row.ref { background: var(--j-keyrow); border-top: 1px dashed var(--j-strong-line); }
+.lbl-row.ref + .lbl-row { border-top: 1px dashed var(--j-strong-line); }
+.lbl-row.ref .kind-tag { padding: 1px 5px; font-size: 9.5px; }
+/* Just above phone width a tag in the rank column would push the table wider than its card: its gap gives way. */
+@media (max-width: 960px) { .lbt td.rk, .lbt th:first-child { padding-right: 4px; } }
 .lbt .n { font-family: var(--j-mono); font-variant-numeric: tabular-nums; }
 .lbt .pm { font-size: 11px; color: var(--j-muted); }
 /* Run by: a GitHub handle, ours (@opper-ai) or the community submitter's. */

@@ -5,4 +5,4 @@ written by `npm run bench -- --endpoint … --submit submissions/<id> …`. See
 [CONTRIBUTING.md](../CONTRIBUTING.md#benchmark-your-own-model).
 
 CI replays every game. They are listed on the leaderboard as **self-reported**, by the `kind` in `submission.json`:
-decision models are ranked, chat models and rules are listed apart.
+decision models are ranked, chat models and rules show at their score for reference, without a rank.

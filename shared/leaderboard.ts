@@ -131,8 +131,8 @@ export interface CommunityEntry extends LeaderboardEntry {
 /**
  * How an entry answers the game's questions. A decision model gives odds for every option in one pass, without
  * writing text: what this benchmark measures, and the only kind ranked (all of ours are). A chat model writes its
- * answer. Rules use no model at all (a hand-written scorer, a die roll). Chat models and rules are listed apart from
- * the ranking, for reference.
+ * answer. Rules use no model at all (a hand-written scorer, a die roll). Chat models and rules show in the table at
+ * their score, for reference, without a rank.
  */
 export const MODEL_KINDS = ['decision', 'chat', 'rules'] as const;
 export type ModelKind = (typeof MODEL_KINDS)[number];

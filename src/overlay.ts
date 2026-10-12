@@ -109,17 +109,22 @@ export interface Picker {
   action: () => void;
 }
 
-/** A board as dotted lines, as the roster draws them: place, initials, score; the player's own line in yellow. */
-function boardLines(entries: BoardEntry[], limit: number, mine: number | null = null): HTMLOListElement {
+/**
+ * A board as dotted lines, as the roster draws them: place, initials, score; the player's own line in yellow. With
+ * `fill`, places nobody holds yet show as dim "---" lines, as on an arcade's empty table, so the board keeps its height.
+ */
+function boardLines(entries: BoardEntry[], limit: number, mine: number | null = null, fill = false): HTMLOListElement {
   const list = el('ol', undefined, 'dots board');
-  entries.slice(0, limit).forEach((e, i) => {
-    const li = el('li', undefined, i + 1 === mine ? 'you' : undefined);
-    li.style.setProperty('--gc', i + 1 === mine ? '#ffd800' : '#ffffff');
+  const lines: (BoardEntry | null)[] = entries.slice(0, limit);
+  while (fill && lines.length < limit) lines.push(null);
+  lines.forEach((e, i) => {
+    const li = el('li', undefined, e ? (i + 1 === mine ? 'you' : undefined) : 'open');
+    li.style.setProperty('--gc', !e ? 'var(--j-arc-dim)' : i + 1 === mine ? '#ffd800' : '#ffffff');
     const name = el('span', undefined, 'nm');
-    name.append(el('span', `${i + 1}`, 'rk'), e.initials);
+    name.append(el('span', `${i + 1}`, 'rk'), e ? e.initials : '---');
     const lead = el('span', undefined, 'lead');
     lead.setAttribute('aria-hidden', 'true');
-    li.append(name, lead, el('span', e.score.toLocaleString('en-US'), 'num'));
+    li.append(name, lead, el('span', e ? e.score.toLocaleString('en-US') : '–', 'num'));
     list.append(li);
   });
   return list;
@@ -309,8 +314,8 @@ export function showPicker(root: HTMLElement, o: PickerOptions): Picker {
     const key = boardOf(o.lineup());
     const boards = o.boards();
     if (!key) return hs.replaceChildren(el('p', 'High scores', 'colh'), el('p', 'Only the preset lineups have a board', 'tap'));
-    const entries = boards?.[key] ?? [];
-    hs.replaceChildren(el('p', `High scores · ${boardLabel(key)}`, 'colh'), entries.length ? boardLines(entries, 3) : el('p', boards ? 'No scores yet. Be the first!' : 'High scores are loading…', 'tap'));
+    // Three lines whatever the board holds: open places show as "---" until someone takes them.
+    hs.replaceChildren(el('p', `High scores · ${boardLabel(key)}`, 'colh'), boardLines(boards?.[key] ?? [], 3, null, true));
   };
   const renderAll = () => {
     render();

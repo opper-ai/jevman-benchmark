@@ -56,8 +56,16 @@ npm run bench -- --endpoint http://localhost:8787 --games 2
 ### 3. Record the submission
 
 ```bash
-npm run bench -- --endpoint http://localhost:8787 --submit submissions/my-model --name "My Model" --by your-github-handle --url https://example.com/my-model
+npm run bench -- --endpoint http://localhost:8787 --submit submissions/my-model --name "My Model" --by your-github-handle --kind decision --url https://example.com/my-model
 ```
+
+`--kind` says how your entry answers, and it decides where it's listed:
+
+- `decision`: a decision model, which answers each question with odds for every option in one pass, without writing text. Only these are ranked.
+- `chat`: a chat model (a regular LLM) that writes its answer, through a prompt or an adapter.
+- `rules`: no model at all, such as hand-written rules or a random baseline.
+
+Chat models and rules are listed apart from the ranking, for reference. We check the kind when we review the pull request.
 
 This plays 24 games, the minimum for a submission (our own runs play 100), each to game over or 300 seconds, against
 the scripted ghosts, 4 at a time (change that with `--parallel`). It writes `submissions/my-model/`, holding `submission.json` and one

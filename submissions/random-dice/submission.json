@@ -1,6 +1,7 @@
 {
   "name": "Random (die roll)",
   "by": "seiggy",
+  "kind": "rules",
   "benchVersion": 1,
   "recordedAt": "2026-10-09T02:17:45.821Z",
   "games": 100

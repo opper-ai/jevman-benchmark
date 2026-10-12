@@ -9,13 +9,14 @@ import { parseArgs } from 'node:util';
 import { gunzipSync } from 'node:zlib';
 import type { Recording } from '../src/replay';
 import { DECISION_MODELS } from '../shared/models';
-import { BENCH_VERSION, rank, SUBMISSION_RULES, summarize, type Community, type CommunityEntry, type GameResult, type SubmissionRules } from '../shared/leaderboard';
+import { BENCH_VERSION, isModelKind, rank, SUBMISSION_RULES, summarize, type Community, type CommunityEntry, type GameResult, type ModelKind, type SubmissionRules } from '../shared/leaderboard';
 import { verifyGame } from './verify';
 
 interface Manifest {
   name: string;
   by: string;
   url?: string;
+  kind: ModelKind;
   benchVersion: number;
   games: number;
 }
@@ -39,6 +40,8 @@ export function checkSubmission(dir: string, id: string, rules: SubmissionRules 
   if (typeof manifest.name !== 'string' || !/^[\p{L}\p{N}\p{P}\p{Zs}\p{S}]{1,40}$/u.test(manifest.name) || !manifest.name.trim()) return { error: 'name must be 1 to 40 printable characters' };
   if (typeof manifest.by !== 'string' || !/^[A-Za-z0-9-]{1,39}$/.test(manifest.by)) return { error: 'by must be a GitHub handle' };
   if (manifest.url !== undefined && (typeof manifest.url !== 'string' || !/^https:\/\/\S+$/.test(manifest.url))) return { error: 'url must start with https://' };
+  // Only decision models are ranked: the others are listed apart, so how an entry answers must be said.
+  if (!isModelKind(manifest.kind)) return { error: 'kind must be decision, chat or rules: how your entry answers (see CONTRIBUTING.md)' };
   // A submitted model must not pass for one we benchmark ourselves.
   if (DECISION_MODELS.some((m) => m.id === id || m.name.toLowerCase() === manifest.name.trim().toLowerCase())) return { error: `${manifest.name} is on the main leaderboard already` };
   const v = manifest.benchVersion;
@@ -72,6 +75,7 @@ export function checkSubmission(dir: string, id: string, rules: SubmissionRules 
     ...summarize(id, results, manifest.name.trim()),
     by: manifest.by,
     ...(manifest.url ? { url: manifest.url } : {}),
+    kind: manifest.kind,
     selfReported: true,
   };
   return { entry };

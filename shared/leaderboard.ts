@@ -119,12 +119,24 @@ export interface CommunityEntry extends LeaderboardEntry {
   by: string;
   /** Where to learn more about the model. */
   url?: string;
+  /** How it answers, as its submitter declared it and we checked in review. */
+  kind: ModelKind;
   /**
    * Always true. The games were replayed and their scores checked, but the moves, latency, cost and choice of games
    * are as reported by the submitter.
    */
   selfReported: true;
 }
+
+/**
+ * How an entry answers the game's questions. A decision model gives odds for every option in one pass, without
+ * writing text: what this benchmark measures, and the only kind ranked (all of ours are). A chat model writes its
+ * answer. Rules use no model at all (a hand-written scorer, a die roll). Chat models and rules are listed apart from
+ * the ranking, for reference.
+ */
+export const MODEL_KINDS = ['decision', 'chat', 'rules'] as const;
+export type ModelKind = (typeof MODEL_KINDS)[number];
+export const isModelKind = (v: unknown): v is ModelKind => MODEL_KINDS.includes(v as ModelKind);
 
 export interface Community {
   generatedAt: string;

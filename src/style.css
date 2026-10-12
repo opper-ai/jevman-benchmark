@@ -443,6 +443,23 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .section .sub a { text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
 .section .foot { margin: 0; font-size: 12.5px; color: var(--j-muted); }
 .tablecard { border: 1px solid var(--j-line); border-radius: 16px; overflow: hidden; }
+/* The leaderboard's sections: decision models ranked, then chat models and rules apart, each with a heading. */
+.lb-sections { display: grid; gap: 32px; }
+.lb-sec { display: grid; gap: 10px; }
+.lb-sec-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
+.lb-sec-head h3 { margin: 0; font: 600 20px/1.3 var(--j-display); }
+.lb-sec-head span { font-size: 14px; color: var(--j-muted); }
+/* The sections' tables share their column widths (sized for the decision models), so their columns line up. */
+.lb-sec .lbt { table-layout: fixed; }
+.lb-sec .lbt td:nth-child(2) { white-space: normal; }
+.lb-sec .lbt th:nth-child(1) { width: 4%; }
+.lb-sec .lbt th:nth-child(2) { width: 19.5%; }
+.lb-sec .lbt th:nth-child(3) { width: 20.5%; }
+.lb-sec .lbt th:nth-child(4) { width: 8.7%; }
+.lb-sec .lbt th:nth-child(5), .lb-sec .lbt th:nth-child(6) { width: 7.7%; }
+.lb-sec .lbt th:nth-child(7) { width: 11%; }
+.lb-sec .lbt th:nth-child(8) { width: 9.7%; }
+.lb-sec .lbt th:nth-child(9) { width: 11.2%; }
 /* A model's mark links where its name does. */
 .logo-link { display: inline-flex; flex: none; line-height: 0; }
 /* Phones: the leaderboard as a list instead of the table (see the 900px rules); a row opens its numbers. */

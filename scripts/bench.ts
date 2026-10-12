@@ -5,8 +5,8 @@
 //   plays each model as Pac-Man against the scripted ghosts; every move is the model's own.
 // --record needs --games 1 and writes the game (steps, decisions, panel events) for src/replay.ts.
 // Your own model: --endpoint https://… plays Pac-Man through your HTTP endpoint (see CONTRIBUTING.md); with
-//   --submit submissions/<id> --name "My Model" --by <github-handle> [--url https://…] it plays the leaderboard's
-//   games and writes them as a submission to open a pull request with.
+//   --submit submissions/<id> --name "My Model" --by <github-handle> --kind decision|chat|rules [--url https://…] it
+//   plays the leaderboard's games and writes them as a submission to open a pull request with.
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 import { basename, dirname, join } from 'node:path';
@@ -22,7 +22,7 @@ import { verifyGame } from './verify';
 import { emptyResult, finishResult, scriptedControls } from './game';
 import { GameStats } from '../src/stats';
 import { DECISION_MODELS, DEFAULT_MODEL, isModelId, modelName, type ModelId } from '../shared/models';
-import { BENCH_VERSION, rank, SUBMISSION_RULES, summarize, type GameResult, type Leaderboard, type LeaderboardEntry } from '../shared/leaderboard';
+import { BENCH_VERSION, isModelKind, rank, SUBMISSION_RULES, summarize, type GameResult, type Leaderboard, type LeaderboardEntry } from '../shared/leaderboard';
 
 const { values } = parseArgs({
   options: {
@@ -42,6 +42,7 @@ const { values } = parseArgs({
     name: { type: 'string' },
     by: { type: 'string' },
     url: { type: 'string' },
+    kind: { type: 'string' },
   },
 });
 const leaderboard = values.models !== undefined;
@@ -57,6 +58,7 @@ if (values.record && games !== 1) fail('--record needs --games 1');
 if (values.endpoint && (leaderboard || values['pacman-model'] || values.ghosts === 'jev')) fail('--endpoint plays Pac-Man only, instead of --models and --pacman-model');
 if (submit) {
   if (!values.name || !values.by) fail('--submit needs --name "Model name" and --by <your GitHub handle>');
+  if (!isModelKind(values.kind)) fail('--submit needs --kind decision|chat|rules: how your model answers (see CONTRIBUTING.md)');
   if (!/^[a-z0-9][a-z0-9-]*$/.test(basename(values.submit!))) fail('--submit folder name is the model id: lowercase letters, digits and dashes, e.g. submissions/my-model');
   if (games < SUBMISSION_RULES.minGames) fail(`a submission needs at least ${SUBMISSION_RULES.minGames} games`);
   if (maxSeconds !== SUBMISSION_RULES.maxSeconds) fail(`a submission plays the leaderboard's ${SUBMISSION_RULES.maxSeconds} s games`);
@@ -227,6 +229,7 @@ function writeSubmission(recordings: Recording[]): void {
     name: values.name,
     by: values.by,
     ...(values.url ? { url: values.url } : {}),
+    kind: values.kind,
     benchVersion: BENCH_VERSION,
     recordedAt: new Date().toISOString(),
     games: recordings.length,

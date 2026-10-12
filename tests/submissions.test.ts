@@ -34,7 +34,7 @@ function folder(opts: { manifest?: Record<string, unknown> | null; games?: numbe
     if (i === 3) opts.tamper?.(rec);
     writeFileSync(join(dir, `game-${String(i).padStart(2, '0')}.json.gz`), gzipSync(JSON.stringify(rec)));
   }
-  const manifest = opts.manifest === null ? null : { name: 'Acme Pac', by: 'acme', url: 'https://acme.example', benchVersion: BENCH_VERSION, games, ...opts.manifest };
+  const manifest = opts.manifest === null ? null : { name: 'Acme Pac', by: 'acme', url: 'https://acme.example', kind: 'decision', benchVersion: BENCH_VERSION, games, ...opts.manifest };
   writeFileSync(join(dir, 'submission.json'), JSON.stringify(manifest));
   return dir;
 }
@@ -42,9 +42,16 @@ function folder(opts: { manifest?: Record<string, unknown> | null; games?: numbe
 describe('checkSubmission', () => {
   it('replays every game and builds a self-reported entry from the replays', () => {
     const checked = checkSubmission(folder(), 'acme-pac', RULES);
-    expect(checked).toMatchObject({ entry: { model: 'acme-pac', name: 'Acme Pac', by: 'acme', selfReported: true, games: RULES.minGames } });
+    expect(checked).toMatchObject({ entry: { model: 'acme-pac', name: 'Acme Pac', by: 'acme', kind: 'decision', selfReported: true, games: RULES.minGames } });
     const mean = recorded.slice(0, RULES.minGames).reduce((a, g) => a + g.final.score, 0) / RULES.minGames;
     expect('entry' in checked && checked.entry.meanScore).toBe(Math.round(mean));
+  });
+
+  it('needs to say how the entry answers: a decision model, a chat model or rules', () => {
+    for (const kind of ['chat', 'rules']) expect(checkSubmission(folder({ manifest: { kind } }), 'acme-pac', RULES)).toMatchObject({ entry: { kind } });
+    for (const kind of [undefined, 'llm', 'Decision', 1]) {
+      expect(checkSubmission(folder({ manifest: { kind } }), 'acme-pac', RULES)).toMatchObject({ error: expect.stringMatching(/^kind must be decision, chat or rules/) });
+    }
   });
 
   it('refuses the whole submission when one game does not check out', () => {

@@ -114,7 +114,7 @@ names explicitly (`--pacman-model`, `npm run leaderboard`) must be one of the
   mean score), which the site shows at `/leaderboard`, and prints a table. Same flags as `bench`, plus `--models id,id` (default: all),
   `--parallel 4` (games at a time per model); defaults to 8 games per model and a 300 s cap.
 - `npm run bench -- --endpoint http://…` — plays Pac-Man with any model behind your own HTTP endpoint; with
-  `--submit submissions/<id> --name … --by …` it records the leaderboard's games as a submission. See
+  `--submit submissions/<id> --name … --by … --kind decision|chat|rules` it records the leaderboard's games as a submission. See
   [CONTRIBUTING.md](CONTRIBUTING.md#benchmark-your-own-model).
 - `npm run submissions` — replays every submitted game in [`submissions/`](submissions) and writes
   `public/community.json`, the leaderboard's **self-reported** list. The image build runs it too, so a submission that
@@ -166,7 +166,7 @@ then:
 
 ```bash
 npm run bench -- --endpoint http://localhost:8787 --games 2
-npm run bench -- --endpoint http://localhost:8787 --submit submissions/my-model --name "My Model" --by your-github-handle
+npm run bench -- --endpoint http://localhost:8787 --submit submissions/my-model --name "My Model" --by your-github-handle --kind decision
 npm run submissions
 ```
 

@@ -15,7 +15,7 @@ export type Boards = Record<string, BoardEntry[]>;
 const BOARD_SIZE = 10;
 
 /** "Mixed", "All jev", "All Luna": a board's name as the picker's lineups name it. */
-export const boardLabel = (key: string): string => (key === 'mixed' ? 'Mixed' : `All ${modelName(key).replace(/ 1\.13$/, '').replace(/ 4B$/, '').replace(/^GPT-6 /, '')}`);
+export const boardLabel = (key: string): string => (key === 'mixed' ? 'Mixed' : `All ${modelName(key).replace(/ 1\.13$/, '').replace(/ 4B$/, '').replace(/^GPT-6 /, '').replace(/^Microsoft /, '')}`);
 
 export async function fetchBoards(): Promise<Boards | null> {
   try {

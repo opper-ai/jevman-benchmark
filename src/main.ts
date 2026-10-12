@@ -306,7 +306,7 @@ const recorderControls: Controls = {
   },
 };
 
-const short = (model: string) => modelName(model).replace(/ 1\.13$/, '');
+const short = (model: string) => modelName(model).replace(/ 1\.13$/, '').replace(/^Microsoft /, '');
 /** The top strip, as on the cabinet: who plays Pac-Man over the score (or a status line), and the ghosts where 2UP is. */
 function setPlate(label: string | null = null): void {
   if (label !== null) {

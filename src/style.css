@@ -361,11 +361,12 @@ main { display: block; padding-bottom: 96px; }
 .roster .md .logo { width: 14px; height: 14px; }
 .arc .mono-mark { filter: invert(1); } /* OpenAI's black mark: white on the arcade's black, in both themes */
 .arc .tap { margin: 0; font: 8px/1.6 var(--j-pixel); color: var(--j-arc-dim); }
-.arc .opts { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; }
-.arc .opts button { border: 0; background: none; padding: 4px 2px; font: 9px/1.4 var(--j-pixel); color: var(--j-arc-dim); white-space: nowrap; text-transform: uppercase; }
+.arc .opts { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
+.arc .opts button { position: relative; border: 0; background: none; padding: 4px 2px; font: 9px/1.4 var(--j-pixel); color: var(--j-arc-dim); white-space: nowrap; text-transform: uppercase; }
 .arc .opts button:hover { color: #fff; }
 .arc .opts button[aria-pressed='true'] { color: var(--j-arc-yellow); }
-.arc .opts button::before { content: '>'; margin-right: 5px; visibility: hidden; }
+/* The marker sits in the gap before the chosen lineup, taking no room, so seven lineups fit on two lines. */
+.arc .opts button::before { content: '>'; position: absolute; right: 100%; margin-right: 1px; visibility: hidden; }
 .arc .opts button[aria-pressed='true']::before { visibility: visible; }
 .arc .press { justify-self: center; display: inline-flex; align-items: center; gap: 10px; border: 2px solid var(--j-arc-yellow); border-radius: 4px; background: none; padding: 11px 18px; font: 12px/1 var(--j-pixel); color: var(--j-arc-yellow); letter-spacing: 0.04em; text-transform: uppercase; transition: background 120ms, color 120ms; }
 /* The triangle drawn, not typed: ▶ isn't in the pixel font, and the fallback glyph sat below the letters. */
@@ -406,6 +407,12 @@ main { display: block; padding-bottom: 96px; }
 .initials input::placeholder { color: #3a3f55; }
 .initials input:focus { outline: none; border-bottom-color: #fff; }
 .arc .hs { display: grid; gap: 4px; padding-top: 10px; border-top: 2px solid var(--j-maze); }
+/* In the picker it always takes the height of its three lines, so a lineup with fewer scores doesn't move the card (on phones the card is centred). */
+/* The picker fits the board: a little tighter than the other cards. */
+.card.arc.pick { gap: 10px; padding-top: 16px; padding-bottom: 14px; }
+.pick .roster button { padding-block: 5px; }
+.pick .hs .dots li { padding-block: 3px; }
+.arc .press ~ .hs { min-height: 87px; padding-top: 8px; align-content: start; }
 .dots.board li { font-size: 9px; }
 @media (prefers-reduced-motion: reduce) { .arc .made-title.top { animation: none; } }
 .arc .press.alt { border-color: var(--j-maze); color: #fff; }

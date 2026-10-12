@@ -495,6 +495,11 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .lbl-row.ref { background: var(--j-keyrow); border-top: 1px dashed var(--j-strong-line); }
 .lbl-row.ref + .lbl-row { border-top: 1px dashed var(--j-strong-line); }
 .lbl-row.ref .kind-tag { padding: 1px 5px; font-size: 9.5px; }
+.kind-tag { cursor: help; }
+.kind-tag:hover, .kind-tag:focus-visible, .kind-tag[aria-describedby] { border-color: var(--j-text); }
+/* The tag's explanation, styled as the credits' tooltip in the header; fixed to the window, as the table scrolls in its card. */
+.kind-tip { position: fixed; z-index: 80; width: max-content; max-width: 320px; background: var(--j-card); color: var(--j-text); border: 1px solid var(--j-line); border-radius: 8px; padding: 6px 12px; font-size: 12.5px; font-weight: 500; line-height: 1.45; box-shadow: 0 8px 24px -12px rgba(27, 46, 64, 0.35); pointer-events: none; }
+.kind-tip[hidden] { display: none; }
 /* Just above phone width a tag in the rank column would push the table wider than its card: its gap gives way. */
 @media (max-width: 960px) { .lbt td.rk, .lbt th:first-child { padding-right: 4px; } }
 .lbt .n { font-family: var(--j-mono); font-variant-numeric: tabular-nums; }

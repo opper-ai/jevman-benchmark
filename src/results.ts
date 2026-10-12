@@ -46,23 +46,75 @@ function chevron(): SVGSVGElement {
   return svg;
 }
 
-/** What a row that isn't ranked is: a chat model or rules, shown at its score for reference. */
-const REFERENCE: Partial<Record<ModelKind, { tag: string; title: string }>> = {
-  chat: { tag: 'Chat', title: 'A chat model, which writes its answer: shown for reference, not ranked' },
-  rules: { tag: 'Rules', title: 'Rules, no model at all: shown for reference, not ranked' },
+/** What a row that isn't ranked is: a chat model or a baseline (rules, no model), shown at its score for reference. */
+const REFERENCE: Partial<Record<ModelKind, { tag: string; tip: string }>> = {
+  chat: { tag: 'Chat', tip: 'Chat model: an LLM that writes its answer. Shown at its score for reference, not ranked.' },
+  rules: { tag: 'Base', tip: 'Baseline: no model, like hand-written rules or a die roll. Shown at its score for reference, not ranked.' },
 };
-/** The rank cell of a reference row: what it is instead of a number. */
+
+// One tooltip for the tags, placed against the window so the table's scrolling box can't clip it. Hover or focus shows
+// it; a click (a tap on phones) pins it until a click elsewhere, Escape, or a scroll.
+let tip: HTMLElement | null = null;
+let tipFor: HTMLButtonElement | null = null;
+let pinned = false;
+function showTip(button: HTMLButtonElement, text: string): void {
+  if (!tip) {
+    tip = el('div', undefined, 'kind-tip');
+    tip.id = 'kind-tip';
+    tip.setAttribute('role', 'tooltip');
+    document.body.append(tip);
+    const close = () => hideTip(true);
+    document.addEventListener('click', (e) => {
+      if (!(e.target instanceof Element && e.target.closest('.kind-tag'))) close();
+    });
+    document.addEventListener('keydown', (e) => e.key === 'Escape' && close());
+    window.addEventListener('scroll', close, { passive: true });
+    window.addEventListener('resize', close);
+  }
+  tip.textContent = text;
+  tip.hidden = false;
+  tipFor?.removeAttribute('aria-describedby');
+  tipFor = button;
+  button.setAttribute('aria-describedby', 'kind-tip');
+  const r = button.getBoundingClientRect();
+  const width = tip.offsetWidth;
+  const height = tip.offsetHeight;
+  tip.style.left = `${Math.max(12, Math.min(r.left, document.documentElement.clientWidth - width - 12))}px`;
+  tip.style.top = `${r.bottom + 8 + height > window.innerHeight ? r.top - 8 - height : r.bottom + 8}px`;
+}
+function hideTip(force = false): void {
+  if (!tip || (pinned && !force)) return;
+  pinned = false;
+  tip.hidden = true;
+  tipFor?.removeAttribute('aria-describedby');
+  tipFor = null;
+}
+/** The rank cell of a reference row: what it is instead of a number, explained on hover or a tap. */
 function kindTag(kind: ModelKind): HTMLElement {
-  const t = el('span', REFERENCE[kind]!.tag, 'kind-tag');
-  t.title = REFERENCE[kind]!.title;
-  return t;
+  const { tag: label, tip: text } = REFERENCE[kind]!;
+  const b = el('button', label, 'kind-tag');
+  b.type = 'button';
+  b.addEventListener('mouseenter', () => !pinned && showTip(b, text));
+  b.addEventListener('mouseleave', () => hideTip());
+  b.addEventListener('focus', () => !pinned && showTip(b, text));
+  b.addEventListener('blur', () => hideTip());
+  b.addEventListener('click', (e) => {
+    e.stopPropagation(); // on a phone row, a tap on the tag explains it instead of opening the row
+    const open = !(pinned && tipFor === b);
+    hideTip(true);
+    if (open) {
+      showTip(b, text);
+      pinned = true;
+    }
+  });
+  return b;
 }
 
 /**
  * The leaderboard on the main page: rank (=1 for models tied within the margin of error), model and maker, mean
  * score with its margin, then survival, latency, backup moves, cost and who ran the games. Community models
  * (self-reported submissions) are ranked with our runs by mean score. Only decision models are ranked: chat models
- * and rules sit in the table at their score as reference rows, marked Chat or Rules where the rank would be. `table`
+ * and rules sit in the table at their score as reference rows, marked Chat or Base where the rank would be. `table`
  * is the full table; `list` is the same ranking for phones, a row per model that opens its numbers when tapped.
  */
 export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, sub: HTMLElement, board: Leaderboard, community: Community | null): void {

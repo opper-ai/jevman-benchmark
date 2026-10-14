@@ -733,7 +733,7 @@ function gameOver(): void {
     entry: l ? boardEntry(l, summary.score) : null,
     onPlayAgain: again,
     onShare: async () => {
-      const result = await shareScore(l ? aiShareText(summary, l, SHARE_URL) : board ? shareText(versus(board, summary.score), SHARE_URL) : `I scored ${summary.score} at jevman 🟡 ${SHARE_URL}`);
+      const result = await shareScore(l ? aiShareText(summary, l, SHARE_URL) : board ? shareText(versus(board, summary.score), SHARE_URL) : `I scored ${summary.score} at JevMan 🟡 ${SHARE_URL}`);
       track('click_share', { source: 'game_over', result });
       return result;
     },

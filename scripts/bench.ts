@@ -219,7 +219,7 @@ function writeSubmission(recordings: Recording[]): void {
   const dir = values.submit!;
   recordings.forEach((rec, i) => {
     const verdict = verifyGame(rec);
-    if (!verdict.ok) fail(`game ${i + 1} does not replay: ${verdict.error}. Please open an issue: this is a jevman bug.`);
+    if (!verdict.ok) fail(`game ${i + 1} does not replay: ${verdict.error}. Please open an issue: this is a JevMan bug.`);
   });
   mkdirSync(dir, { recursive: true });
   // A run replaces the folder's games: none of an earlier run may be left behind.

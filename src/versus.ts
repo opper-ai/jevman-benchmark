@@ -28,7 +28,7 @@ export function versusLine(v: Versus): string {
 
 /** What "Share" posts: short, emoji-marked, with the link. */
 export function shareText(v: Versus, url: string): string {
-  const head = `I scored ${v.score.toLocaleString('en-US')} at jevman 🟡 and beat ${v.beaten.length} of ${v.total} AIs at Pac-Man`;
+  const head = `I scored ${v.score.toLocaleString('en-US')} at JevMan 🟡 and beat ${v.beaten.length} of ${v.total} AIs at Pac-Man`;
   const lines = [head];
   if (v.beaten.length) lines.push(`✅ ${v.beaten.join(' · ')}`);
   if (v.ahead.length) lines.push(`❌ ${v.ahead.join(' · ')}`);

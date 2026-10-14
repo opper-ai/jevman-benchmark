@@ -64,7 +64,7 @@ try:
     assert revision == {'app': 'jevman', 'commit': sha, 'draining': False}, revision
     with urllib.request.urlopen(url + '/', timeout=2) as response:
         page = response.read().decode()
-    assert '<title>jevman' in page and 'og:image' in page, 'index.html not served'
+    assert '<title>JevMan' in page and 'og:image' in page, 'index.html not served'
     assert '%VITE_' not in page, 'a %VITE_...% placeholder was left in index.html'
     assert f'src="{base}/assets/' in page, 'index.html was built for another base path'
     with urllib.request.urlopen(url + '/leaderboard', timeout=2) as response:

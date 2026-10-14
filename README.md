@@ -1,4 +1,4 @@
-# jevman
+# JevMan
 
 A Pac-Man benchmark for decision models: System One models (TypeSafe's jev, `typesafe/jev-1.13.0`, and the others
 Opper serves) steer Pac-Man in real time against the classic arcade ghosts, and `npm run leaderboard` measures which
@@ -62,7 +62,7 @@ cost, so the panel shows an **estimate** (`≈`) from token usage at TypeSafe's 
 ($0.042 per million input tokens; output is free). Like option A this is a local key, ignored on
 https deployments unless `JEV_ALLOW_DEV_KEY=1`. `npm run smoke` and `npm run bench` use it too.
 
-This is also the easiest way to play jevman without an Opper account: clone the repo, add your
+This is also the easiest way to play JevMan without an Opper account: clone the repo, add your
 TypeSafe key, `npm run dev`. The hosted page links here from its header, under "Sign in with Opper".
 
 ### Option D — free credits for everyone (the hosted page)
@@ -161,7 +161,7 @@ hour**; with the AI on both sides, about the two together. Lowering the speed ma
 ## Benchmark your own model
 
 Any model can join the [leaderboard](https://opper.ai/jevman-benchmark/leaderboard) as **self-reported**. Put it behind an
-HTTP endpoint that answers jevman's questions (copy [`scripts/example-endpoint.ts`](scripts/example-endpoint.ts)),
+HTTP endpoint that answers JevMan's questions (copy [`scripts/example-endpoint.ts`](scripts/example-endpoint.ts)),
 then:
 
 ```bash
@@ -243,7 +243,7 @@ stop timeout.
 
 ## License
 
-Copyright © 2026 Johnny Chadda. jevman is free software under the
+Copyright © 2026 Johnny Chadda. JevMan is free software under the
 [GNU Affero General Public License v3.0 or later](LICENSE). You may use, change and host it. If you
 run a modified version as a service, you must offer its users the source of your version, as the
 game's "Source on GitHub" link does for this one.

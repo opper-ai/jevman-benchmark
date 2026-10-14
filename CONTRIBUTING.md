@@ -14,7 +14,7 @@ The [leaderboard](https://opper.ai/jevman-benchmark/leaderboard) has two parts:
 
 ### 1. Put your model behind an HTTP endpoint
 
-At every junction the bench POSTs the same JSON that jevman sends System One:
+At every junction the bench POSTs the same JSON that JevMan sends System One:
 
 ```json
 {

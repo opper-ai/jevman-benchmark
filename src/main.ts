@@ -929,7 +929,7 @@ void Promise.all([
     board = b;
     // The cabinet's HIGH SCORE: the best single game any model played in the benchmark.
     topAiScore = Math.max(TOP_RECORDED_SCORE, ...b.entries.map((e) => e.bestScore ?? 0));
-    renderLeaderboard($<HTMLTableElement>('#leaderboard-table'), $('#leaderboard-list'), $('#leaderboard-sub'), b, community);
+    renderLeaderboard($<HTMLTableElement>('#leaderboard-table'), $('#leaderboard-list'), $('#leaderboard-sort'), $('#leaderboard-sub'), b, community);
     // The chips in the leaderboard's order: by mean score, ours first on an equal one (as the table ranks them).
     const ranked = [...b.entries, ...community.entries].sort((x, y) => y.meanScore - x.meanScore).map((e) => e.model);
     watchOrder = [...ranked.filter((m) => RECORDINGS[m] !== undefined), ...Object.keys(RECORDINGS).filter((m) => !ranked.includes(m))];

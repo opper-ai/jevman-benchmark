@@ -12,7 +12,7 @@ import { renderLeaderboard } from './results';
 import { Scheduler } from './scheduler';
 import { createGame, fruitForLevel, jevActors, step, type Controls, type GameState } from './sim';
 import { cuesBetween, snapshot, Sound } from './sound';
-import { RECORDINGS, TOP_RECORDED_SCORE, watchName } from './recordings';
+import { OPENING_RECORDING, RECORDINGS, TOP_RECORDED_SCORE, watchName } from './recordings';
 import { CLIPS } from './clips';
 import { checkPlayerGame } from './player-check';
 import { Recorder, roundDt, type Recording } from './replay';
@@ -56,11 +56,11 @@ const loadFor = (model: string): Promise<Recording | null> => {
   }
   return p;
 };
-const firstLoad = loadFor(DEFAULT_MODEL);
+const firstLoad = loadFor(OPENING_RECORDING);
 const me = await fetchMe();
 const authError = takeAuthError();
 const rec = await firstLoad;
-const loaded = new Map<string, Recording>(rec ? [[DEFAULT_MODEL, rec]] : []);
+const loaded = new Map<string, Recording>(rec ? [[OPENING_RECORDING, rec]] : []);
 
 const canvas = $<HTMLCanvasElement>('#game');
 let state: GameState = createGame();
@@ -240,7 +240,7 @@ const problemOf = (models: string[]) => models.map((m) => warmProblems.get(m)).f
 
 // ---------- what is on the board ----------
 type Mode = { kind: 'recording'; model: string } | { kind: 'play'; lineup: Lineup | null };
-let mode: Mode = { kind: 'recording', model: DEFAULT_MODEL };
+let mode: Mode = { kind: 'recording', model: OPENING_RECORDING };
 let demo: DemoPlayer | null = null;
 /** Whether a live game runs (anything but a recording). */
 let live = false;
@@ -470,10 +470,10 @@ function leaveRecording(): void {
   }
 }
 
-/** A model's recorded benchmark game (jev's when the page opens). Costs nothing: no model is called. */
-function showRecording(model: string = mode.kind === 'recording' ? mode.model : DEFAULT_MODEL): void {
-  const r = loaded.get(model) ?? loaded.get(DEFAULT_MODEL);
-  if (r && !loaded.has(model)) model = DEFAULT_MODEL;
+/** A model's recorded benchmark game (jev 1.14's when the page opens). Costs nothing: no model is called. */
+function showRecording(model: string = mode.kind === 'recording' ? mode.model : OPENING_RECORDING): void {
+  const r = loaded.get(model) ?? loaded.get(OPENING_RECORDING);
+  if (r && !loaded.has(model)) model = OPENING_RECORDING;
   leaveRecording();
   retire();
   watchToken += 1;

@@ -29,6 +29,9 @@ export const RECORDINGS: Record<string, { path: string; score: number; name?: st
   'berget/convaiinnovations/laya': { path: '/demo/laya-demo.json', score: 590 },
 };
 
+/** The game the page opens on, for everyone: jev's latest version. */
+export const OPENING_RECORDING = 'typesafe/jev-1.14.0';
+
 /** The name a watched model goes by: a community model's own, else the listed model's. */
 export const watchName = (model: string): string => RECORDINGS[model]?.name ?? modelName(model);
 

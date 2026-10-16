@@ -495,13 +495,13 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 /* A column's name sorts the leaderboard by it; the sorted column reads a shade darker, with an arrow. */
 .lbt th .sort { display: inline-flex; align-items: center; gap: 3px; padding: 0; border: 0; background: none; font: inherit; color: inherit; white-space: nowrap; cursor: pointer; }
 .lbt th .sort:hover, .lbt th.sorted { color: var(--j-text); }
-.lbt th .arr { font-size: 11px; }
-.lbt th .arr:empty { display: none; }
+.lbt th .arr { font-size: 11px; visibility: hidden; }
+.lbt th.sorted .arr { visibility: visible; }
 .lbt td.sorted, .lbt td.sorted .n { font-weight: 600; }
 /* Phones: the number column's name is a menu of the sorts. */
 .lbl-sort { position: relative; }
 .lbl-sort select { appearance: none; padding: 0 13px 0 0; border: 0; background: none; font: inherit; color: var(--j-text); text-align: right; text-align-last: right; cursor: pointer; }
-.lbl-sort::after { content: '▾'; position: absolute; right: 46px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--j-text); pointer-events: none; }
+.lbl-sort::after { content: '▾'; position: absolute; right: 38px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--j-text); pointer-events: none; }
 /* A model's mark links where its name does. */
 .logo-link { display: inline-flex; flex: none; line-height: 0; }
 /* Phones: the leaderboard as a list instead of the table (see the 900px rules); a row opens its numbers. */
@@ -509,7 +509,7 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .lbl-cols { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--j-soft); font-size: 12px; color: var(--j-muted); }
 .lbl-cols .rk { width: 40px; }
 .lbl-cols .grow { flex: 1; }
-.lbl-cols span:last-child { padding-right: 46px; }
+.lbl-cols span:last-child { padding-right: 38px; }
 .lbl-row { border-top: 1px solid var(--j-line); }
 .lbl-row.open { background: var(--j-keyrow); }
 .lbl-head { min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 8px 6px 8px 14px; cursor: pointer; }
@@ -520,8 +520,10 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .lbl-head .who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .lbl-head .mname { font-size: 15px; font-weight: 600; line-height: 1.3; color: inherit; text-decoration: none; }
 .lbl-head .who small { font-size: 12.5px; color: var(--j-muted); }
-.lbl-head .n { font: 600 15px var(--j-mono); font-variant-numeric: tabular-nums; }
-.lbl-toggle { flex: none; width: 36px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--j-muted); }
+.lbl-head .n { font: 600 14px var(--j-mono); font-variant-numeric: tabular-nums; }
+/* As wide as the widest number a sort shows ($0.0064), so the names don't move when the sort changes. */
+.lbl-head .n { min-width: 7ch; text-align: right; }
+.lbl-toggle { flex: none; width: 28px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--j-muted); }
 .lbl-head .chev { transition: transform 160ms; }
 .lbl-row.open .chev { transform: rotate(180deg); }
 .lbl-d { margin: 0; padding: 2px 14px 14px 86px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 13px; }

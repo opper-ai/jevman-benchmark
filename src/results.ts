@@ -204,7 +204,12 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
     if (key) {
       const b = tag(el('button', label, 'sort'), 'click_leaderboard_sort', { source: 'leaderboard', sort: key });
       b.type = 'button';
-      b.append(el('span', '', 'arr'));
+      // Every sortable name keeps room for the arrow, shown only on the sorted one, so no column moves on a click.
+      if (label !== '#') {
+        const arrow = el('span', '↓', 'arr');
+        arrow.setAttribute('aria-hidden', 'true');
+        b.append(arrow);
+      }
       b.addEventListener('click', () => pick(key, true));
       th.append(b);
     } else th.textContent = label;
@@ -350,7 +355,7 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
       if (on) th.setAttribute('aria-sort', dir);
       else th.removeAttribute('aria-sort');
       const arrow = th.querySelector('.arr');
-      if (arrow) arrow.textContent = on ? (dir === 'descending' ? '↓' : '↑') : '';
+      if (arrow && on) arrow.textContent = dir === 'descending' ? '↓' : '↑';
     });
     body.replaceChildren(...rows.map(({ e, by, url, kind }) => row(e, { tie: tied.has(e), by, url, kind })));
     for (const tr of body.rows) tr.cells[col]?.classList.add('sorted');

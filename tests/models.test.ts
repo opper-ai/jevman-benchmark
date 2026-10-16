@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { DECISION_MODELS, DEFAULT_MODEL, isModelId, modelName } from '../shared/models';
+import { DECISION_MODELS, DEFAULT_MODEL, inPlay, isModelId, modelName } from '../shared/models';
 import { handleDecide, type DecideDeps } from '../server/decide';
 import { modelFor, requestedModelFor } from '../server/jev';
 
@@ -12,11 +12,13 @@ const sentModel = (f: ReturnType<typeof ok>) => JSON.parse((f.mock.calls[0][1] a
 
 describe('decision models', () => {
   it('lists the System One models Opper serves, jev first and default', () => {
-    expect(DECISION_MODELS.map((m) => m.id)).toEqual(['typesafe/jev-1.13.0', 'typesafe/jev-1.14.0', 'opper/clef', 'opper/clef-flash', 'opper/kev-4b', 'berget/convaiinnovations/laya', 'openai/gpt-6-luna-decisions', 'empiriolabs/aplomb-1', 'microsoft/decision-1']);
+    expect(DECISION_MODELS.map((m) => m.id)).toEqual(['typesafe/jev-1.13.0', 'typesafe/jev-1.14.0', 'opper/clef', 'opper/clef-flash', 'opper/kev-4b', 'berget/convaiinnovations/laya', 'openai/gpt-6-luna-decisions', 'empiriolabs/aplomb-1', 'microsoft/decision-1', 'upright/eevo-1']);
     expect(DEFAULT_MODEL).toBe('typesafe/jev-1.13.0');
     expect(isModelId('opper/kev-4b')).toBe(true);
     expect(isModelId('openai/gpt-5')).toBe(false);
     expect(modelName('opper/clef-flash')).toBe('Clef Flash');
+    // Eevo 1 is on the leaderboard, not in Play.
+    expect(DECISION_MODELS.filter((m) => !inPlay(m.id)).map((m) => m.id)).toEqual(['upright/eevo-1']);
   });
 
   it('maps a model to the id each provider expects; TypeSafe only serves jev', () => {
@@ -26,6 +28,8 @@ describe('decision models', () => {
     // Opper serves Microsoft Decision 1 under its Azure route.
     expect(requestedModelFor('opper', 'microsoft/decision-1')).toBe('azure:global/microsoft-decision-1');
     expect(requestedModelFor('typesafe', 'microsoft/decision-1')).toBeNull();
+    // Upright's EU route answered faster than its global one.
+    expect(requestedModelFor('opper', 'upright/eevo-1')).toBe('eevo:eu/eevo-1');
     expect(modelFor('opper', {})).toBe('typesafe/jev-1.13.0');
   });
 });

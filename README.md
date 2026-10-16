@@ -130,9 +130,10 @@ Opper serves several System One decision models with the same API, listed in
 `opper/clef` and `opper/clef-flash` (Cloudflare), `opper/kev-4b` (a Qwen3.5-4B fine-tune by Jared
 Palmer), `berget/convaiinnovations/laya` (ConvAI Innovations; its 512-token context is shorter
 than one of our questions), `openai/gpt-6-luna-decisions` (OpenAI's GPT-6 Luna Decisions, which Opper translates
-to System One), `empiriolabs/aplomb-1` (EmpirioLabs' Aplomb 1) and `microsoft/decision-1` (Microsoft Decision 1,
-which Opper serves as `azure:global/microsoft-decision-1`). The server forwards only these. Through Opper any of them can play; a
-TypeSafe key (option C) reaches jev 1.13 only.
+to System One), `empiriolabs/aplomb-1` (EmpirioLabs' Aplomb 1), `microsoft/decision-1` (Microsoft Decision 1,
+which Opper serves as `azure:global/microsoft-decision-1`) and `upright/eevo-1` (Upright's Eevo 1, which Opper serves
+as `eevo:eu/eevo-1`). The server forwards only these. Through Opper any of them can play, except Eevo 1: at 60 times
+jev's price per token it is on the leaderboard and in Watch only. A TypeSafe key (option C) reaches jev 1.13 only.
 
 Any other model can join the leaderboard as **self-reported**: anyone can run the benchmark against an endpoint and
 send the recorded games in a pull request, which CI replays. See

@@ -125,13 +125,14 @@ names explicitly (`--pacman-model`, `npm run leaderboard`) must be one of the
 ## Decision models
 
 Opper serves several System One decision models with the same API, listed in
-[`shared/models.ts`](shared/models.ts): `typesafe/jev-1.13.0` (TypeSafe, the default),
+[`shared/models.ts`](shared/models.ts): `typesafe/jev-1.13.0` (TypeSafe, the default) and its successor
+`typesafe/jev-1.14.0`,
 `opper/clef` and `opper/clef-flash` (Cloudflare), `opper/kev-4b` (a Qwen3.5-4B fine-tune by Jared
 Palmer), `berget/convaiinnovations/laya` (ConvAI Innovations; its 512-token context is shorter
 than one of our questions), `openai/gpt-6-luna-decisions` (OpenAI's GPT-6 Luna Decisions, which Opper translates
 to System One), `empiriolabs/aplomb-1` (EmpirioLabs' Aplomb 1) and `microsoft/decision-1` (Microsoft Decision 1,
 which Opper serves as `azure:global/microsoft-decision-1`). The server forwards only these. Through Opper any of them can play; a
-TypeSafe key (option C) reaches jev only.
+TypeSafe key (option C) reaches jev 1.13 only.
 
 Any other model can join the leaderboard as **self-reported**: anyone can run the benchmark against an endpoint and
 send the recorded games in a pull request, which CI replays. See

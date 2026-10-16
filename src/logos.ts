@@ -14,8 +14,7 @@ const LOGOS: Record<string, { src: string; maker: string; page?: string; shape?:
   'berget/convaiinnovations/laya': { src: 'logos/convai.webp', maker: 'Convai Innovations', page: 'community/laya', shape: 'tile' },
   'openai/gpt-6-luna-decisions': { src: 'logos/openai.svg', maker: 'OpenAI', page: 'openai/gpt-6-luna-decisions', mono: true },
   'empiriolabs/aplomb-1': { src: 'logos/empiriolabs.png', maker: 'EmpirioLabs', page: 'empiriolabs/aplomb-1', shape: 'round' },
-  // No page on opper.ai yet (2026-10-10).
-  'microsoft/decision-1': { src: 'logos/microsoft.svg', maker: 'Microsoft' },
+  'microsoft/decision-1': { src: 'logos/microsoft.svg', maker: 'Microsoft', page: 'microsoft/microsoft-decision-1' },
 };
 
 /**

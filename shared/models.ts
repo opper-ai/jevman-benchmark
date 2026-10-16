@@ -6,6 +6,7 @@
  */
 export const DECISION_MODELS = [
   { id: 'typesafe/jev-1.13.0', name: 'jev 1.13', maker: 'TypeSafe' },
+  { id: 'typesafe/jev-1.14.0', name: 'jev 1.14', maker: 'TypeSafe' },
   { id: 'opper/clef', name: 'Clef', maker: 'Cloudflare', opper: 'sference/clef' },
   { id: 'opper/clef-flash', name: 'Clef Flash', maker: 'Cloudflare', opper: 'cloudflare:global/clef-flash' },
   { id: 'opper/kev-4b', name: 'Kev 4B', maker: 'Jared Palmer' },

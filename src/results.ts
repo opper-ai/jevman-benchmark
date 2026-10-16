@@ -1,6 +1,6 @@
 import { jointLeaders, type Community, type Leaderboard, type LeaderboardEntry, type ModelKind } from '../shared/leaderboard';
 import { logoFor, makerOf, pageOf } from './logos';
-import { tag } from './track';
+import { tag, track } from './track';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, cls?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
@@ -113,15 +113,15 @@ function kindTag(kind: ModelKind): HTMLElement {
 /**
  * What the leaderboard can be sorted by: its rank (the mean score) or one of its other numbers, each best first: the
  * highest score, the longest survival, the lowest latency, backup rate and cost. In the table's column order, after
- * # and Model.
+ * # and Model; `head` is the column's name on phones.
  */
 export const SORTS = [
-  { key: 'rank', label: 'Rank', head: 'Mean score', best: 'descending' },
-  { key: 'best', label: 'High score', head: 'High score', best: 'descending' },
-  { key: 'survival', label: 'Survival', head: 'Survival', best: 'descending' },
-  { key: 'latency', label: 'Latency', head: 'Latency', best: 'ascending' },
-  { key: 'backup', label: 'Backup moves', head: 'Backup moves', best: 'ascending' },
-  { key: 'cost', label: 'Cost', head: 'Cost / game', best: 'ascending' },
+  { key: 'rank', head: 'Mean score', best: 'descending' },
+  { key: 'best', head: 'High score', best: 'descending' },
+  { key: 'survival', head: 'Survival', best: 'descending' },
+  { key: 'latency', head: 'Latency', best: 'ascending' },
+  { key: 'backup', head: 'Backup moves', best: 'ascending' },
+  { key: 'cost', head: 'Cost / game', best: 'ascending' },
 ] as const;
 export type SortKey = (typeof SORTS)[number]['key'];
 
@@ -134,15 +134,21 @@ const SORT_VALUE: Record<Exclude<SortKey, 'rank'>, (e: LeaderboardEntry) => numb
   cost: (e) => (e.costPerGame > 0 ? e.costPerGame : null),
 };
 
-/** The rows (in rank order) sorted by `key`, best first; a missing number goes last and equal ones keep their rank order. */
-export function sortRows<T extends { e: LeaderboardEntry }>(rows: readonly T[], key: SortKey): T[] {
-  if (key === 'rank') return [...rows];
+/**
+ * The rows (in rank order) sorted by `key`, best first, or worst first when `reversed`. A missing number goes last
+ * either way, and equal ones keep their rank order.
+ */
+export function sortRows<T extends { e: LeaderboardEntry }>(rows: readonly T[], key: SortKey, reversed = false): T[] {
+  if (key === 'rank') return reversed ? [...rows].reverse() : [...rows];
   const value = SORT_VALUE[key];
-  return [...rows].sort((a, b) => {
+  const sorted = [...rows].sort((a, b) => {
     const x = value(a.e);
     const y = value(b.e);
     return x === null ? (y === null ? 0 : 1) : y === null ? -1 : x - y;
   });
+  if (!reversed) return sorted;
+  const missing = sorted.filter((r) => value(r.e) === null);
+  return [...sorted.filter((r) => value(r.e) !== null).reverse(), ...missing];
 }
 
 /** The number a phone row shows beside the name: the one the list is sorted by. */
@@ -161,10 +167,11 @@ const SHOWN: Record<SortKey, (e: LeaderboardEntry) => string> = {
  * (self-reported submissions) are ranked with our runs by mean score. Only decision models are ranked: chat models
  * and rules sit in the table at their score as reference rows, marked Chat or Base where the rank would be. `table`
  * is the full table; `list` is the same ranking for phones, a row per model that opens its numbers when tapped.
- * `sortBar` gets a chip per sort (SORTS): the rank by default, or one of the numbers, which reorders both; the #
- * column keeps the rank.
+ * A click on a column's name sorts both by it (SORTS), best first, and a second click turns it round; # or the mean
+ * score goes back to the rank, the default. The # column keeps the rank. On phones the list's number column picks the
+ * sort from a menu.
  */
-export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, sortBar: HTMLElement, sub: HTMLElement, board: Leaderboard, community: Community | null): void {
+export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, sub: HTMLElement, board: Leaderboard, community: Community | null): void {
   // One table: our runs (all decision models) and the self-reported ones by mean score (ours first on an equal score).
   const all: { e: LeaderboardEntry; by?: string; url?: string; kind: ModelKind }[] = [...board.entries.map((e) => ({ e, kind: 'decision' as ModelKind })), ...(community?.entries ?? []).map((e) => ({ e, by: e.by, url: e.url, kind: e.kind }))];
   all.sort((a, b) => b.e.meanScore - a.e.meanScore);
@@ -182,8 +189,26 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, so
   const hr = el('tr');
   // Narrower than a laptop, Survival and Run by go (who ran it sits under the model's name); on phones only the rank
   // and model stay, with the score under the name too.
+  // The columns that sort, by name; Model and Run by don't.
+  const sortOf: Record<string, SortKey> = { '#': 'rank', 'Mean score ± 95%': 'rank', 'High score': 'best', Survival: 'survival', Latency: 'latency', 'Backup moves': 'backup', 'Cost / game': 'cost' };
+  let current: { key: SortKey; reversed: boolean } = { key: 'rank', reversed: false };
+  let draw = () => {};
+  // Another column sorts best first; the same one again turns round.
+  const pick = (key: SortKey, turn: boolean) => {
+    current = { key, reversed: turn && current.key === key ? !current.reversed : false };
+    draw();
+  };
   for (const [label, cls] of [['#', ''], ['Model', ''], ['Mean score ± 95%', 'hide-n'], ['High score', 'r hide-n'], ['Survival', 'r hide-m'], ['Latency', 'r hide-n'], ['Backup moves', 'r hide-n'], ['Cost / game', 'r hide-n'], ['Run by', 'hide-m']]) {
-    hr.append(el('th', label, cls || undefined));
+    const th = el('th', undefined, cls || undefined);
+    const key = sortOf[label];
+    if (key) {
+      const b = tag(el('button', label, 'sort'), 'click_leaderboard_sort', { source: 'leaderboard', sort: key });
+      b.type = 'button';
+      b.append(el('span', '', 'arr'));
+      b.addEventListener('click', () => pick(key, true));
+      th.append(b);
+    } else th.textContent = label;
+    hr.append(th);
   }
   head.append(hr);
 
@@ -300,37 +325,37 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, so
     item.append(head, details);
     return item;
   };
+  // Phones have no column names to click: the number column's name is a menu of the sorts.
   const cols = el('div', undefined, 'lbl-cols');
-  const shownHead = el('span');
-  cols.append(el('span', '#', 'rk'), el('span', 'Model', 'grow'), shownHead);
+  const menu = el('select');
+  menu.setAttribute('aria-label', 'Sort by');
+  for (const s of SORTS) menu.append(Object.assign(el('option', s.head), { value: s.key }));
+  menu.addEventListener('change', () => {
+    track('click_leaderboard_sort', { source: 'leaderboard_mobile', sort: menu.value });
+    pick(menu.value as SortKey, false);
+  });
+  const menuWrap = el('span', undefined, 'lbl-sort');
+  menuWrap.append(menu);
+  cols.append(el('span', '#', 'rk'), el('span', 'Model', 'grow'), menuWrap);
 
-  const draw = (key: SortKey) => {
-    const rows = sortRows(all, key);
+  draw = () => {
+    const { key, reversed } = current;
+    const rows = sortRows(all, key, reversed);
     const sort = SORTS.find((s) => s.key === key)!;
     const col = SORTS.indexOf(sort) + 2; // after # and Model
+    const dir = reversed ? (sort.best === 'descending' ? 'ascending' : 'descending') : sort.best;
     [...hr.cells].forEach((th, i) => {
-      th.classList.toggle('sorted', i === col);
-      if (i === col) th.setAttribute('aria-sort', sort.best);
+      const on = i === col;
+      th.classList.toggle('sorted', on);
+      if (on) th.setAttribute('aria-sort', dir);
       else th.removeAttribute('aria-sort');
+      const arrow = th.querySelector('.arr');
+      if (arrow) arrow.textContent = on ? (dir === 'descending' ? '↓' : '↑') : '';
     });
     body.replaceChildren(...rows.map(({ e, by, url, kind }) => row(e, { tie: tied.has(e), by, url, kind })));
     for (const tr of body.rows) tr.cells[col]?.classList.add('sorted');
-    shownHead.textContent = sort.head;
+    menu.value = key;
     list.replaceChildren(cols, ...rows.map(({ e, by, url, kind }, i) => listItem(e, i, key, { tie: tied.has(e), by, url, kind })));
   };
-  sortBar.replaceChildren(
-    ...SORTS.map((s) => {
-      const chip = el('button', s.label, 'chip');
-      chip.type = 'button';
-      chip.setAttribute('role', 'radio');
-      chip.setAttribute('aria-checked', String(s.key === 'rank'));
-      tag(chip, 'click_leaderboard_sort', { source: 'leaderboard', sort: s.key });
-      chip.addEventListener('click', () => {
-        for (const c of sortBar.children) c.setAttribute('aria-checked', String(c === chip));
-        draw(s.key);
-      });
-      return chip;
-    }),
-  );
-  draw('rank');
+  draw();
 }

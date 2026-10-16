@@ -30,7 +30,7 @@ const rows = [
   entry('b', { meanScore: 3000, bestScore: 9000, meanSurvivedSeconds: 80, meanLatencyMs: null, fallbackRate: 0.02, costPerGame: 0 }),
   entry('c', { meanScore: 2000, bestScore: undefined, meanSurvivedSeconds: 70, meanLatencyMs: 100, fallbackRate: 0.05, costPerGame: 0.003 }),
 ];
-const names = (key: Parameters<typeof sortRows>[1]) => sortRows(rows, key).map((r) => r.e.name);
+const names = (key: Parameters<typeof sortRows>[1], reversed = false) => sortRows(rows, key, reversed).map((r) => r.e.name);
 
 describe('sorting the leaderboard', () => {
   it('keeps the rank by default', () => {
@@ -51,6 +51,12 @@ describe('sorting the leaderboard', () => {
     expect(names('cost').at(-1)).toBe('b');
     expect(names('survival').slice(1)).toEqual(['a', 'c']);
     expect(names('backup').slice(1)).toEqual(['a', 'c']);
+  });
+  it('turns round on a second click, worst first, with a missing number still last', () => {
+    expect(names('rank', true)).toEqual(['c', 'b', 'a']);
+    expect(names('latency', true)).toEqual(['a', 'c', 'b']);
+    expect(names('best', true)).toEqual(['a', 'b', 'c']);
+    expect(names('cost', true)).toEqual(['a', 'c', 'b']);
   });
   it('leaves the rows it was given as they were', () => {
     sortRows(rows, 'latency');

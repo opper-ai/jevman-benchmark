@@ -21,11 +21,12 @@ const LOGOS: Record<string, { src: string; maker: string; page?: string; shape?:
 
 /**
  * Community models (by submission id) get the mark their makers use on their own profiles too: the model's maker
- * (Qwen, Liquid AI), the project's own icon (RizzoFlow), or its author's GitHub or Hugging Face avatar. The random
- * baseline gets a die.
+ * (Qwen, Liquid AI, Bespoke Labs), the project's own icon (RizzoFlow), or its author's GitHub or Hugging Face avatar.
+ * The random baseline gets a die.
  */
 const COMMUNITY_LOGOS: Record<string, { src: string; shape?: 'round' | 'tile'; mono?: true }> = {
   semif: { src: 'logos/community/semif.png', shape: 'round' },
+  'nimble-v4-max': { src: 'logos/community/bespoke-labs.png' },
   'qwen-3-8-flash-next-nvfp4': { src: 'logos/community/qwen.svg' },
   'rizzo-flow': { src: 'logos/community/rizzo-flow.png' },
   'winnow-12b-nvfp4': { src: 'logos/community/eldanring.png', shape: 'round' },

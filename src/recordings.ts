@@ -10,6 +10,7 @@ import { modelName } from '../shared/models';
  * Each also needs its highlight to download: `npm run clips -- <model>` (scripts/clips.ts).
  */
 export const RECORDINGS: Record<string, { path: string; score: number; name?: string }> = {
+  'typesafe/jev-1.14.0': { path: '/demo/jev-1-14-demo.json', score: 2820 },
   semif: { path: '/demo/semif-demo.json', score: 3230, name: 'SemIf' }, // game-100
   'typesafe/jev-1.13.0': { path: '/demo/jev-demo.json', score: 3870 },
   'qwen-3-8-flash-next-nvfp4': { path: '/demo/qwen-3-8-flash-next-nvfp4-demo.json', score: 2700, name: 'Qwen 3.8 Flash Next NVFP4' }, // game-13

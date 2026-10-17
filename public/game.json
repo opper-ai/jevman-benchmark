@@ -1,0 +1,10 @@
+{
+  "slug": "jevman",
+  "name": "jevman",
+  "tagline": "Decision models steer Pac-Man in real time against the classic arcade ghosts.",
+  "category": "Arcade",
+  "author": { "github": "joch", "originalRepo": "https://github.com/joch/jevman" },
+  "license": "AGPL-3.0-or-later",
+  "metric": { "name": "Mean score", "unit": "points", "higherIsBetter": true },
+  "updatedAt": "2026-10-12"
+}

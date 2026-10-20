@@ -7,7 +7,7 @@
 // Your own model: --endpoint https://… plays Pac-Man through your HTTP endpoint (see CONTRIBUTING.md); with
 //   --submit submissions/<id> --name "My Model" --by <github-handle> --kind decision|trained|chat|rules [--url https://…] it
 //   plays the leaderboard's games and writes them as a submission to open a pull request with.
-import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 import { basename, dirname, join } from 'node:path';
 import { parseArgs } from 'node:util';
@@ -242,13 +242,17 @@ const line = (r: GameResult) =>
   `survived ${r.survived.toFixed(1)}s, score ${r.score}, pellets ${r.pellets}, deaths ${r.deaths}, level ${r.level}, ghosts ${r.ghostsEaten}, calls ${r.calls}, fallbacks ${r.fallbacks}/${r.decisions}, $${r.cost.toFixed(4)}`;
 
 if (leaderboard) {
-  const models = values.models === 'all' || values.models === '' ? DECISION_MODELS.map((m) => m.id).filter((id) => !isRetired(id)) : values.models!.split(',').map(asModel);
+  const all = values.models === 'all' || values.models === '';
+  const models = all ? DECISION_MODELS.map((m) => m.id).filter((id) => !isRetired(id)) : values.models!.split(',').map(asModel);
   const parallel = Number(values.parallel ?? 4);
   console.log(`leaderboard: ${models.length} models × ${games} games, cap ${maxSeconds}s, ${parallel} at a time, scripted ghosts (via ${target?.provider ?? 'no key'})`);
+  // A retired model can't play again: a full run keeps its row from the board it replaces, while the game is the same.
+  const previous = all && existsSync(values.out!) ? (JSON.parse(readFileSync(values.out!, 'utf8')) as Leaderboard) : undefined;
+  const retired = previous && (previous.settings.benchVersion ?? 1) === BENCH_VERSION ? previous.entries.filter((e) => isRetired(e.model)) : [];
   const entries: LeaderboardEntry[] = [];
   const skipped: Leaderboard['skipped'] = [];
   const write = () => {
-    const board: Leaderboard = { generatedAt: new Date().toISOString(), settings: { gamesPerModel: games, maxSeconds, benchVersion: BENCH_VERSION, ghosts: 'scripted' }, entries: rank(entries), skipped };
+    const board: Leaderboard = { generatedAt: new Date().toISOString(), settings: { gamesPerModel: games, maxSeconds, benchVersion: BENCH_VERSION, ghosts: 'scripted' }, entries: rank([...retired, ...entries]), skipped };
     mkdirSync(dirname(values.out!), { recursive: true });
     writeFileSync(values.out!, `${JSON.stringify(board, null, 2)}\n`);
     return board;

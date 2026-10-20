@@ -17,8 +17,8 @@ export const CLIPS: Record<string, { file: string; mp4: number; gif: number }> =
   },
   "upright/eevo-1": {
     "file": "eevo-1",
-    "mp4": 525333,
-    "gif": 635566
+    "mp4": 522415,
+    "gif": 635343
   },
   "typesafe/jev-1.13.0": {
     "file": "jev",

@@ -14,9 +14,12 @@ export const DECISION_MODELS = [
   { id: 'openai/gpt-6-luna-decisions', name: 'GPT-6 Luna', maker: 'OpenAI' },
   { id: 'empiriolabs/aplomb-1', name: 'Aplomb 1', maker: 'EmpirioLabs' },
   { id: 'microsoft/decision-1', name: 'Microsoft Decision 1', maker: 'Microsoft', opper: 'azure:global/microsoft-decision-1' },
-  // Upright serves Eevo 1 from two routes; the EU one answered about 100 ms faster in our test (2026-10-16). At 60
-  // times jev's price per token it is on the leaderboard and in Watch, but not in Play.
-  { id: 'upright/eevo-1', name: 'Eevo 1', maker: 'Upright', opper: 'eevo:eu/eevo-1', play: false },
+  // Upright serves Eevo-1 from two routes; the EU one answered about 100 ms faster in our test (2026-10-16). At 60
+  // times jev's price per token it is on the leaderboard and in Watch, but not in Play. Upright's eevo-1 names its
+  // latest version and keeps no old ones: the first, Eevo-1, is retired (its row and Watch game stay, the server no
+  // longer forwards it), and Eevo-1.1 (2026-10-18) goes through that name until Opper lists eevo-1.1 itself.
+  { id: 'upright/eevo-1', name: 'Eevo-1', maker: 'Upright', play: false, retired: true },
+  { id: 'upright/eevo-1.1', name: 'Eevo-1.1', maker: 'Upright', opper: 'eevo:eu/eevo-1', play: false },
 ] as const;
 
 export type ModelId = (typeof DECISION_MODELS)[number]['id'];
@@ -27,6 +30,9 @@ export const isModelId = (v: unknown): v is ModelId => DECISION_MODELS.some((m) 
 
 /** Whether Play offers the model: free and signed-in games alike. */
 export const inPlay = (id: string): boolean => !(DECISION_MODELS as readonly { id: string; play?: boolean }[]).some((m) => m.id === id && m.play === false);
+
+/** Whether its maker no longer serves the model: it keeps its leaderboard row and recordings, but nothing calls it. */
+export const isRetired = (id: string): boolean => (DECISION_MODELS as readonly { id: string; retired?: boolean }[]).some((m) => m.id === id && m.retired === true);
 
 /** The display name of a listed model; any other System One model (say, from JEV_MODEL) shows its id. */
 export const modelName = (id: string): string => DECISION_MODELS.find((m) => m.id === id)?.name ?? id;

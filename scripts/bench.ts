@@ -21,7 +21,7 @@ import { Recorder, roundDt, type Recording } from '../src/replay';
 import { verifyGame } from './verify';
 import { emptyResult, finishResult, scriptedControls } from './game';
 import { GameStats } from '../src/stats';
-import { DECISION_MODELS, DEFAULT_MODEL, isModelId, modelName, type ModelId } from '../shared/models';
+import { DECISION_MODELS, DEFAULT_MODEL, isModelId, isRetired, modelName, type ModelId } from '../shared/models';
 import { BENCH_VERSION, isModelKind, rank, SUBMISSION_RULES, summarize, type GameResult, type Leaderboard, type LeaderboardEntry } from '../shared/leaderboard';
 
 const { values } = parseArgs({
@@ -242,7 +242,7 @@ const line = (r: GameResult) =>
   `survived ${r.survived.toFixed(1)}s, score ${r.score}, pellets ${r.pellets}, deaths ${r.deaths}, level ${r.level}, ghosts ${r.ghostsEaten}, calls ${r.calls}, fallbacks ${r.fallbacks}/${r.decisions}, $${r.cost.toFixed(4)}`;
 
 if (leaderboard) {
-  const models = values.models === 'all' || values.models === '' ? DECISION_MODELS.map((m) => m.id) : values.models!.split(',').map(asModel);
+  const models = values.models === 'all' || values.models === '' ? DECISION_MODELS.map((m) => m.id).filter((id) => !isRetired(id)) : values.models!.split(',').map(asModel);
   const parallel = Number(values.parallel ?? 4);
   console.log(`leaderboard: ${models.length} models × ${games} games, cap ${maxSeconds}s, ${parallel} at a time, scripted ghosts (via ${target?.provider ?? 'no key'})`);
   const entries: LeaderboardEntry[] = [];

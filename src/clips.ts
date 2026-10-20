@@ -5,6 +5,11 @@ export const CLIPS: Record<string, { file: string; mp4: number; gif: number }> =
     "mp4": 546490,
     "gif": 601369
   },
+  "upright/eevo-1.1": {
+    "file": "eevo-1-1",
+    "mp4": 488087,
+    "gif": 536882
+  },
   "semif": {
     "file": "semif",
     "mp4": 561421,

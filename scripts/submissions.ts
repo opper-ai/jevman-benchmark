@@ -41,7 +41,7 @@ export function checkSubmission(dir: string, id: string, rules: SubmissionRules 
   if (typeof manifest.by !== 'string' || !/^[A-Za-z0-9-]{1,39}$/.test(manifest.by)) return { error: 'by must be a GitHub handle' };
   if (manifest.url !== undefined && (typeof manifest.url !== 'string' || !/^https:\/\/\S+$/.test(manifest.url))) return { error: 'url must start with https://' };
   // Only decision models are ranked: the others are listed apart, so how an entry answers must be said.
-  if (!isModelKind(manifest.kind)) return { error: 'kind must be decision, chat or rules: how your entry answers (see CONTRIBUTING.md)' };
+  if (!isModelKind(manifest.kind)) return { error: 'kind must be decision, trained, chat or rules: how your entry answers (see CONTRIBUTING.md)' };
   // A submitted model must not pass for one we benchmark ourselves.
   if (DECISION_MODELS.some((m) => m.id === id || m.name.toLowerCase() === manifest.name.trim().toLowerCase())) return { error: `${manifest.name} is on the main leaderboard already` };
   const v = manifest.benchVersion;

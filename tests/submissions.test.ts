@@ -47,10 +47,10 @@ describe('checkSubmission', () => {
     expect('entry' in checked && checked.entry.meanScore).toBe(Math.round(mean));
   });
 
-  it('needs to say how the entry answers: a decision model, a chat model or rules', () => {
-    for (const kind of ['chat', 'rules']) expect(checkSubmission(folder({ manifest: { kind } }), 'acme-pac', RULES)).toMatchObject({ entry: { kind } });
+  it('needs to say how the entry answers: a decision model, one trained for this game, a chat model or rules', () => {
+    for (const kind of ['trained', 'chat', 'rules']) expect(checkSubmission(folder({ manifest: { kind } }), 'acme-pac', RULES)).toMatchObject({ entry: { kind } });
     for (const kind of [undefined, 'llm', 'Decision', 1]) {
-      expect(checkSubmission(folder({ manifest: { kind } }), 'acme-pac', RULES)).toMatchObject({ error: expect.stringMatching(/^kind must be decision, chat or rules/) });
+      expect(checkSubmission(folder({ manifest: { kind } }), 'acme-pac', RULES)).toMatchObject({ error: expect.stringMatching(/^kind must be decision, trained, chat or rules/) });
     }
   });
 

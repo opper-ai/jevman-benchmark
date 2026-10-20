@@ -46,8 +46,12 @@ function chevron(): SVGSVGElement {
   return svg;
 }
 
-/** What a row that isn't ranked is: a chat model or a baseline (rules, no model), shown at its score for reference. */
-const REFERENCE: Partial<Record<ModelKind, { tag: string; tip: string }>> = {
+/**
+ * What a row that isn't ranked is: a model trained for this game, a chat model or a baseline (rules, no model), shown
+ * at its score for reference. Every kind but decision needs one (the type says so).
+ */
+const REFERENCE: Record<Exclude<ModelKind, 'decision'>, { tag: string; tip: string }> = {
+  trained: { tag: 'Trained', tip: 'Trained for this game: a model trained or tuned on JevMan itself. Shown at its score for reference, not ranked.' },
   chat: { tag: 'Chat', tip: 'Chat model: an LLM that writes its answer. Shown at its score for reference, not ranked.' },
   rules: { tag: 'Base', tip: 'Baseline: no model, like hand-written rules or a die roll. Shown at its score for reference, not ranked.' },
 };
@@ -90,8 +94,8 @@ function hideTip(force = false): void {
   tipFor = null;
 }
 /** The rank cell of a reference row: what it is instead of a number, explained on hover or a tap. */
-function kindTag(kind: ModelKind): HTMLElement {
-  const { tag: label, tip: text } = REFERENCE[kind]!;
+function kindTag(kind: Exclude<ModelKind, 'decision'>): HTMLElement {
+  const { tag: label, tip: text } = REFERENCE[kind];
   const b = el('button', label, 'kind-tag');
   b.type = 'button';
   b.addEventListener('mouseenter', () => !pinned && showTip(b, text));
@@ -258,7 +262,7 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
     const tdScore = el('td', undefined, 'hide-n');
     tdScore.append(scw);
     const rk = el('td', undefined, 'rk');
-    rk.append(ref ? kindTag(opts.kind) : rankOf(e));
+    rk.append(opts.kind !== 'decision' ? kindTag(opts.kind) : rankOf(e));
     tr.append(
       rk,
       tdModel,
@@ -304,7 +308,7 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
     toggle.append(chevron());
     const head = tag(el('div', undefined, 'lbl-head'), 'click_leaderboard_row', { source: 'mobile', model: e.model });
     const rk = el('span', undefined, 'rk');
-    rk.append(ref ? kindTag(opts.kind) : rankOf(e));
+    rk.append(opts.kind !== 'decision' ? kindTag(opts.kind) : rankOf(e));
     head.append(rk, markOf(e, name), who, el('span', SHOWN[key](e), 'n'), toggle);
     const details = el('dl', undefined, 'lbl-d');
     details.id = `lbl-${i}`;

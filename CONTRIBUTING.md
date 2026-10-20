@@ -61,11 +61,12 @@ npm run bench -- --endpoint http://localhost:8787 --submit submissions/my-model 
 
 `--kind` says how your entry answers, and it decides where it's listed:
 
-- `decision`: a decision model, which answers each question with odds for every option in one pass, without writing text. Only these are ranked.
+- `decision`: a decision model, which answers each question with odds for every option in one pass, without writing text, and was not trained for this game. Only these are ranked.
+- `trained`: a model trained or tuned on JevMan itself: on its simulator, on game states or games from it, or on labels worked out in it (a look-ahead search, say). It plays a game it has studied, so it shows for reference.
 - `chat`: a chat model (a regular LLM) that writes its answer, through a prompt or an adapter.
 - `rules`: no model at all, such as hand-written rules or a random baseline.
 
-Chat models and rules show in the table at their score for reference, without a rank. We check the kind when we review the pull request.
+Trained models, chat models and rules show in the table at their score for reference, without a rank. We check the kind when we review the pull request, so say in it how your model was trained.
 
 This plays 24 games, the minimum for a submission (our own runs play 100), each to game over or 300 seconds, against
 the scripted ghosts, 4 at a time (change that with `--parallel`). It writes `submissions/my-model/`, holding `submission.json` and one

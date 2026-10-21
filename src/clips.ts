@@ -15,6 +15,11 @@ export const CLIPS: Record<string, { file: string; mp4: number; gif: number }> =
     "mp4": 561421,
     "gif": 587414
   },
+  "bespoke/nimble-v4-max": {
+    "file": "nimble-v4-max",
+    "mp4": 546875,
+    "gif": 620639
+  },
   "upright/eevo-1": {
     "file": "eevo-1",
     "mp4": 522415,

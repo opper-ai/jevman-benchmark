@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-20T22:20:00.354Z",
+  "generatedAt": "2026-10-21T09:04:48.985Z",
   "settings": {
     "gamesPerModel": 100,
     "maxSeconds": 300,
@@ -49,6 +49,28 @@
         "at/near junction": 140,
         "ghost ahead in corridor": 129,
         "waiting at junction": 31
+      }
+    },
+    {
+      "model": "bespoke/nimble-v4-max",
+      "name": "Nimble v4 Max",
+      "games": 100,
+      "meanScore": 3103,
+      "bestScore": 5780,
+      "scoreStdError": 82,
+      "meanSurvivedSeconds": 68.6,
+      "meanPellets": 208,
+      "pelletsPerLife": 69,
+      "meanGhostsEaten": 2.5,
+      "fruitEaten": "150/192",
+      "bestLevel": 2,
+      "fallbackRate": 0.029,
+      "meanLatencyMs": 380,
+      "costPerGame": 0.00432,
+      "deathsBy": {
+        "ghost ahead in corridor": 185,
+        "at/near junction": 90,
+        "waiting at junction": 25
       }
     },
     {

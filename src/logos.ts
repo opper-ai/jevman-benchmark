@@ -17,6 +17,7 @@ const LOGOS: Record<string, { src: string; maker: string; page?: string; shape?:
   'microsoft/decision-1': { src: 'logos/microsoft.svg', maker: 'Microsoft', page: 'microsoft/microsoft-decision-1' },
   // Upright's Hugging Face avatar and favicon.
   'upright/eevo-1': { src: 'logos/upright.png', maker: 'Upright', page: 'upright/eevo-1', shape: 'tile' },
+  'upright/eevo-1.1': { src: 'logos/upright.png', maker: 'Upright', page: 'upright/eevo-1', shape: 'tile' },
 };
 
 /**

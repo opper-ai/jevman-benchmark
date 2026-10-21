@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-16T09:30:35.243Z",
+  "generatedAt": "2026-10-20T22:20:00.354Z",
   "settings": {
     "gamesPerModel": 100,
     "maxSeconds": 300,
@@ -30,8 +30,30 @@
       }
     },
     {
+      "model": "upright/eevo-1.1",
+      "name": "Eevo-1.1",
+      "games": 100,
+      "meanScore": 3416,
+      "bestScore": 8690,
+      "scoreStdError": 147,
+      "meanSurvivedSeconds": 71.6,
+      "meanPellets": 236,
+      "pelletsPerLife": 79,
+      "meanGhostsEaten": 2.6,
+      "fruitEaten": "111/211",
+      "bestLevel": 2,
+      "fallbackRate": 0.031,
+      "meanLatencyMs": 353,
+      "costPerGame": 0.31019,
+      "deathsBy": {
+        "at/near junction": 140,
+        "ghost ahead in corridor": 129,
+        "waiting at junction": 31
+      }
+    },
+    {
       "model": "upright/eevo-1",
-      "name": "Eevo 1",
+      "name": "Eevo-1",
       "games": 100,
       "meanScore": 3004,
       "bestScore": 6260,

@@ -140,15 +140,22 @@ describe('player keys', () => {
     expect(log.mock.calls[0][0]).toMatch(/^\[jev player\] /);
   });
   it("refuses a model Play doesn't offer for free and signed-in games, but not for the server's own key", async () => {
-    const eevo = { ...body, model: 'upright/eevo-1' };
+    const eevo = { ...body, model: 'upright/eevo-1.1' };
     for (const keyMode of ['pool', 'player'] as const) {
       const fetchMock = ok();
-      expect(await handleDecide(eevo, deps(fetchMock, { keyMode }))).toEqual({ status: 400, body: { error: 'Eevo 1 is on the leaderboard but not in Play' } });
+      expect(await handleDecide(eevo, deps(fetchMock, { keyMode }))).toEqual({ status: 400, body: { error: 'Eevo-1.1 is on the leaderboard but not in Play' } });
       expect(fetchMock).not.toHaveBeenCalled();
     }
     const fetchMock = ok();
     expect((await handleDecide(eevo, deps(fetchMock, { keyMode: 'dev' }))).status).toBe(200);
     expect(JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string).model).toBe('eevo:eu/eevo-1');
+  });
+  it('refuses a retired model for every key, since its old name now reaches a newer version', async () => {
+    for (const keyMode of ['pool', 'player', 'dev'] as const) {
+      const fetchMock = ok();
+      expect(await handleDecide({ ...body, model: 'upright/eevo-1' }, deps(fetchMock, { keyMode }))).toEqual({ status: 400, body: { error: 'Eevo-1 is retired: its maker no longer serves it' } });
+      expect(fetchMock).not.toHaveBeenCalled();
+    }
   });
 });
 

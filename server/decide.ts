@@ -3,7 +3,7 @@ import { signAnswers } from './answers.ts';
 import { endpointFor, modelFor, requestedModelFor, TYPESAFE_USD_PER_INPUT_TOKEN, type JevProvider, type JevTarget } from './jev.ts';
 import { clientIp, poolAcceptsBody, POOL_EMPTY_MESSAGE, type Pool, type VisitorLimits } from './pool.ts';
 import type { SessionData } from './session.ts';
-import { DEFAULT_MODEL, inPlay, isModelId, modelName } from '../shared/models.ts';
+import { DEFAULT_MODEL, inPlay, isModelId, isRetired, modelName } from '../shared/models.ts';
 
 export const JEV_MODEL = modelFor('opper');
 
@@ -74,6 +74,10 @@ export async function handleDecide(input: unknown, deps: DecideDeps): Promise<De
   const requested = input.model ?? undefined;
   if (requested !== undefined && !isModelId(requested)) {
     return { status: 400, body: { error: `Unknown decision model: ${typeof requested === 'string' ? requested.slice(0, 80) : typeof requested}` } };
+  }
+  // A retired model's name may now reach a newer version, which would play under the old name: no key calls it.
+  if (requested !== undefined && isRetired(requested)) {
+    return { status: 400, body: { error: `${modelName(requested)} is retired: its maker no longer serves it` } };
   }
   // Play's games (free or on a visitor's wallet) can't name a model Play doesn't offer; the server's own key can.
   if (requested !== undefined && !inPlay(requested) && (deps.keyMode === 'pool' || deps.keyMode === 'player')) {

@@ -14,6 +14,7 @@ export const DECISION_MODELS = [
   { id: 'openai/gpt-6-luna-decisions', name: 'GPT-6 Luna', maker: 'OpenAI' },
   { id: 'empiriolabs/aplomb-1', name: 'Aplomb 1', maker: 'EmpirioLabs' },
   { id: 'microsoft/decision-1', name: 'Microsoft Decision 1', maker: 'Microsoft', opper: 'azure:global/microsoft-decision-1' },
+  { id: 'bespoke/nimble-v4-max', name: 'Nimble v4 Max', maker: 'Bespoke Labs' },
   // Upright serves Eevo-1 from two routes; the EU one answered about 100 ms faster in our test (2026-10-16). At 60
   // times jev's price per token it is on the leaderboard and in Watch, but not in Play. Upright's eevo-1 names its
   // latest version and keeps no old ones: the first, Eevo-1, is retired (its row and Watch game stay, the server no

@@ -15,6 +15,7 @@ const LOGOS: Record<string, { src: string; maker: string; page?: string; shape?:
   'openai/gpt-6-luna-decisions': { src: 'logos/openai.svg', maker: 'OpenAI', page: 'openai/gpt-6-luna-decisions', mono: true },
   'empiriolabs/aplomb-1': { src: 'logos/empiriolabs.png', maker: 'EmpirioLabs', page: 'empiriolabs/aplomb-1', shape: 'round' },
   'microsoft/decision-1': { src: 'logos/microsoft.svg', maker: 'Microsoft', page: 'microsoft/microsoft-decision-1' },
+  'bespoke/nimble-v4-max': { src: 'logos/bespoke-labs.png', maker: 'Bespoke Labs', page: 'bespoke/nimble-v4-max' },
   // Upright's Hugging Face avatar and favicon.
   'upright/eevo-1': { src: 'logos/upright.png', maker: 'Upright', page: 'upright/eevo-1', shape: 'tile' },
   'upright/eevo-1.1': { src: 'logos/upright.png', maker: 'Upright', page: 'upright/eevo-1', shape: 'tile' },

@@ -185,9 +185,8 @@ export function renderLeaderboard(table: HTMLTableElement, list: HTMLElement, su
   const rankOf = (e: LeaderboardEntry) => (tied.has(e) ? '=1' : String(ranked.indexOf(e) + 1));
   // Every row's bar on one scale, the best mean in the table, so a reference row reads against the models.
   const top = Math.max(1, ...all.map((r) => r.e.meanScore));
-  const date = new Date(board.generatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  const lead = `${board.settings.gamesPerModel} games per model against the classic ghosts, last run on ${date}`;
-  sub.replaceChildren(community?.entries.length ? `${lead}, ranked together with models the community ran. ` : `${lead}. `, tag(Object.assign(el('a', 'Add your model'), { href: 'https://github.com/opper-ai/jevman-benchmark/blob/main/CONTRIBUTING.md#benchmark-your-own-model', target: '_blank', rel: 'noopener' }), 'click_add_model', { source: 'leaderboard' }));
+  const lead = `${board.settings.gamesPerModel} games per model against the classic ghosts`;
+  sub.replaceChildren(community?.entries.length ? `${lead}, ranked together with models the community ran. ` : `${lead}. `, tag(Object.assign(el('a', 'Get your model benchmarked', 'tease'), { href: '#add-model' }), 'click_add_model', { source: 'leaderboard' }));
 
   const head = el('thead');
   const hr = el('tr');

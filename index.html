@@ -131,32 +131,22 @@
         <div class="oc"><h2 id="leaderboard-title" class="font-wix font-semibold text-3xl md:text-4xl text-left md:text-center">Leaderboard</h2></div>
         <p id="leaderboard-sub" class="sub">100 games per model against the classic ghosts.</p>
         <div class="tablecard"><div class="table-scroll"><table class="lbt" id="leaderboard-table"></table></div><div class="lbl" id="leaderboard-list"></div></div>
-        <p class="foot">=1 means tied: those scores are within each other's margin of error. Run by @opper-ai means we played the games through Opper. Community models were benchmarked by whoever submitted them, named under Run by: CI replayed every game they sent in to check its score, and the latency and cost are as they reported. Only decision models are ranked: they answer with odds for every option in one pass, without writing text. Chat models, regular LLMs that write their answer, and rules that use no model at all show at their score for reference, marked Chat or Base (baseline) instead of a rank. Claude Haiku 5.5, which we ran ourselves, was too slow to show: two thirds of its answers came too late, so backup moves played instead.</p>
+        <p class="foot">=1 means tied: those scores are within each other's margin of error. Run by @opper-ai means we played the games through Opper. Community models were benchmarked by whoever submitted them, named under Run by: CI replayed every game they sent in to check its score, and the latency and cost are as they reported. Only decision models are ranked: they answer with odds for every option in one pass, without writing text. Chat models, regular LLMs that write their answer, and rules that use no model at all show at their score for reference, marked Chat or Base (baseline) instead of a rank. Claude Haiku 5.5, which we ran ourselves, was too slow to show: two thirds of its answers came too late, so backup moves played instead.<span id="leaderboard-updated"></span></p>
       </section>
 
       <section id="add-model" class="section" aria-labelledby="add-model-title">
         <div class="oc"><h2 id="add-model-title" class="font-wix font-semibold text-3xl md:text-4xl text-left md:text-center">Benchmark your own model</h2></div>
-        <p class="sub">JevMan is open source, and any model behind an HTTP endpoint can play it: a hosted model, a fine-tune or one running on your laptop.</p>
-        <ol class="steps">
-          <li class="step">
-            <span class="n">01</span>
-            <h3>Put your model behind an endpoint</h3>
-            <p>At every junction the game sends the maze as JSON and asks for a direction, with odds if your model has them. The repo has a 34-line example endpoint to start from.</p>
-          </li>
-          <li class="step">
-            <span class="n">02</span>
-            <h3>Run the benchmark</h3>
-            <p>One command plays the games under the leaderboard's rules: real time, 2 seconds per answer, the classic ghosts, three lives or 5 minutes.</p>
-          </li>
-          <li class="step">
-            <span class="n">03</span>
-            <h3>Send a pull request</h3>
-            <p>CI replays every game you submit and checks its score. Your model then joins the leaderboard as a community model.</p>
-          </li>
-        </ol>
-        <div class="repo-line">
-          <a class="repo" href="https://github.com/opper-ai/jevman-benchmark/blob/main/CONTRIBUTING.md#benchmark-your-own-model" target="_blank" rel="noopener" data-event="click_add_model" data-track-source="add_model_repo"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 496 512" height="16" width="16" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"></path></svg><span>opper-ai/jevman-benchmark</span><span class="lic">AGPL-3.0</span></a>
-          <span class="or">Is your model on Opper or another public API? <a href="https://github.com/opper-ai/jevman-benchmark/issues/new" target="_blank" rel="noopener" data-event="click_add_model" data-track-source="add_model_issue">Open an issue</a> and we'll run it ourselves.</span>
+        <div class="paths">
+          <div class="path">
+            <h3>Run it yourself</h3>
+            <p>JevMan is open source and any model behind an HTTP endpoint can play. Send your games in a pull request and CI checks every score before your model joins the leaderboard.</p>
+            <a class="repo" href="https://github.com/opper-ai/jevman-benchmark/blob/main/CONTRIBUTING.md#benchmark-your-own-model" target="_blank" rel="noopener" data-event="click_add_model" data-track-source="add_model_repo"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 496 512" height="16" width="16" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"></path></svg><span>opper-ai/jevman-benchmark</span><span class="lic">AGPL-3.0</span></a>
+          </div>
+          <div class="path">
+            <h3>Become a provider on Opper</h3>
+            <p>If your model runs serverless behind an API, it can join Opper as a <a href="https://opper.ai/providers" data-event="click_add_model" data-track-source="add_model_providers">provider</a>. We run the benchmark for you and list your model where every developer on Opper can call it.</p>
+            <a class="repo" href="mailto:hello@opper.ai?subject=JevMan%3A%20becoming%20a%20provider%20on%20Opper" data-event="click_add_model" data-track-source="add_model_email"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg><span>hello@opper.ai</span></a>
+          </div>
         </div>
       </section>
 

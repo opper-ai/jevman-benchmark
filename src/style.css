@@ -490,6 +490,8 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .section .sub { max-width: 680px; margin: -4px 0 6px; color: var(--j-text); font: 500 17px/1.5 var(--j-display); text-align: left; }
 @media (min-width: 768px) { .section .sub { margin-inline: auto; text-align: center; } }
 .section .sub a { text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
+/* The leaderboard's pointer to #add-model wraps whole rather than breaking mid-phrase. */
+.section .sub a.tease { display: inline-block; }
 .section .foot { margin: 0; font-size: 12.5px; color: var(--j-muted); }
 .tablecard { border: 1px solid var(--j-line); border-radius: 16px; overflow: hidden; }
 /* A column's name sorts the leaderboard by it; the sorted column reads a shade darker, with an arrow. */
@@ -582,18 +584,18 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .spec dt { font: 600 15px/1.5 var(--j-display); }
 .spec dd { margin: 0; font-size: 15px; line-height: 1.55; }
 @media (max-width: 640px) { .spec > div { grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 14px 16px; } }
-/* How to add a model, as the repo's CONTRIBUTING.md has it: three steps, then the repo itself. */
-.steps { list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.step { border: 1px solid var(--j-line); border-radius: 16px; padding: 18px 18px 20px; background: var(--j-card); display: grid; gap: 8px; align-content: start; }
-.step .n { font: 600 12px var(--j-mono); letter-spacing: 0.06em; color: var(--j-muted); }
-.step h3 { margin: 0; font: 700 16px/1.3 var(--j-display); }
-.step p { margin: 0; font-size: 14.5px; line-height: 1.55; }
-.repo-line { margin-top: 6px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 18px; font-size: 14px; text-align: center; }
-.repo { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--j-line); border-radius: 999px; padding: 7px 14px; background: var(--j-card); font-weight: 600; text-decoration: none; }
+/* Two ways onto the board: run it yourself, as the repo's CONTRIBUTING.md has it, or ask us about a model served through an API. */
+.paths { margin-top: 10px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.path { border: 1px solid var(--j-line); border-radius: 16px; padding: 22px 22px 24px; background: var(--j-card); display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.path h3 { margin: 0; font: 700 16px/1.3 var(--j-display); }
+.path p { margin: 0 0 8px; font-size: 14.5px; line-height: 1.55; }
+.path p a { text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
+.path .repo { margin-top: auto; }
+.repo { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--j-line); border-radius: 999px; padding: 7px 14px; background: var(--j-card); font-size: 14px; font-weight: 600; white-space: nowrap; text-decoration: none; }
 .repo:hover { background: var(--j-soft); }
 .repo .lic { font: 600 10.5px var(--j-mono); letter-spacing: 0.04em; color: var(--j-muted); border: 1px solid var(--j-line); border-radius: 6px; padding: 1px 6px; }
-.repo-line .or a { font-weight: 600; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
-@media (max-width: 760px) { .steps { grid-template-columns: minmax(0, 1fr); } .repo-line { justify-content: flex-start; text-align: left; } }
+/* On phones the licence tag would push the repo pill onto two lines. */
+@media (max-width: 760px) { .paths { grid-template-columns: minmax(0, 1fr); } .repo .lic { display: none; } }
 
 /* ---------- small screens ---------- */
 @media (max-width: 900px) {

@@ -14,6 +14,7 @@ export const RECORDINGS: Record<string, { path: string; score: number; name?: st
   'upright/eevo-1.1': { path: '/demo/eevo-1-1-demo.json', score: 3400 },
   semif: { path: '/demo/semif-demo.json', score: 3230, name: 'SemIf' }, // game-100
   'bespoke/nimble-v4-max': { path: '/demo/nimble-v4-max-demo.json', score: 3040 },
+  'perplexity/pplx-decider-v1.2': { path: '/demo/pplx-decider-1-2-demo.json', score: 2750 },
   'upright/eevo-1': { path: '/demo/eevo-1-demo.json', score: 2640 },
   'typesafe/jev-1.13.0': { path: '/demo/jev-demo.json', score: 3870 },
   'qwen-3-8-flash-next-nvfp4': { path: '/demo/qwen-3-8-flash-next-nvfp4-demo.json', score: 2700, name: 'Qwen 3.8 Flash Next NVFP4' }, // game-13
@@ -23,10 +24,12 @@ export const RECORDINGS: Record<string, { path: string; score: number; name?: st
   'opper/clef': { path: '/demo/clef-demo.json', score: 3340 },
   'microsoft/decision-1': { path: '/demo/microsoft-decision-1-demo.json', score: 2700 },
   'winnow-12b-nvfp4': { path: '/demo/winnow-12b-nvfp4-demo.json', score: 2350, name: 'Winnow-12B NVFP4' }, // game-03
+  'perplexity/pplx-decider-flash-v1.2': { path: '/demo/pplx-decider-flash-1-2-demo.json', score: 1650 },
   'empiriolabs/aplomb-1': { path: '/demo/aplomb-1-demo.json', score: 1810 },
   'opper/kev-4b': { path: '/demo/kev-4b-demo.json', score: 1480 },
   'd1-3b': { path: '/demo/d1-3b-demo.json', score: 1160, name: 'd1-3B' }, // game-07
   'random-dice': { path: '/demo/random-dice-demo.json', score: 1030, name: 'Random (die roll)' }, // game-12
+  'cloudflare/clef-omni': { path: '/demo/clef-omni-demo.json', score: 910 },
   von: { path: '/demo/von-demo.json', score: 970, name: 'Von' }, // game-06
   'berget/convaiinnovations/laya': { path: '/demo/laya-demo.json', score: 590 },
 };

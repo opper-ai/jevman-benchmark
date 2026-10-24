@@ -14,6 +14,8 @@ describe('who plays the ghosts', () => {
     expect(presets(['typesafe/jev-1.13.0']).map((p) => p.label)).toEqual(['All jev']);
     expect(defaultLineup(['typesafe/jev-1.13.0'])).toEqual({ blinky: 'typesafe/jev-1.13.0', pinky: 'typesafe/jev-1.13.0', inky: 'typesafe/jev-1.13.0', clyde: 'typesafe/jev-1.13.0' });
     expect(lineupNames(defaultLineup(['typesafe/jev-1.13.0']))).toBe('jev');
+    // Perplexity's long names would overflow the roster: the logo says whose.
+    expect(lineupNames(defaultLineup(['perplexity/pplx-decider-flash-v1.2']))).toBe('Decider Flash');
   });
 
   it('switches a tapped ghost to the next model, round the list', () => {

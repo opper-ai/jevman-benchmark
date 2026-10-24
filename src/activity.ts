@@ -4,7 +4,7 @@ import type { SchedulerEvent } from './scheduler';
 import { fruitForLevel, type GameState, type Status } from './sim';
 import { FRUIT_EMOJI } from './render';
 import type { Dir, GhostId } from './types';
-import { modelName } from '../shared/models';
+import { modelName, shortName } from '../shared/models';
 
 const ARROW: Record<Dir, string> = { up: '↑', left: '←', down: '↓', right: '→' };
 const DIR_NAME: Record<Dir, string> = { up: 'Up', left: 'Left', down: 'Down', right: 'Right' };
@@ -153,7 +153,7 @@ export class ActivityLog {
   private whoText(actor: Decision['actor']): string {
     if (actor === 'pacman') return '';
     const model = this.subject.lineup?.[actor];
-    return `${GHOST_NAMES[actor]}${model ? ` · ${modelName(model).replace(/ 1\.13$/, '')}` : ''}`;
+    return `${GHOST_NAMES[actor]}${model ? ` · ${shortName(model)}` : ''}`;
   }
 
   private row(e: Entry, fresh = false): HTMLLIElement {
@@ -181,7 +181,7 @@ export class ActivityLog {
         li.style.setProperty('--gc', ARCADE_FILL[e.ghost]); // the banner in the colour of the ghost that caught Pac-Man
       }
       const model = e.ghost ? this.subject.lineup?.[e.ghost] : undefined;
-      tx.textContent = e.ghost ? `Caught by ${GHOST_NAMES[e.ghost]}${model ? ` (${modelName(model)})` : ''}` : 'Caught';
+      tx.textContent = e.ghost ? `Caught by ${GHOST_NAMES[e.ghost]}${model ? ` (${shortName(model)})` : ''}` : 'Caught';
       // The life is taken when the dying animation ends, so `lives` still counts this one.
       meta = e.lives > 2 ? `${e.lives - 1} lives left` : e.lives === 2 ? '1 life left' : '';
     } else {

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { DECISION_MODELS, DEFAULT_MODEL, inPlay, isModelId, isRetired, modelName } from '../shared/models';
+import { DECISION_MODELS, DEFAULT_MODEL, inPlay, isModelId, isRetired, modelName, shortName } from '../shared/models';
 import { handleDecide, type DecideDeps } from '../server/decide';
 import { modelFor, requestedModelFor } from '../server/jev';
 
@@ -17,6 +17,12 @@ describe('decision models', () => {
     expect(isModelId('opper/kev-4b')).toBe(true);
     expect(isModelId('openai/gpt-5')).toBe(false);
     expect(modelName('opper/clef-flash')).toBe('Clef Flash');
+    // Where Play has little room, the maker's name goes when the logo beside it says whose; other names stay whole.
+    expect(shortName('perplexity/pplx-decider-flash-v1.2')).toBe('Decider Flash');
+    expect(shortName('perplexity/pplx-decider-v1.2')).toBe('Decider');
+    expect(shortName('microsoft/decision-1')).toBe('Decision 1');
+    expect(shortName('typesafe/jev-1.13.0')).toBe('jev');
+    expect(DECISION_MODELS.filter((m) => !/^(typesafe\/jev-1\.13\.0|microsoft\/decision-1|perplexity\/)/.test(m.id)).every((m) => shortName(m.id) === m.name)).toBe(true);
     // Eevo-1 is on the leaderboard, not in Play; Upright no longer serves 1.0.
     expect(DECISION_MODELS.filter((m) => !inPlay(m.id)).map((m) => m.id)).toEqual(['upright/eevo-1', 'upright/eevo-1.1']);
     expect(DECISION_MODELS.filter((m) => isRetired(m.id)).map((m) => m.id)).toEqual(['upright/eevo-1']);

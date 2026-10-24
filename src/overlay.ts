@@ -1,7 +1,7 @@
 import type { Leaderboard } from '../shared/leaderboard';
 import { boardOf, MIXED_LINEUP, SOLO_MODELS } from '../shared/lineups';
 import { boardLabel, type BoardEntry, type Boards } from './highscores';
-import { modelName } from '../shared/models';
+import { modelName, shortName } from '../shared/models';
 import { logoFor } from './logos';
 import type { GameSummary } from './stats';
 import { GHOST_IDS, type GhostId } from './types';
@@ -21,7 +21,7 @@ const SOLO = SOLO_MODELS;
 
 const allOf = (model: string): Lineup => Object.fromEntries(GHOST_IDS.map((g) => [g, model])) as Lineup;
 const sameLineup = (a: Lineup, b: Lineup) => GHOST_IDS.every((g) => a[g] === b[g]);
-const short = (model: string) => modelName(model).replace(/ 1\.13$/, '').replace(/ 4B$/, '').replace(/^Microsoft /, '').replace(/^Perplexity (.+) 1\.2$/, '$1');
+const short = (model: string) => shortName(model).replace(/ 4B$/, '');
 
 /** The presets the picker offers, limited to the models this key can use. */
 export function presets(offered: string[]): { key: string; label: string; lineup: Lineup }[] {

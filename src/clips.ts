@@ -20,6 +20,11 @@ export const CLIPS: Record<string, { file: string; mp4: number; gif: number }> =
     "mp4": 546875,
     "gif": 620639
   },
+  "perplexity/pplx-decider-v1.2": {
+    "file": "pplx-decider-1-2",
+    "mp4": 531450,
+    "gif": 606486
+  },
   "upright/eevo-1": {
     "file": "eevo-1",
     "mp4": 522415,
@@ -65,6 +70,11 @@ export const CLIPS: Record<string, { file: string; mp4: number; gif: number }> =
     "mp4": 489558,
     "gif": 594875
   },
+  "perplexity/pplx-decider-flash-v1.2": {
+    "file": "pplx-decider-flash-1-2",
+    "mp4": 527305,
+    "gif": 584125
+  },
   "empiriolabs/aplomb-1": {
     "file": "aplomb-1",
     "mp4": 509367,
@@ -84,6 +94,11 @@ export const CLIPS: Record<string, { file: string; mp4: number; gif: number }> =
     "file": "random-dice",
     "mp4": 464446,
     "gif": 556438
+  },
+  "cloudflare/clef-omni": {
+    "file": "clef-omni",
+    "mp4": 500783,
+    "gif": 580301
   },
   "von": {
     "file": "von",

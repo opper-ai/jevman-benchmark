@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-21T09:04:48.985Z",
+  "generatedAt": "2026-10-24T16:22:24.175Z",
   "settings": {
     "gamesPerModel": 100,
     "maxSeconds": 300,
@@ -71,6 +71,28 @@
         "ghost ahead in corridor": 185,
         "at/near junction": 90,
         "waiting at junction": 25
+      }
+    },
+    {
+      "model": "perplexity/pplx-decider-v1.2",
+      "name": "Perplexity Decider 1.2",
+      "games": 100,
+      "meanScore": 3100,
+      "bestScore": 8340,
+      "scoreStdError": 98,
+      "meanSurvivedSeconds": 73.9,
+      "meanPellets": 218,
+      "pelletsPerLife": 73,
+      "meanGhostsEaten": 2.2,
+      "fruitEaten": "157/206",
+      "bestLevel": 2,
+      "fallbackRate": 0.025,
+      "meanLatencyMs": 324,
+      "costPerGame": 0.00243,
+      "deathsBy": {
+        "ghost ahead in corridor": 144,
+        "at/near junction": 112,
+        "waiting at junction": 44
       }
     },
     {
@@ -206,6 +228,28 @@
       }
     },
     {
+      "model": "perplexity/pplx-decider-flash-v1.2",
+      "name": "Perplexity Decider Flash 1.2",
+      "games": 100,
+      "meanScore": 2088,
+      "bestScore": 7300,
+      "scoreStdError": 89,
+      "meanSurvivedSeconds": 46.1,
+      "meanPellets": 160,
+      "pelletsPerLife": 53,
+      "meanGhostsEaten": 1,
+      "fruitEaten": "125/141",
+      "bestLevel": 2,
+      "fallbackRate": 0.046,
+      "meanLatencyMs": 233,
+      "costPerGame": 0.00079,
+      "deathsBy": {
+        "ghost ahead in corridor": 137,
+        "at/near junction": 146,
+        "waiting at junction": 17
+      }
+    },
+    {
       "model": "empiriolabs/aplomb-1",
       "name": "Aplomb 1",
       "games": 100,
@@ -246,6 +290,28 @@
       "deathsBy": {
         "ghost ahead in corridor": 128,
         "at/near junction": 172
+      }
+    },
+    {
+      "model": "cloudflare/clef-omni",
+      "name": "Clef Omni",
+      "games": 100,
+      "meanScore": 1026,
+      "bestScore": 1190,
+      "scoreStdError": 15,
+      "meanSurvivedSeconds": 28.8,
+      "meanPellets": 91,
+      "pelletsPerLife": 30,
+      "meanGhostsEaten": 0,
+      "fruitEaten": "78/98",
+      "bestLevel": 1,
+      "fallbackRate": 0.04,
+      "meanLatencyMs": 240,
+      "costPerGame": 0.00817,
+      "deathsBy": {
+        "at/near junction": 223,
+        "ghost ahead in corridor": 69,
+        "waiting at junction": 8
       }
     },
     {

@@ -140,7 +140,7 @@ describe('session lookup, logout and /api/me', () => {
   });
   it('describes the account without the key', () => {
     const player = JSON.parse(handleMe(signedIn('/api/me'), cfg, 'opper').body);
-    const all = ['typesafe/jev-1.13.0', 'typesafe/jev-1.14.0', 'opper/clef', 'opper/clef-flash', 'opper/kev-4b', 'berget/convaiinnovations/laya', 'openai/gpt-6-luna-decisions', 'empiriolabs/aplomb-1', 'microsoft/decision-1', 'bespoke/nimble-v4-max'];
+    const all = ['typesafe/jev-1.13.0', 'typesafe/jev-1.14.0', 'opper/clef', 'opper/clef-flash', 'opper/kev-4b', 'berget/convaiinnovations/laya', 'openai/gpt-6-luna-decisions', 'empiriolabs/aplomb-1', 'microsoft/decision-1', 'bespoke/nimble-v4-max', 'perplexity/pplx-decider-v1.2', 'perplexity/pplx-decider-flash-v1.2', 'cloudflare/clef-omni'];
     expect(player).toEqual({ mode: 'player', user: { name: 'Ada' }, projectName: 'jevman', walletUrl: 'https://platform.opper.ai/wallet', loginAvailable: true, defaultModel: 'typesafe/jev-1.13.0', models: all });
     // A TypeSafe key reaches jev only; the demo needs no models.
     expect(JSON.parse(handleMe(req('/api/me'), cfg, 'typesafe').body)).toMatchObject({ mode: 'dev', devProvider: 'typesafe', models: ['typesafe/jev-1.13.0'] });

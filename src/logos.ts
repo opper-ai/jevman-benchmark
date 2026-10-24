@@ -16,6 +16,10 @@ const LOGOS: Record<string, { src: string; maker: string; page?: string; shape?:
   'empiriolabs/aplomb-1': { src: 'logos/empiriolabs.png', maker: 'EmpirioLabs', page: 'empiriolabs/aplomb-1', shape: 'round' },
   'microsoft/decision-1': { src: 'logos/microsoft.svg', maker: 'Microsoft', page: 'microsoft/microsoft-decision-1' },
   'bespoke/nimble-v4-max': { src: 'logos/bespoke-labs.png', maker: 'Bespoke Labs', page: 'bespoke/nimble-v4-max' },
+  // Perplexity's mark is one colour on its own profiles: black on GitHub, white on Hugging Face.
+  'perplexity/pplx-decider-v1.2': { src: 'logos/perplexity.svg', maker: 'Perplexity', page: 'perplexity/pplx-decider-v1-2', mono: true },
+  'perplexity/pplx-decider-flash-v1.2': { src: 'logos/perplexity.svg', maker: 'Perplexity', page: 'perplexity/pplx-decider-flash-v1-2', mono: true },
+  'cloudflare/clef-omni': { src: 'logos/cloudflare.svg', maker: 'Cloudflare', page: 'cloudflare/clef-omni' },
   // Upright's Hugging Face avatar and favicon.
   'upright/eevo-1': { src: 'logos/upright.png', maker: 'Upright', page: 'upright/eevo-1', shape: 'tile' },
   'upright/eevo-1.1': { src: 'logos/upright.png', maker: 'Upright', page: 'upright/eevo-1', shape: 'tile' },

@@ -182,6 +182,14 @@ the way CI will. Commit the folder and open a pull request: CI replays every gam
 and answer format, the rules and what "self-reported" means are in
 [CONTRIBUTING.md](CONTRIBUTING.md#benchmark-your-own-model).
 
+## On the Decision Benchmarks hub
+
+jevman is listed on [opper.ai/decision-benchmarks](https://opper.ai/decision-benchmarks) next to the games in
+[opper-ai/decision-benchmarks](https://github.com/opper-ai/decision-benchmarks). The hub reads
+`public/game.json` (name, tagline, category, credit, license, metric), `public/poster.png` (16:9, at most 150 KB),
+`public/leaderboard.json`, `public/community.json` and `/api/highscores`, all as served below
+`/jevman-benchmark/`. Keep `game.json` in step when the game's name, tagline or license changes.
+
 ## Player high scores
 
 Games against AI ghosts count on a board per lineup (Mixed, and one per model on all four ghosts), top ten each.

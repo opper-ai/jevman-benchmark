@@ -26,7 +26,7 @@ import { shareText, versus } from './versus';
 import { ModelWarming } from './warming';
 import type { Community, Leaderboard } from '../shared/leaderboard';
 import { BOARD_KEYS, boardOf, MIXED_LINEUP } from '../shared/lineups';
-import { DEFAULT_MODEL, modelName } from '../shared/models';
+import { DEFAULT_MODEL, modelName, shortName } from '../shared/models';
 
 trackClicks(appPath('/'));
 /** A game's props for Plausible: AI ghosts (and which lineup) or the classic ghosts. */
@@ -306,7 +306,6 @@ const recorderControls: Controls = {
   },
 };
 
-const short = (model: string) => modelName(model).replace(/ 1\.13$/, '').replace(/^Microsoft /, '').replace(/^Perplexity (.+) 1\.2$/, '$1');
 /** The top strip, as on the cabinet: who plays Pac-Man over the score (or a status line), and the ghosts where 2UP is. */
 function setPlate(label: string | null = null): void {
   if (label !== null) {
@@ -316,7 +315,7 @@ function setPlate(label: string | null = null): void {
   plateLabel.textContent = mode.kind === 'recording' ? watchName(mode.model) : 'You';
   const lineup = mode.kind === 'play' ? mode.lineup : null;
   const models = lineup ? [...new Set(GHOST_IDS.map((g) => lineup[g]))] : [];
-  ghostsEl.textContent = !lineup ? 'Classic' : models.length === 1 ? short(models[0]!) : 'Mixed AIs';
+  ghostsEl.textContent = !lineup ? 'Classic' : models.length === 1 ? shortName(models[0]!) : 'Mixed AIs';
 }
 
 function renderChips(): void {
@@ -618,7 +617,7 @@ function openPicker(): void {
       const models = ghostModels();
       const id = gameId;
       // The button says it short; the line under it names who is waking.
-      void warming.warmAll(() => models, (cold) => { p.busy('Waking up…'); p.note(`Waking up ${cold.map(short).join(' and ')}`); }).then((failed) => {
+      void warming.warmAll(() => models, (cold) => { p.busy('Waking up…'); p.note(`Waking up ${cold.map(shortName).join(' and ')}`); }).then((failed) => {
         if (id !== gameId || picker !== p) return; // closed or replaced meanwhile
         const awake = models.filter((m) => !failed.includes(m));
         if (!awake.length) {

@@ -40,3 +40,9 @@ export const isRetired = (id: string): boolean => (DECISION_MODELS as readonly {
 
 /** The display name of a listed model; any other System One model (say, from JEV_MODEL) shows its id. */
 export const modelName = (id: string): string => DECISION_MODELS.find((m) => m.id === id)?.name ?? id;
+
+/**
+ * The name where Play has little room (the picker's roster, the ghosts slot, the activity log): jev 1.13 is plain jev,
+ * and Microsoft's and Perplexity's names drop the maker, as the logo beside them or the full name elsewhere says whose.
+ */
+export const shortName = (id: string): string => modelName(id).replace(/ 1\.13$/, '').replace(/^Microsoft /, '').replace(/^Perplexity (.+) 1\.2$/, '$1');

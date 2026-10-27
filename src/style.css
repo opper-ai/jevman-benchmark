@@ -160,8 +160,9 @@ main { display: block; padding-bottom: 96px; }
 .arc.hsc .hs-title { color: var(--j-arc-yellow); }
 .hsc .hs-body { display: grid; gap: 10px; }
 .arc .tobeat { margin: 0; display: flex; justify-content: space-between; gap: 10px; padding: 7px 8px; border: 1px dashed var(--j-arc-yellow); border-radius: 3px; font: 8px/1.5 var(--j-pixel); color: var(--j-arc-yellow); text-transform: uppercase; }
-/* Who holds the high score: an arcade tag above the cabinet, on hover or focus. */
-.hi-tip { position: absolute; left: 50%; bottom: calc(100% + 16px); z-index: 5; transform: translate(-50%, 4px); padding: 8px 10px; border: 2px solid var(--j-maze); border-radius: 4px; background: #000; color: #fff; font: 8px/1.5 var(--j-pixel); letter-spacing: 0.02em; text-transform: uppercase; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 140ms, transform 140ms; box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.7); }
+/* Who holds the high score: an arcade tag above the cabinet, on hover or focus. Narrower than the screen, even hidden,
+   so it never makes a small phone scroll sideways: there it wraps onto two lines. */
+.hi-tip { position: absolute; left: 50%; bottom: calc(100% + 16px); z-index: 5; transform: translate(-50%, 4px); padding: 8px 10px; border: 2px solid var(--j-maze); border-radius: 4px; background: #000; color: #fff; font: 8px/1.5 var(--j-pixel); letter-spacing: 0.02em; text-transform: uppercase; width: max-content; max-width: calc(100vw - 16px); text-align: center; pointer-events: none; opacity: 0; transition: opacity 140ms, transform 140ms; box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.7); }
 .hi-tip::after { content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--j-maze); }
 .arcade-top .mid:hover .hi-tip, .arcade-top .mid:focus-visible .hi-tip { opacity: 1; transform: translate(-50%, 0); }
 .arcade-top .mid:focus-visible small { color: var(--j-arc-yellow); }
@@ -506,16 +507,17 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .lbl-sort::after { content: '▾'; position: absolute; right: 38px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--j-text); pointer-events: none; }
 /* A model's mark links where its name does. */
 .logo-link { display: inline-flex; flex: none; line-height: 0; }
-/* Phones: the leaderboard as a list instead of the table (see the 900px rules); a row opens its numbers. */
-.lbl { display: none; }
+/* Phones and narrow windows: the leaderboard as a list instead of the table (see the 960px rule); a row opens its numbers.
+   Its rank column is a little wider than the widest reference tag (Trained), so every row's mark lines up after it. */
+.lbl { display: none; --lbl-rk: 48px; }
 .lbl-cols { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--j-soft); font-size: 12px; color: var(--j-muted); }
-.lbl-cols .rk { width: 40px; }
+.lbl-cols .rk { width: var(--lbl-rk); }
 .lbl-cols .grow { flex: 1; }
 .lbl-cols span:last-child { padding-right: 38px; }
 .lbl-row { border-top: 1px solid var(--j-line); }
 .lbl-row.open { background: var(--j-keyrow); }
 .lbl-head { min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 8px 6px 8px 14px; cursor: pointer; }
-.lbl-head .rk { width: 40px; flex: none; font: 600 13px var(--j-mono); color: var(--j-muted); }
+.lbl-head .rk { width: var(--lbl-rk); flex: none; font: 600 13px var(--j-mono); color: var(--j-muted); }
 .lbl-row.tie .rk { color: var(--j-text); }
 .lbl-head .logo { width: 22px; height: 22px; }
 .lbl-head .initial { display: grid; place-items: center; border-radius: 50%; background: var(--j-soft); border: 1px solid var(--j-line); color: var(--j-muted); font: 600 10px/1 var(--j-mono); }
@@ -528,14 +530,17 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .lbl-toggle { flex: none; width: 28px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--j-muted); }
 .lbl-head .chev { transition: transform 160ms; }
 .lbl-row.open .chev { transform: rotate(180deg); }
-.lbl-d { margin: 0; padding: 2px 14px 14px 86px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 13px; }
+.lbl-d { margin: 0; padding: 2px 14px 14px calc(var(--lbl-rk) + 46px); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 13px; }
 .lbl-d dt { color: var(--j-muted); }
 .lbl-d dd { margin: 0; text-align: right; font-family: var(--j-mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .lbl-d a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
 .table-scroll { overflow-x: auto; }
 .lbt { width: 100%; border-collapse: collapse; font-size: 14px; }
-.lbt th { text-align: left; font-weight: 500; font-size: 12px; padding: 10px 12px; white-space: nowrap; color: var(--j-muted); background: var(--j-soft); }
-.lbt td { padding: 12px 12px; vertical-align: middle; white-space: nowrap; border-top: 1px solid var(--j-line); }
+/* All nine columns fit the card with no sideways scroll: 10px between cells, and a model name too long for its column
+   wraps (none does today). */
+.lbt th { text-align: left; font-weight: 500; font-size: 12px; padding: 10px 10px; white-space: nowrap; color: var(--j-muted); background: var(--j-soft); }
+.lbt td { padding: 12px 10px; vertical-align: middle; white-space: nowrap; border-top: 1px solid var(--j-line); }
+.lbt td:nth-child(2) { white-space: normal; }
 .lbt .r { text-align: right; }
 .lbt .rk { font: 600 13px var(--j-mono); width: 3.2em; color: var(--j-muted); }
 .lbt tr.tie .rk { color: var(--j-text); }
@@ -557,25 +562,26 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .lbt tr.ref + tr td { border-top: 1px dashed var(--j-strong-line); }
 .lbl-row.ref { background: var(--j-keyrow); border-top: 1px dashed var(--j-strong-line); }
 .lbl-row.ref + .lbl-row { border-top: 1px dashed var(--j-strong-line); }
-.lbl-row.ref .kind-tag { padding: 1px 5px; font-size: 9.5px; }
+.lbl-row.ref .kind-tag { position: relative; padding: 1px 3px; font-size: 9px; }
+/* The tag stays small, but a tap anywhere around it explains it, rather than opening the row's numbers. */
+.lbl-row.ref .kind-tag::after { content: ''; position: absolute; inset: -12px -6px; }
 .kind-tag { cursor: help; }
 .kind-tag:hover, .kind-tag:focus-visible, .kind-tag[aria-describedby] { border-color: var(--j-text); }
 /* The tag's explanation, styled as the credits' tooltip in the header; fixed to the window, as the table scrolls in its card. */
 .kind-tip { position: fixed; z-index: 80; width: max-content; max-width: 320px; background: var(--j-card); color: var(--j-text); border: 1px solid var(--j-line); border-radius: 8px; padding: 6px 12px; font-size: 12.5px; font-weight: 500; line-height: 1.45; box-shadow: 0 8px 24px -12px rgba(27, 46, 64, 0.35); pointer-events: none; }
 .kind-tip[hidden] { display: none; }
-/* Just above phone width a tag in the rank column would push the table wider than its card: its gap gives way. */
-@media (max-width: 960px) { .lbt td.rk, .lbt th:first-child { padding-right: 4px; } }
+/* A tag in the rank column (Trained, the widest) would push the table wider than its card: its gap gives way. */
+.lbt td.rk, .lbt th:first-child { padding-right: 4px; }
 .lbt .n { font-family: var(--j-mono); font-variant-numeric: tabular-nums; }
 .lbt .pm { font-size: 11px; color: var(--j-muted); }
 /* Run by: a GitHub handle, ours (@opper-ai) or the community submitter's. */
 .lbt .run { font-size: 13px; }
 .lbt .run a, .lbt .mdl small a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
 .lbt .show-m { display: none; }
-/* Narrower than a laptop the full table doesn't fit: Survival and Run by go, and long model names wrap. */
+/* Narrower than a laptop the full table doesn't fit: Survival and Run by go. */
 @media (max-width: 1279px) {
   .lbt .hide-m { display: none; }
   .lbt .show-m { display: inline; }
-  .lbt td:nth-child(2) { white-space: normal; }
 }
 /* Method as a spec sheet: one row per rule, the full width of the section, in the leaderboard's card. */
 .spec { margin: 0; border: 1px solid var(--j-line); border-radius: 16px; background: var(--j-card); overflow: hidden; }
@@ -605,6 +611,9 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
   .section { margin-top: 64px; }
   .lbt .hide-n { display: none; }
   .lbt .mdl .score-m { display: block; }
+}
+/* Below 960px the table's seven columns no longer fit its card: the list takes over, so it never scrolls sideways. */
+@media (max-width: 960px) {
   .tablecard .table-scroll { display: none; }
   .lbl { display: block; }
 }

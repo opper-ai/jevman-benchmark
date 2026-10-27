@@ -6,8 +6,7 @@ import { appPath } from './paths';
  */
 const LOGOS: Record<string, { src: string; maker: string; page?: string; shape?: 'round' | 'tile'; mono?: true }> = {
   'typesafe/jev-1.13.0': { src: 'logos/typesafe.png', maker: 'TypeSafe', page: 'typesafe/jev-1-13-0', shape: 'tile' },
-  // No page on opper.ai yet (2026-10-16).
-  'typesafe/jev-1.14.0': { src: 'logos/typesafe.png', maker: 'TypeSafe', shape: 'tile' },
+  'typesafe/jev-1.14.0': { src: 'logos/typesafe.png', maker: 'TypeSafe', page: 'typesafe/jev-1-14-0', shape: 'tile' },
   'opper/clef': { src: 'logos/cloudflare.svg', maker: 'Cloudflare', page: 'cloudflare/clef' },
   'opper/clef-flash': { src: 'logos/cloudflare.svg', maker: 'Cloudflare', page: 'cloudflare/clef-flash' },
   'opper/kev-4b': { src: 'logos/jared-palmer.webp', maker: 'Jared Palmer', page: 'community/kev-4b', shape: 'round' },

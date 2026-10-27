@@ -506,7 +506,7 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .lbl-sort::after { content: '▾'; position: absolute; right: 38px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--j-text); pointer-events: none; }
 /* A model's mark links where its name does. */
 .logo-link { display: inline-flex; flex: none; line-height: 0; }
-/* Phones: the leaderboard as a list instead of the table (see the 900px rules); a row opens its numbers. */
+/* Phones and narrow windows: the leaderboard as a list instead of the table (see the 960px rule); a row opens its numbers. */
 .lbl { display: none; }
 .lbl-cols { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--j-soft); font-size: 12px; color: var(--j-muted); }
 .lbl-cols .rk { width: 40px; }
@@ -534,8 +534,11 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .lbl-d a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
 .table-scroll { overflow-x: auto; }
 .lbt { width: 100%; border-collapse: collapse; font-size: 14px; }
-.lbt th { text-align: left; font-weight: 500; font-size: 12px; padding: 10px 12px; white-space: nowrap; color: var(--j-muted); background: var(--j-soft); }
-.lbt td { padding: 12px 12px; vertical-align: middle; white-space: nowrap; border-top: 1px solid var(--j-line); }
+/* All nine columns fit the card with no sideways scroll: 10px between cells, and a model name too long for its column
+   wraps (none does today). */
+.lbt th { text-align: left; font-weight: 500; font-size: 12px; padding: 10px 10px; white-space: nowrap; color: var(--j-muted); background: var(--j-soft); }
+.lbt td { padding: 12px 10px; vertical-align: middle; white-space: nowrap; border-top: 1px solid var(--j-line); }
+.lbt td:nth-child(2) { white-space: normal; }
 .lbt .r { text-align: right; }
 .lbt .rk { font: 600 13px var(--j-mono); width: 3.2em; color: var(--j-muted); }
 .lbt tr.tie .rk { color: var(--j-text); }
@@ -563,19 +566,18 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 /* The tag's explanation, styled as the credits' tooltip in the header; fixed to the window, as the table scrolls in its card. */
 .kind-tip { position: fixed; z-index: 80; width: max-content; max-width: 320px; background: var(--j-card); color: var(--j-text); border: 1px solid var(--j-line); border-radius: 8px; padding: 6px 12px; font-size: 12.5px; font-weight: 500; line-height: 1.45; box-shadow: 0 8px 24px -12px rgba(27, 46, 64, 0.35); pointer-events: none; }
 .kind-tip[hidden] { display: none; }
-/* Just above phone width a tag in the rank column would push the table wider than its card: its gap gives way. */
-@media (max-width: 960px) { .lbt td.rk, .lbt th:first-child { padding-right: 4px; } }
+/* A tag in the rank column (Trained, the widest) would push the table wider than its card: its gap gives way. */
+.lbt td.rk, .lbt th:first-child { padding-right: 4px; }
 .lbt .n { font-family: var(--j-mono); font-variant-numeric: tabular-nums; }
 .lbt .pm { font-size: 11px; color: var(--j-muted); }
 /* Run by: a GitHub handle, ours (@opper-ai) or the community submitter's. */
 .lbt .run { font-size: 13px; }
 .lbt .run a, .lbt .mdl small a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
 .lbt .show-m { display: none; }
-/* Narrower than a laptop the full table doesn't fit: Survival and Run by go, and long model names wrap. */
+/* Narrower than a laptop the full table doesn't fit: Survival and Run by go. */
 @media (max-width: 1279px) {
   .lbt .hide-m { display: none; }
   .lbt .show-m { display: inline; }
-  .lbt td:nth-child(2) { white-space: normal; }
 }
 /* Method as a spec sheet: one row per rule, the full width of the section, in the leaderboard's card. */
 .spec { margin: 0; border: 1px solid var(--j-line); border-radius: 16px; background: var(--j-card); overflow: hidden; }
@@ -605,6 +607,9 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
   .section { margin-top: 64px; }
   .lbt .hide-n { display: none; }
   .lbt .mdl .score-m { display: block; }
+}
+/* Below 960px the table's seven columns no longer fit its card: the list takes over, so it never scrolls sideways. */
+@media (max-width: 960px) {
   .tablecard .table-scroll { display: none; }
   .lbl { display: block; }
 }

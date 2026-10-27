@@ -37,6 +37,7 @@ const COMMUNITY_LOGOS: Record<string, { src: string; shape?: 'round' | 'tile'; m
   'winnow-12b-nvfp4': { src: 'logos/community/eldanring.png', shape: 'round' },
   'd1-3b': { src: 'logos/community/liquid-ai.svg', mono: true },
   von: { src: 'logos/community/von.png', shape: 'round' },
+  'modernbert-jev': { src: 'logos/community/ksonny4.png', shape: 'round' },
   'random-dice': { src: 'logos/community/dice.svg' },
 };
 

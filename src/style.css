@@ -507,17 +507,17 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .lbl-sort::after { content: '▾'; position: absolute; right: 38px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--j-text); pointer-events: none; }
 /* A model's mark links where its name does. */
 .logo-link { display: inline-flex; flex: none; line-height: 0; }
-/* Phones and narrow windows: the leaderboard as a list instead of the table (see the 960px rule); a row opens its numbers. */
-.lbl { display: none; }
+/* Phones and narrow windows: the leaderboard as a list instead of the table (see the 960px rule); a row opens its numbers.
+   Its rank column is a little wider than the widest reference tag (Trained), so every row's mark lines up after it. */
+.lbl { display: none; --lbl-rk: 48px; }
 .lbl-cols { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--j-soft); font-size: 12px; color: var(--j-muted); }
-/* As wide as the widest reference tag (Trained), so every row's mark lines up 10px after it. */
-.lbl-cols .rk { width: 48px; }
+.lbl-cols .rk { width: var(--lbl-rk); }
 .lbl-cols .grow { flex: 1; }
 .lbl-cols span:last-child { padding-right: 38px; }
 .lbl-row { border-top: 1px solid var(--j-line); }
 .lbl-row.open { background: var(--j-keyrow); }
 .lbl-head { min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 8px 6px 8px 14px; cursor: pointer; }
-.lbl-head .rk { width: 48px; flex: none; font: 600 13px var(--j-mono); color: var(--j-muted); }
+.lbl-head .rk { width: var(--lbl-rk); flex: none; font: 600 13px var(--j-mono); color: var(--j-muted); }
 .lbl-row.tie .rk { color: var(--j-text); }
 .lbl-head .logo { width: 22px; height: 22px; }
 .lbl-head .initial { display: grid; place-items: center; border-radius: 50%; background: var(--j-soft); border: 1px solid var(--j-line); color: var(--j-muted); font: 600 10px/1 var(--j-mono); }
@@ -530,7 +530,7 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .lbl-toggle { flex: none; width: 28px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--j-muted); }
 .lbl-head .chev { transition: transform 160ms; }
 .lbl-row.open .chev { transform: rotate(180deg); }
-.lbl-d { margin: 0; padding: 2px 14px 14px 94px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 13px; }
+.lbl-d { margin: 0; padding: 2px 14px 14px calc(var(--lbl-rk) + 46px); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 13px; }
 .lbl-d dt { color: var(--j-muted); }
 .lbl-d dd { margin: 0; text-align: right; font-family: var(--j-mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .lbl-d a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
@@ -562,7 +562,9 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 .lbt tr.ref + tr td { border-top: 1px dashed var(--j-strong-line); }
 .lbl-row.ref { background: var(--j-keyrow); border-top: 1px dashed var(--j-strong-line); }
 .lbl-row.ref + .lbl-row { border-top: 1px dashed var(--j-strong-line); }
-.lbl-row.ref .kind-tag { padding: 1px 4px; font-size: 9px; }
+.lbl-row.ref .kind-tag { position: relative; padding: 1px 3px; font-size: 9px; }
+/* The tag stays small, but a tap anywhere around it explains it, rather than opening the row's numbers. */
+.lbl-row.ref .kind-tag::after { content: ''; position: absolute; inset: -12px -6px; }
 .kind-tag { cursor: help; }
 .kind-tag:hover, .kind-tag:focus-visible, .kind-tag[aria-describedby] { border-color: var(--j-text); }
 /* The tag's explanation, styled as the credits' tooltip in the header; fixed to the window, as the table scrolls in its card. */

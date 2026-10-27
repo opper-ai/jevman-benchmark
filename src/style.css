@@ -583,6 +583,28 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
   .lbt .hide-m { display: none; }
   .lbt .show-m { display: inline; }
 }
+/* Press that covered JevMan: the outlets' own marks, small and in the muted text colour, each linking to its article. */
+.press { margin-top: 56px; display: grid; justify-items: center; gap: 14px; }
+.press-h { margin: 0; font-size: 13px; color: var(--j-muted); }
+.press-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 36px; }
+.press-row a { display: inline-flex; align-items: center; gap: 6px; color: var(--j-muted); text-decoration: none; opacity: 0.85; transition: opacity 120ms, color 120ms; }
+.press-row a:hover { opacity: 1; color: var(--j-text); }
+.pl { display: block; background: currentColor; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+/* Each mark at its own proportions; the heights balance them by eye. */
+.pl-tc { --m: url('/logos/press/techcrunch.svg'); height: 17px; aspect-ratio: 149 / 16; }
+.pl-forbes { --m: url('/logos/press/forbes.svg'); height: 24px; aspect-ratio: 200 / 54; }
+.pl-ibm { --m: url('/logos/press/ibm.svg'); height: 18px; aspect-ratio: 24 / 9.2; }
+.pl-think { font: 600 20px/1 var(--j-display); letter-spacing: -0.01em; }
+.pl-giga { --m: url('/logos/press/gigazine.png'); height: 24px; aspect-ratio: 416 / 121; }
+/* Phones: two by two, and a little smaller on the narrowest, so the row never scrolls sideways. */
+@media (max-width: 560px) { .press-row { display: grid; grid-template-columns: repeat(2, auto); justify-content: center; justify-items: center; gap: 18px 32px; } }
+@media (max-width: 400px) {
+  .press-row { gap: 16px 24px; }
+  .pl-tc { height: 14px; }
+  .pl-forbes, .pl-giga { height: 20px; }
+  .pl-ibm { height: 15px; }
+  .pl-think { font-size: 17px; }
+}
 /* Method as a spec sheet: one row per rule, the full width of the section, in the leaderboard's card. */
 .spec { margin: 0; border: 1px solid var(--j-line); border-radius: 16px; background: var(--j-card); overflow: hidden; }
 .spec > div { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 24px; padding: 16px 20px; }

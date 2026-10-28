@@ -174,7 +174,18 @@ describe('HighScores', () => {
   it('puts the presets on boards and leaves custom mixes off', () => {
     expect(boardOf(MIXED_LINEUP)).toBe('mixed');
     expect(boardOf({ blinky: 'opper/clef', pinky: 'opper/clef', inky: 'opper/clef', clyde: 'opper/clef' })).toBe('opper/clef');
-    expect(boardOf({ blinky: 'opper/clef', pinky: 'opper/clef', inky: 'opper/kev-4b', clyde: 'opper/clef' })).toBeNull();
+    expect(boardOf({ blinky: 'opper/clef', pinky: 'opper/clef', inky: 'openai/gpt-6-luna-decisions', clyde: 'opper/clef' })).toBeNull();
+  });
+
+  it("carries a board over when its model moves on (All jev: 1.13 to 1.14), and drops a board no lineup has", async () => {
+    const stored = { mixed: [entry('MIX', 500)], 'typesafe/jev-1.13.0': [{ ...entry('OLD', 900), who: 'a' }, { ...entry('TOP', 1200), who: 'b' }], 'opper/kev-4b': [entry('KEV', 700)] };
+    const store = memoryStore(JSON.stringify(stored));
+    const h = new HighScores(store);
+    await h.ready();
+    expect(h.view()['typesafe/jev-1.14.0']!.map((e) => e.initials)).toEqual(['TOP', 'OLD']);
+    expect(h.view().mixed!.map((e) => e.initials)).toEqual(['MIX']);
+    expect(Object.keys(h.view())).not.toContain('opper/kev-4b');
+    expect(Object.keys(h.view())).not.toContain('typesafe/jev-1.13.0');
   });
 });
 

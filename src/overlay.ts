@@ -244,7 +244,7 @@ export function showHighScores(root: HTMLElement, o: { boards: () => Boards | nu
     body.replaceChildren(...parts);
   };
   render();
-  card.append(close, el('p', 'High scores', 'over-title hs-title'), el('p', 'Each lineup has its own board for players against the AI ghosts.', 'tap'), tabs, body);
+  card.append(close, el('p', 'High scores', 'over-title hs-title'), tabs, body);
   show(root, card, close);
   return { refresh: render };
 }

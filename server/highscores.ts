@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { BOARD_KEYS } from '../shared/lineups.ts';
+import { BOARD_KEYS, MOVED_BOARDS } from '../shared/lineups.ts';
 import { credentialsFromEnv, s3Store, type TextStore } from './s3.ts';
 
 /** One line on a board: three initials, the score, when, and a hash of the account (to trace abuse, never shown). */
@@ -176,7 +176,8 @@ export class HighScores {
   private merge(text: string): void {
     const data = JSON.parse(text) as Record<string, unknown>;
     for (const k of BOARD_KEYS) {
-      const stored = Array.isArray(data[k]) ? (data[k] as unknown[]) : [];
+      const keys = [k, ...Object.keys(MOVED_BOARDS).filter((old) => MOVED_BOARDS[old] === k)];
+      const stored = keys.flatMap((key) => (Array.isArray(data[key]) ? (data[key] as unknown[]) : []));
       const valid = stored.filter((e): e is ScoreEntry => !!e && typeof e === 'object' && cleanInitials((e as ScoreEntry).initials) !== null && Number.isInteger((e as ScoreEntry).score));
       const best = new Map<string, ScoreEntry>();
       for (const e of [...this.boards[k]!, ...valid]) {

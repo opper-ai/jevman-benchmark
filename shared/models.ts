@@ -9,7 +9,8 @@ export const DECISION_MODELS = [
   { id: 'typesafe/jev-1.14.0', name: 'jev 1.14', maker: 'TypeSafe' },
   { id: 'opper/clef', name: 'Clef', maker: 'Cloudflare', opper: 'sference/clef' },
   { id: 'opper/clef-flash', name: 'Clef Flash', maker: 'Cloudflare', opper: 'cloudflare:global/clef-flash' },
-  { id: 'opper/kev-4b', name: 'Kev 4B', maker: 'Jared Palmer' },
+  // Opper's catalog dropped Kev, and its name has reached Clef since 2026-10-26: retired, its row and Watch game stay.
+  { id: 'opper/kev-4b', name: 'Kev 4B', maker: 'Jared Palmer', play: false, retired: true },
   { id: 'berget/convaiinnovations/laya', name: 'Laya', maker: 'ConvAI Innovations' },
   { id: 'openai/gpt-6-luna-decisions', name: 'GPT-6 Luna', maker: 'OpenAI' },
   { id: 'empiriolabs/aplomb-1', name: 'Aplomb 1', maker: 'EmpirioLabs' },
@@ -18,12 +19,12 @@ export const DECISION_MODELS = [
   { id: 'perplexity/pplx-decider-v1.2', name: 'Perplexity Decider 1.2', maker: 'Perplexity' },
   { id: 'perplexity/pplx-decider-flash-v1.2', name: 'Perplexity Decider Flash 1.2', maker: 'Perplexity' },
   { id: 'cloudflare/clef-omni', name: 'Clef Omni', maker: 'Cloudflare', opper: 'cloudflare:global/clef-omni' },
-  // Upright serves Eevo-1 from two routes; the EU one answered about 100 ms faster in our test (2026-10-16). At 60
-  // times jev's price per token it is on the leaderboard and in Watch, but not in Play. Upright's eevo-1 names its
-  // latest version and keeps no old ones: the first, Eevo-1, is retired (its row and Watch game stay, the server no
-  // longer forwards it), and Eevo-1.1 (2026-10-18) goes through that name until Opper lists eevo-1.1 itself.
+  // Upright serves Eevo-1 from two routes; the EU one answered about 100 ms faster in our test (2026-10-16). Upright's
+  // eevo-1 names its latest version and keeps no old ones: the first, Eevo-1, is retired (its row and Watch game stay,
+  // the server no longer forwards it), and Eevo-1.1 (2026-10-18) goes through that name until Opper lists eevo-1.1
+  // itself. It joined Play once its price came down to GPT-6 Luna's (2026-10-28).
   { id: 'upright/eevo-1', name: 'Eevo-1', maker: 'Upright', play: false, retired: true },
-  { id: 'upright/eevo-1.1', name: 'Eevo-1.1', maker: 'Upright', opper: 'eevo:eu/eevo-1', play: false },
+  { id: 'upright/eevo-1.1', name: 'Eevo-1.1', maker: 'Upright', opper: 'eevo:eu/eevo-1' },
 ] as const;
 
 export type ModelId = (typeof DECISION_MODELS)[number]['id'];

@@ -7,12 +7,14 @@ export const GHOST_NAMES_IN_ORDER: readonly GhostName[] = ['blinky', 'pinky', 'i
 export type GhostLineup = Record<GhostName, string>;
 
 /** The mixed lineup: a different AI behind each ghost, like the arcade original where every ghost had its own mind. */
-export const MIXED_LINEUP: GhostLineup = { blinky: 'opper/clef', pinky: 'typesafe/jev-1.13.0', inky: 'opper/kev-4b', clyde: 'openai/gpt-6-luna-decisions' };
+export const MIXED_LINEUP: GhostLineup = { blinky: 'opper/clef', pinky: 'typesafe/jev-1.14.0', inky: 'perplexity/pplx-decider-v1.2', clyde: 'openai/gpt-6-luna-decisions' };
 /** The models a lineup can put on all four ghosts. */
-export const SOLO_MODELS: readonly string[] = ['typesafe/jev-1.13.0', 'opper/clef', 'opper/kev-4b', 'openai/gpt-6-luna-decisions', 'microsoft/decision-1', 'empiriolabs/aplomb-1'];
+export const SOLO_MODELS: readonly string[] = ['typesafe/jev-1.14.0', 'opper/clef', 'openai/gpt-6-luna-decisions', 'microsoft/decision-1', 'empiriolabs/aplomb-1'];
 
 /** A high-score board: "mixed", or the model all four ghosts play. */
 export const BOARD_KEYS: readonly string[] = ['mixed', ...SOLO_MODELS];
+/** Boards whose model moved on to a newer version: their scores carry over to the new one's board. */
+export const MOVED_BOARDS: Readonly<Record<string, string>> = { 'typesafe/jev-1.13.0': 'typesafe/jev-1.14.0' };
 
 /** The board a lineup's games count on, or null for a custom mix (those don't go on a board). */
 export function boardOf(lineup: GhostLineup): string | null {

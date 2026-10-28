@@ -23,9 +23,9 @@ describe('decision models', () => {
     expect(shortName('microsoft/decision-1')).toBe('Decision 1');
     expect(shortName('typesafe/jev-1.13.0')).toBe('jev');
     expect(DECISION_MODELS.filter((m) => !/^(typesafe\/jev-1\.13\.0|microsoft\/decision-1|perplexity\/)/.test(m.id)).every((m) => shortName(m.id) === m.name)).toBe(true);
-    // Eevo-1 is on the leaderboard, not in Play; Upright no longer serves 1.0.
-    expect(DECISION_MODELS.filter((m) => !inPlay(m.id)).map((m) => m.id)).toEqual(['upright/eevo-1', 'upright/eevo-1.1']);
-    expect(DECISION_MODELS.filter((m) => isRetired(m.id)).map((m) => m.id)).toEqual(['upright/eevo-1']);
+    // Kev and Eevo-1 keep their leaderboard rows, out of Play: their names now reach Clef and Eevo-1.1.
+    expect(DECISION_MODELS.filter((m) => !inPlay(m.id)).map((m) => m.id)).toEqual(['opper/kev-4b', 'upright/eevo-1']);
+    expect(DECISION_MODELS.filter((m) => isRetired(m.id)).map((m) => m.id)).toEqual(['opper/kev-4b', 'upright/eevo-1']);
   });
 
   it('maps a model to the id each provider expects; TypeSafe only serves jev', () => {
@@ -79,7 +79,7 @@ describe('handleDecide with a model', () => {
     expect((await handleDecide({ ...body, model: 'openai/gpt-5' }, deps(f))).status).toBe(400);
     expect((await handleDecide({ ...body, model: { toString: 1 } }, deps(f))).status).toBe(400);
     expect((await handleDecide({ ...body, model: '__proto__' }, deps(f))).status).toBe(400);
-    const ts = await handleDecide({ ...body, model: 'opper/kev-4b' }, deps(f, { provider: 'typesafe', baseUrl: 'https://api.typesafe.ai' }));
+    const ts = await handleDecide({ ...body, model: 'openai/gpt-6-luna-decisions' }, deps(f, { provider: 'typesafe', baseUrl: 'https://api.typesafe.ai' }));
     expect(ts.status).toBe(400);
     expect((ts.body as { error: string }).error).toMatch(/TypeSafe key only/);
     expect(f).not.toHaveBeenCalled();

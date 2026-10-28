@@ -158,7 +158,10 @@ main { display: block; padding-bottom: 96px; }
 .tv.scores-open .hi-tip { display: none; }
 /* The players' boards (from HIGH SCORE): tabs as arcade options, the AI's best pinned in yellow, then the board. */
 .arc.hsc .hs-title { color: var(--j-arc-yellow); }
-.hsc .hs-body { display: grid; gap: 10px; }
+.hsc .hs-body { display: grid; gap: 8px; }
+/* Tighter than the other cards, so the top ten and the Play button fit on the board without scrolling. */
+.card.arc.hsc { gap: 10px; padding-top: 14px; }
+.arc.hsc .dots li { padding: 3px 6px; }
 .arc .tobeat { margin: 0; display: flex; justify-content: space-between; gap: 10px; padding: 7px 8px; border: 1px dashed var(--j-arc-yellow); border-radius: 3px; font: 8px/1.5 var(--j-pixel); color: var(--j-arc-yellow); text-transform: uppercase; }
 /* Who holds the high score: an arcade tag above the cabinet, on hover or focus. Narrower than the screen, even hidden,
    so it never makes a small phone scroll sideways: there it wraps onto two lines. */
@@ -583,8 +586,9 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
   .lbt .hide-m { display: none; }
   .lbt .show-m { display: inline; }
 }
-/* Press that covered JevMan: the outlets' own marks, small and in the muted text colour, each linking to its article. */
-.press { margin-top: 56px; display: grid; justify-items: center; gap: 14px; }
+/* Press that covered JevMan: the outlets' own marks, small and in the muted text colour, each linking to its article.
+   Not .press: that is the arcade cards' buttons (Press start, Play again, Enter), which the margin pushed down. */
+.press-sec { margin-top: 56px; display: grid; justify-items: center; gap: 14px; }
 .press-h { margin: 0; font-size: 13px; color: var(--j-muted); }
 .press-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 36px; }
 .press-row a { display: inline-flex; align-items: center; gap: 6px; color: var(--j-muted); text-decoration: none; opacity: 0.85; transition: opacity 120ms, color 120ms; }

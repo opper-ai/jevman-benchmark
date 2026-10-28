@@ -139,21 +139,18 @@ describe('player keys', () => {
     await handleDecide(body, deps(ok(), { keyMode: 'player', log }));
     expect(log.mock.calls[0][0]).toMatch(/^\[jev player\] /);
   });
-  it("refuses a model Play doesn't offer for free and signed-in games, but not for the server's own key", async () => {
-    const eevo = { ...body, model: 'upright/eevo-1.1' };
-    for (const keyMode of ['pool', 'player'] as const) {
+  it('plays Eevo-1.1 on every key, through Upright\'s EU route', async () => {
+    for (const keyMode of ['pool', 'player', 'dev'] as const) {
       const fetchMock = ok();
-      expect(await handleDecide(eevo, deps(fetchMock, { keyMode }))).toEqual({ status: 400, body: { error: 'Eevo-1.1 is on the leaderboard but not in Play' } });
-      expect(fetchMock).not.toHaveBeenCalled();
+      expect((await handleDecide({ ...body, model: 'upright/eevo-1.1' }, deps(fetchMock, { keyMode }))).status).toBe(200);
+      expect(JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string).model).toBe('eevo:eu/eevo-1');
     }
-    const fetchMock = ok();
-    expect((await handleDecide(eevo, deps(fetchMock, { keyMode: 'dev' }))).status).toBe(200);
-    expect(JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string).model).toBe('eevo:eu/eevo-1');
   });
-  it('refuses a retired model for every key, since its old name now reaches a newer version', async () => {
+  it('refuses a retired model for every key, since its old name now reaches another model', async () => {
     for (const keyMode of ['pool', 'player', 'dev'] as const) {
       const fetchMock = ok();
       expect(await handleDecide({ ...body, model: 'upright/eevo-1' }, deps(fetchMock, { keyMode }))).toEqual({ status: 400, body: { error: 'Eevo-1 is retired: its maker no longer serves it' } });
+      expect(await handleDecide({ ...body, model: 'opper/kev-4b' }, deps(fetchMock, { keyMode }))).toEqual({ status: 400, body: { error: 'Kev 4B is retired: its maker no longer serves it' } });
       expect(fetchMock).not.toHaveBeenCalled();
     }
   });

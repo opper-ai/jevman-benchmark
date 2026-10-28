@@ -9,7 +9,7 @@ export type GhostLineup = Record<GhostName, string>;
 /** The mixed lineup: a different AI behind each ghost, like the arcade original where every ghost had its own mind. */
 export const MIXED_LINEUP: GhostLineup = { blinky: 'opper/clef', pinky: 'typesafe/jev-1.14.0', inky: 'perplexity/pplx-decider-v1.2', clyde: 'openai/gpt-6-luna-decisions' };
 /** The models a lineup can put on all four ghosts. */
-export const SOLO_MODELS: readonly string[] = ['typesafe/jev-1.14.0', 'opper/clef', 'openai/gpt-6-luna-decisions', 'microsoft/decision-1', 'empiriolabs/aplomb-1'];
+export const SOLO_MODELS: readonly string[] = ['typesafe/jev-1.14.0', 'opper/clef', 'openai/gpt-6-luna-decisions', 'microsoft/decision-1', 'perplexity/pplx-decider-v1.2', 'bespoke/nimble-v4-max'];
 
 /** A high-score board: "mixed", or the model all four ghosts play. */
 export const BOARD_KEYS: readonly string[] = ['mixed', ...SOLO_MODELS];

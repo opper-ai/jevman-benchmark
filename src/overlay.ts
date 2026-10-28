@@ -28,7 +28,7 @@ export function presets(offered: string[]): { key: string; label: string; lineup
   const has = (m: string) => offered.includes(m);
   const out: { key: string; label: string; lineup: Lineup }[] = [];
   if (GHOST_IDS.every((g) => has(MIXED[g]))) out.push({ key: 'mixed', label: 'Mixed', lineup: MIXED });
-  for (const m of SOLO) if (has(m)) out.push({ key: m, label: `All ${short(m)}`, lineup: allOf(m) });
+  for (const m of SOLO) if (has(m)) out.push({ key: m, label: boardLabel(m), lineup: allOf(m) });
   return out;
 }
 
@@ -298,7 +298,7 @@ export function showPicker(root: HTMLElement, o: PickerOptions): Picker {
     );
     opts.replaceChildren(
       ...all.map((p) => {
-        const b = el('button', p.label.replace(/GPT-6 /, ''));
+        const b = el('button', p.label);
         b.type = 'button';
         b.setAttribute('aria-pressed', String(sameLineup(p.lineup, lineup)));
         b.addEventListener('click', () => {

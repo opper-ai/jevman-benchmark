@@ -25,7 +25,7 @@ import { GHOST_IDS, type Dir } from './types';
 import { shareText, versus } from './versus';
 import { ModelWarming } from './warming';
 import type { Community, Leaderboard } from '../shared/leaderboard';
-import { BOARD_KEYS, boardOf, MIXED_LINEUP } from '../shared/lineups';
+import { BOARD_KEYS, boardOf, MIXED_LINEUP, movedOn } from '../shared/lineups';
 import { DEFAULT_MODEL, modelName, shortName } from '../shared/models';
 
 trackClicks(appPath('/'));
@@ -189,8 +189,10 @@ let choice: ModelChoice = { ...base };
 
 function loadLineup(): Lineup {
   try {
-    const saved = JSON.parse(localStorage.getItem(LINEUP_KEY) ?? 'null') as Partial<Lineup> | null;
-    if (saved && GHOST_IDS.every((g) => typeof saved[g] === 'string' && offered.includes(saved[g]!))) return saved as Lineup;
+    const stored = JSON.parse(localStorage.getItem(LINEUP_KEY) ?? 'null') as Partial<Lineup> | null;
+    // "All jev" from before its board moved to jev 1.14 plays 1.14 now, on the board its scores went to.
+    const saved = stored && GHOST_IDS.every((g) => typeof stored[g] === 'string') ? movedOn(stored as Lineup) : null;
+    if (saved && GHOST_IDS.every((g) => offered.includes(saved[g]))) return saved;
   } catch {
     // nothing stored, or blocked storage
   }

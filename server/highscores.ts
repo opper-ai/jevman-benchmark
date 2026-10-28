@@ -53,6 +53,8 @@ const SAVE_ATTEMPTS = 5;
  */
 export class HighScores {
   private readonly boards: Record<string, ScoreEntry[]> = {};
+  /** Boards in the store that no lineup has any more (a retired preset): written back as read, never shown. */
+  private retired: Record<string, unknown> = {};
   private readonly store: TextStore | null;
   private readonly warn: (msg: string) => void;
   private loaded = false;
@@ -141,7 +143,7 @@ export class HighScores {
     const store = this.store;
     const write = async () => {
       for (let attempt = 0; attempt < SAVE_ATTEMPTS; attempt++) {
-        const next = await store.save(JSON.stringify(this.boards), this.version);
+        const next = await store.save(JSON.stringify({ ...this.retired, ...this.boards }), this.version);
         if (next !== null) {
           this.version = next;
           return;
@@ -175,6 +177,7 @@ export class HighScores {
    */
   private merge(text: string): void {
     const data = JSON.parse(text) as Record<string, unknown>;
+    this.retired = Object.fromEntries(Object.entries(data).filter(([k]) => !BOARD_KEYS.includes(k)));
     for (const k of BOARD_KEYS) {
       const keys = [k, ...Object.keys(MOVED_BOARDS).filter((old) => MOVED_BOARDS[old] === k)];
       const stored = keys.flatMap((key) => (Array.isArray(data[key]) ? (data[key] as unknown[]) : []));

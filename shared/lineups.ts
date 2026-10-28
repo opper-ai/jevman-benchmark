@@ -16,6 +16,12 @@ export const BOARD_KEYS: readonly string[] = ['mixed', ...SOLO_MODELS];
 /** Boards whose model moved on to a newer version: their scores carry over to the new one's board. */
 export const MOVED_BOARDS: Readonly<Record<string, string>> = { 'typesafe/jev-1.13.0': 'typesafe/jev-1.14.0' };
 
+/** A saved lineup, with a moved board's model on all four ghosts brought up to the version its board went to. */
+export function movedOn(lineup: GhostLineup): GhostLineup {
+  const next = MOVED_BOARDS[lineup.blinky];
+  return next && GHOST_NAMES_IN_ORDER.every((g) => lineup[g] === lineup.blinky) ? { blinky: next, pinky: next, inky: next, clyde: next } : lineup;
+}
+
 /** The board a lineup's games count on, or null for a custom mix (those don't go on a board). */
 export function boardOf(lineup: GhostLineup): string | null {
   if (GHOST_NAMES_IN_ORDER.every((g) => lineup[g] === MIXED_LINEUP[g])) return 'mixed';

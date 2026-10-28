@@ -22,7 +22,9 @@ export async function fetchBoards(): Promise<Boards | null> {
     const res = await fetch(appPath('/api/highscores'), { signal: AbortSignal.timeout(5000) });
     if (!res.ok) return null;
     const data = (await res.json()) as { boards?: Boards };
-    return data.boards && BOARD_KEYS.every((k) => Array.isArray(data.boards![k])) ? data.boards : null;
+    if (!data.boards || typeof data.boards !== 'object') return null;
+    // A board this server doesn't have yet (an older one, mid-deploy) shows empty rather than hiding them all.
+    return Object.fromEntries(BOARD_KEYS.map((k) => [k, Array.isArray(data.boards![k]) ? data.boards![k] : []]));
   } catch {
     return null;
   }

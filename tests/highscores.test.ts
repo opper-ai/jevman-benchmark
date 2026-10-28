@@ -8,7 +8,7 @@ import { BOARD_SIZE, cleanInitials, fileStore, HighScores, highScoresStore } fro
 import type { TextStore } from '../server/s3';
 import { createJevMiddleware } from '../server/routes';
 import { sealSession } from '../server/session';
-import { boardOf, MIXED_LINEUP } from '../shared/lineups';
+import { boardOf, MIXED_LINEUP, movedOn } from '../shared/lineups';
 import { checkPlayerGame } from '../src/player-check';
 import { playAndRecord, TEST_SECRET } from './support/player-game';
 
@@ -186,6 +186,22 @@ describe('HighScores', () => {
     expect(h.view().mixed!.map((e) => e.initials)).toEqual(['MIX']);
     expect(Object.keys(h.view())).not.toContain('opper/kev-4b');
     expect(Object.keys(h.view())).not.toContain('typesafe/jev-1.13.0');
+    // ...but the store keeps them as they were, so a rollback still finds them.
+    h.add('mixed', { ...entry('NEW', 800), who: 'n' });
+    expect(await h.flush()).toBe(true);
+    const saved = JSON.parse(store.saved.at(-1)!);
+    expect(saved['opper/kev-4b']).toEqual(stored['opper/kev-4b']);
+    expect(saved['typesafe/jev-1.13.0']).toEqual(stored['typesafe/jev-1.13.0']);
+    expect(saved.mixed.map((e: { initials: string }) => e.initials)).toEqual(['NEW', 'MIX']);
+  });
+
+  it('brings a saved "All jev" lineup up to jev 1.14 with its board, and leaves other lineups as they are', () => {
+    const all = (m: string) => ({ blinky: m, pinky: m, inky: m, clyde: m });
+    expect(movedOn(all('typesafe/jev-1.13.0'))).toEqual(all('typesafe/jev-1.14.0'));
+    expect(boardOf(movedOn(all('typesafe/jev-1.13.0')))).toBe('typesafe/jev-1.14.0');
+    const mix = { ...all('opper/clef'), pinky: 'typesafe/jev-1.13.0' };
+    expect(movedOn(mix)).toBe(mix);
+    expect(movedOn(all('empiriolabs/aplomb-1'))).toEqual(all('empiriolabs/aplomb-1'));
   });
 });
 

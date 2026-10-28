@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { modelOptions } from '../src/choice';
 import { defaultLineup, lineupNames, nextModel, presets } from '../src/overlay';
 
 const ALL = ['typesafe/jev-1.13.0', 'typesafe/jev-1.14.0', 'opper/clef', 'opper/clef-flash', 'berget/convaiinnovations/laya', 'openai/gpt-6-luna-decisions', 'empiriolabs/aplomb-1', 'microsoft/decision-1', 'bespoke/nimble-v4-max', 'perplexity/pplx-decider-v1.2'];
@@ -15,6 +16,11 @@ describe('who plays the ghosts', () => {
     expect(presets(['typesafe/jev-1.14.0']).map((p) => p.label)).toEqual(['All jev 1.14']);
     // A TypeSafe key reaches jev 1.13 only: no preset, everyone on jev.
     expect(presets(['typesafe/jev-1.13.0'])).toEqual([]);
+    // Signed out with the free credits gone, the server sends no list: the picker shows Play's lineups to sign in for.
+    const signedOut = modelOptions({}).map((o) => o.id);
+    expect(signedOut).toContain('upright/eevo-1.1');
+    expect(signedOut).not.toContain('opper/kev-4b');
+    expect(presets(signedOut).map((p) => p.label)).toEqual(['Mixed', 'All jev 1.14', 'All Clef', 'All Luna', 'All Decision 1', 'All Decider', 'All Nimble']);
     expect(defaultLineup(['typesafe/jev-1.13.0'])).toEqual({ blinky: 'typesafe/jev-1.13.0', pinky: 'typesafe/jev-1.13.0', inky: 'typesafe/jev-1.13.0', clyde: 'typesafe/jev-1.13.0' });
     expect(lineupNames(defaultLineup(['typesafe/jev-1.13.0']))).toBe('jev');
     // Perplexity's long names would overflow the roster: the logo says whose.

@@ -1,4 +1,4 @@
-import { DEFAULT_MODEL, isModelId, modelName, type ModelId } from '../shared/models';
+import { DECISION_MODELS, DEFAULT_MODEL, inPlay, isModelId, modelName, type ModelId } from '../shared/models';
 import { ACTOR_IDS, GHOST_IDS, type ActorId } from './types';
 
 /** Which decision model plays each character. Values are model ids from modelOptions. */
@@ -12,8 +12,11 @@ export interface ModelInfo {
 
 const STORAGE_KEY = 'jevman.models';
 
+/** What Play offers through Opper, for when the server sends no list: signed out with the free credits used up. */
+const IN_PLAY = DECISION_MODELS.map((m) => m.id).filter(inPlay);
+
 export function modelOptions(me: ModelInfo): { id: string; label: string }[] {
-  const listed = (me.models ?? [DEFAULT_MODEL]).filter(isModelId).map((id) => ({ id, label: modelName(id) }));
+  const listed = (me.models ?? IN_PLAY).filter(isModelId).map((id) => ({ id, label: modelName(id) }));
   const def = me.defaultModel ?? DEFAULT_MODEL;
   // An operator's JEV_MODEL may name a System One model that isn't on the shared list.
   return listed.some((o) => o.id === def) ? listed : [{ id: def, label: `${def} (server default)` }, ...listed];

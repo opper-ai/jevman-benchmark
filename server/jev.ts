@@ -21,7 +21,7 @@ const DEFAULTS: Record<JevProvider, string> = { opper: DEFAULT_MODEL, typesafe: 
 
 /**
  * The server's default System One model, for requests that name none. JEV_MODEL overrides it for both providers, so
- * the same game can drive any model that speaks the System One API, e.g. `opper/kev-4b` or `opper/clef` through Opper.
+ * the same game can drive any model that speaks the System One API, e.g. `opper/clef` or `opper/clef-flash` through Opper.
  */
 export const modelFor = (provider: JevProvider, env: Record<string, string | undefined> = process.env): string =>
   env.JEV_MODEL?.trim() || DEFAULTS[provider];

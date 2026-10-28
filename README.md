@@ -6,9 +6,9 @@ plays best. You can [add your own](#benchmark-your-own-model).
 
 The page opens on jev's recorded benchmark game, with the leaderboard and the method below it. Two things to do:
 
-- **Play against the AIs**: you steer Pac-Man and AI models play the four ghosts, one model each (Mixed: Clef, jev,
-  Kev and GPT-6 Luna) or all the same one; tap a ghost to switch its model. A model that doesn't wake up in time is
-  stood in for by an awake one, so the game still starts. Signed out, this runs on the [free credits](#option-d--free-credits-for-everyone-the-hosted-page)
+- **Play against the AIs**: you steer Pac-Man and AI models play the four ghosts, one model each (Mixed: Clef,
+  jev 1.14, Perplexity Decider 1.2 and GPT-6 Luna) or all the same one; tap a ghost to switch its model. A model that
+  doesn't wake up in time is stood in for by an awake one, so the game still starts. Signed out, this runs on the [free credits](#option-d--free-credits-for-everyone-the-hosted-page)
   while they last; when they are used up, the classic ghosts stay free.
 - **Watch**: the chips under the board play jev's recording, or any other model live.
 
@@ -90,7 +90,7 @@ says which one is in use.
 ### Another model
 
 jev is the default, but any model that speaks the System One API can play: set `JEV_MODEL` to its
-name, for example `opper/kev-4b` or `opper/clef` through Opper. It applies to the game, `npm run smoke`
+name, for example `opper/clef` or `opper/clef-flash` through Opper. It applies to the game, `npm run smoke`
 and `npm run bench`, and recordings note the model that played. Through TypeSafe directly (option C)
 the cost estimate still uses jev's price. It is the server's default: a model the game or the bench
 names explicitly (`--pacman-model`, `npm run leaderboard`) must be one of the
@@ -127,18 +127,18 @@ names explicitly (`--pacman-model`, `npm run leaderboard`) must be one of the
 Opper serves several System One decision models with the same API, listed in
 [`shared/models.ts`](shared/models.ts): `typesafe/jev-1.13.0` (TypeSafe, the default) and its successor
 `typesafe/jev-1.14.0`,
-`opper/clef` and `opper/clef-flash` (Cloudflare), `opper/kev-4b` (a Qwen3.5-4B fine-tune by Jared
-Palmer), `berget/convaiinnovations/laya` (ConvAI Innovations; its 512-token context is shorter
-than one of our questions), `openai/gpt-6-luna-decisions` (OpenAI's GPT-6 Luna Decisions, which Opper translates
+`opper/clef` and `opper/clef-flash` (Cloudflare), `berget/convaiinnovations/laya` (ConvAI Innovations; its 512-token
+context is shorter than one of our questions), `openai/gpt-6-luna-decisions` (OpenAI's GPT-6 Luna Decisions, which Opper translates
 to System One), `empiriolabs/aplomb-1` (EmpirioLabs' Aplomb 1), `microsoft/decision-1` (Microsoft Decision 1,
 which Opper serves as `azure:global/microsoft-decision-1`), `bespoke/nimble-v4-max` (Bespoke Labs' Nimble v4
 Max), `perplexity/pplx-decider-v1.2` and `perplexity/pplx-decider-flash-v1.2` (Perplexity Decider 1.2 and its small
 version, Decider Flash 1.2), `cloudflare/clef-omni` (Cloudflare's Clef Omni, which Opper serves as
 `cloudflare:global/clef-omni`) and `upright/eevo-1.1` (Upright's Eevo-1.1, which Opper
-serves as `eevo:eu/eevo-1`, Upright's name for its latest version). The server forwards only these. Through Opper any
-of them can play, except Eevo-1.1: at 60 times jev's price per token it is on the leaderboard and in Watch only. A
-TypeSafe key (option C) reaches jev 1.13 only. `upright/eevo-1` (Eevo-1) is retired: Upright replaced it with 1.1
-on 2026-10-18 and keeps no old versions, so its leaderboard row and Watch game stay but nothing calls it.
+serves as `eevo:eu/eevo-1`, Upright's name for its latest version). The server forwards only these, and through Opper
+any of them can play. A TypeSafe key (option C) reaches jev 1.13 only. Two more are retired: their leaderboard rows and
+Watch games stay, but nothing calls them, as their names now reach another model. `upright/eevo-1` (Eevo-1): Upright
+replaced it with 1.1 on 2026-10-18 and keeps no old versions. `opper/kev-4b` (Kev 4B, a Qwen3.5-4B fine-tune by Jared
+Palmer): Opper's catalog dropped it, and since 2026-10-26 its name answers as Cloudflare's Clef.
 
 Any other model can join the leaderboard as **self-reported**: anyone can run the benchmark against an endpoint and
 send the recorded games in a pull request, which CI replays. See

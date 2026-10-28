@@ -348,7 +348,8 @@ export function showPicker(root: HTMLElement, o: PickerOptions): Picker {
     const classic = el('button', 'Play the classic ghosts instead (free)', 'back');
     classic.type = 'button';
     classic.addEventListener('click', o.onClassic);
-    card.append(start, el('p', o.costNote, 'cost warn'), classic, hs);
+    // No top three here: with the sign-in note and the free classic game, they would push the card past the board.
+    card.append(start, el('p', o.costNote, 'cost warn'), classic);
   }
   const back = el('button', 'Back to watching', 'back');
   back.type = 'button';

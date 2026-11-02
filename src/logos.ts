@@ -22,6 +22,8 @@ const LOGOS: Record<string, { src: string; maker: string; page?: string; shape?:
   // Upright's Hugging Face avatar and favicon.
   'upright/eevo-1': { src: 'logos/upright.png', maker: 'Upright', page: 'upright/eevo-1', shape: 'tile' },
   'upright/eevo-1.1': { src: 'logos/upright.png', maker: 'Upright', page: 'upright/eevo-1', shape: 'tile' },
+  // Morph's green M, as on its GitHub profile and its site.
+  'morph/reflex': { src: 'logos/morph.svg', maker: 'Morph', page: 'morph/reflex' },
 };
 
 /**

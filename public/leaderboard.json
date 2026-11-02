@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T16:22:24.175Z",
+  "generatedAt": "2026-11-02T20:10:16.511Z",
   "settings": {
     "gamesPerModel": 100,
     "maxSeconds": 300,
@@ -49,6 +49,28 @@
         "at/near junction": 140,
         "ghost ahead in corridor": 129,
         "waiting at junction": 31
+      }
+    },
+    {
+      "model": "morph/reflex",
+      "name": "reflex",
+      "games": 100,
+      "meanScore": 3326,
+      "bestScore": 8720,
+      "scoreStdError": 99,
+      "meanSurvivedSeconds": 74.9,
+      "meanPellets": 228,
+      "pelletsPerLife": 76,
+      "meanGhostsEaten": 2.8,
+      "fruitEaten": "185/208",
+      "bestLevel": 2,
+      "fallbackRate": 0.045,
+      "meanLatencyMs": 386,
+      "costPerGame": 0.0072,
+      "deathsBy": {
+        "ghost ahead in corridor": 150,
+        "at/near junction": 99,
+        "waiting at junction": 51
       }
     },
     {

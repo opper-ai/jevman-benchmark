@@ -10,6 +10,11 @@ export const CLIPS: Record<string, { file: string; mp4: number; gif: number }> =
     "mp4": 488087,
     "gif": 536882
   },
+  "morph/reflex": {
+    "file": "reflex",
+    "mp4": 551113,
+    "gif": 594308
+  },
   "semif": {
     "file": "semif",
     "mp4": 561421,

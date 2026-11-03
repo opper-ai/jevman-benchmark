@@ -25,6 +25,9 @@ export const DECISION_MODELS = [
   // itself. It joined Play once its price came down to GPT-6 Luna's (2026-10-28).
   { id: 'upright/eevo-1', name: 'Eevo-1', maker: 'Upright', play: false, retired: true },
   { id: 'upright/eevo-1.1', name: 'Eevo-1.1', maker: 'Upright', opper: 'eevo:eu/eevo-1' },
+  // Morph's reflex, which Opper first listed as morph/d3-ultra (2026-11-03). Its route answers more slowly with several
+  // games at once (about 590 ms with 4, 390 ms with one, 2026-11-02), so its leaderboard games were played one at a time.
+  { id: 'morph/reflex', name: 'reflex', maker: 'Morph' },
 ] as const;
 
 export type ModelId = (typeof DECISION_MODELS)[number]['id'];

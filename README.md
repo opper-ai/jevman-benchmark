@@ -133,8 +133,9 @@ to System One), `empiriolabs/aplomb-1` (EmpirioLabs' Aplomb 1), `microsoft/decis
 which Opper serves as `azure:global/microsoft-decision-1`), `bespoke/nimble-v4-max` (Bespoke Labs' Nimble v4
 Max), `perplexity/pplx-decider-v1.2` and `perplexity/pplx-decider-flash-v1.2` (Perplexity Decider 1.2 and its small
 version, Decider Flash 1.2), `cloudflare/clef-omni` (Cloudflare's Clef Omni, which Opper serves as
-`cloudflare:global/clef-omni`) and `upright/eevo-1.1` (Upright's Eevo-1.1, which Opper
-serves as `eevo:eu/eevo-1`, Upright's name for its latest version). The server forwards only these, and through Opper
+`cloudflare:global/clef-omni`), `upright/eevo-1.1` (Upright's Eevo-1.1, which Opper
+serves as `eevo:eu/eevo-1`, Upright's name for its latest version) and `morph/reflex` (Morph's
+reflex). The server forwards only these, and through Opper
 any of them can play. A TypeSafe key (option C) reaches jev 1.13 only. Two more are retired: their leaderboard rows and
 Watch games stay, but nothing calls them, as their names now reach another model. `upright/eevo-1` (Eevo-1): Upright
 replaced it with 1.1 on 2026-10-18 and keeps no old versions. `opper/kev-4b` (Kev 4B, a Qwen3.5-4B fine-tune by Jared

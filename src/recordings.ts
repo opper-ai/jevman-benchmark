@@ -12,6 +12,7 @@ import { modelName } from '../shared/models';
 export const RECORDINGS: Record<string, { path: string; score: number; name?: string }> = {
   'typesafe/jev-1.14.0': { path: '/demo/jev-1-14-demo.json', score: 2820 },
   'upright/eevo-1.1': { path: '/demo/eevo-1-1-demo.json', score: 3400 },
+  'morph/reflex': { path: '/demo/reflex-demo.json', score: 3230 },
   semif: { path: '/demo/semif-demo.json', score: 3230, name: 'SemIf' }, // game-100
   'bespoke/nimble-v4-max': { path: '/demo/nimble-v4-max-demo.json', score: 3040 },
   'perplexity/pplx-decider-v1.2': { path: '/demo/pplx-decider-1-2-demo.json', score: 2750 },

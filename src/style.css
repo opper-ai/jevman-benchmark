@@ -421,7 +421,7 @@ main { display: block; padding-bottom: 96px; }
 .arc .hs { display: grid; gap: 4px; padding-top: 10px; border-top: 2px solid var(--j-maze); }
 /* In the picker it always takes the height of its three lines, so a lineup with fewer scores doesn't move the card (on phones the card is centred). */
 /* The picker fits the board: a little tighter than the other cards. */
-.card.arc.pick { gap: 10px; padding-top: 16px; padding-bottom: 14px; }
+.card.arc.pick { gap: 8px; padding-top: 16px; padding-bottom: 14px; }
 .pick .roster button { padding-block: 5px; }
 .pick .hs .dots li { padding-block: 3px; }
 .arc .press ~ .hs { min-height: 87px; padding-top: 8px; align-content: start; }

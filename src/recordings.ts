@@ -14,8 +14,10 @@ export const RECORDINGS: Record<string, { path: string; score: number; name?: st
   'upright/eevo-1.1': { path: '/demo/eevo-1-1-demo.json', score: 3400 },
   'morph/reflex': { path: '/demo/reflex-demo.json', score: 3230 },
   semif: { path: '/demo/semif-demo.json', score: 3230, name: 'SemIf' }, // game-100
+  'liquid/d1-ultra': { path: '/demo/d1-ultra-demo.json', score: 2960 },
   'bespoke/nimble-v4-max': { path: '/demo/nimble-v4-max-demo.json', score: 3040 },
   'perplexity/pplx-decider-v1.2': { path: '/demo/pplx-decider-1-2-demo.json', score: 2750 },
+  'liquid/d1.1': { path: '/demo/d1-1-demo.json', score: 2910 },
   'upright/eevo-1': { path: '/demo/eevo-1-demo.json', score: 2640 },
   'typesafe/jev-1.13.0': { path: '/demo/jev-demo.json', score: 3870 },
   'qwen-3-8-flash-next-nvfp4': { path: '/demo/qwen-3-8-flash-next-nvfp4-demo.json', score: 2700, name: 'Qwen 3.8 Flash Next NVFP4' }, // game-13

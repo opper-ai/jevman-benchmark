@@ -24,6 +24,9 @@ const LOGOS: Record<string, { src: string; maker: string; page?: string; shape?:
   'upright/eevo-1.1': { src: 'logos/upright.png', maker: 'Upright', page: 'upright/eevo-1', shape: 'tile' },
   // Morph's green M, as on its GitHub profile and its site.
   'morph/reflex': { src: 'logos/morph.svg', maker: 'Morph', page: 'morph/reflex' },
+  // Liquid AI's mark, the one d1-3B has on the community board.
+  'liquid/d1-ultra': { src: 'logos/community/liquid-ai.svg', maker: 'Liquid AI', page: 'liquid/d1-ultra', mono: true },
+  'liquid/d1.1': { src: 'logos/community/liquid-ai.svg', maker: 'Liquid AI', page: 'liquid/d1-1', mono: true },
 };
 
 /**

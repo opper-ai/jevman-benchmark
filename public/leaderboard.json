@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-02T20:10:16.511Z",
+  "generatedAt": "2026-11-03T18:34:06.456Z",
   "settings": {
     "gamesPerModel": 100,
     "maxSeconds": 300,
@@ -74,6 +74,28 @@
       }
     },
     {
+      "model": "liquid/d1-ultra",
+      "name": "d1-ultra",
+      "games": 100,
+      "meanScore": 3133,
+      "bestScore": 8440,
+      "scoreStdError": 106,
+      "meanSurvivedSeconds": 71.7,
+      "meanPellets": 210,
+      "pelletsPerLife": 70,
+      "meanGhostsEaten": 2.7,
+      "fruitEaten": "115/197",
+      "bestLevel": 2,
+      "fallbackRate": 0.04,
+      "meanLatencyMs": 282,
+      "costPerGame": 0.00542,
+      "deathsBy": {
+        "ghost ahead in corridor": 162,
+        "at/near junction": 91,
+        "waiting at junction": 47
+      }
+    },
+    {
       "model": "bespoke/nimble-v4-max",
       "name": "Nimble v4 Max",
       "games": 100,
@@ -115,6 +137,28 @@
         "ghost ahead in corridor": 144,
         "at/near junction": 112,
         "waiting at junction": 44
+      }
+    },
+    {
+      "model": "liquid/d1.1",
+      "name": "d1.1",
+      "games": 100,
+      "meanScore": 3047,
+      "bestScore": 6520,
+      "scoreStdError": 89,
+      "meanSurvivedSeconds": 65.7,
+      "meanPellets": 214,
+      "pelletsPerLife": 71,
+      "meanGhostsEaten": 2.4,
+      "fruitEaten": "119/196",
+      "bestLevel": 2,
+      "fallbackRate": 0.03,
+      "meanLatencyMs": 248,
+      "costPerGame": 0.00242,
+      "deathsBy": {
+        "ghost ahead in corridor": 157,
+        "at/near junction": 128,
+        "waiting at junction": 15
       }
     },
     {

@@ -28,6 +28,10 @@ export const DECISION_MODELS = [
   // Morph's reflex, which Opper first listed as morph/d3-ultra (2026-11-03). Its route answers more slowly with several
   // games at once (about 590 ms with 4, 390 ms with one, 2026-11-02), so its leaderboard games were played one at a time.
   { id: 'morph/reflex', name: 'reflex', maker: 'Morph' },
+  // Liquid AI hosts these two: d1-ultra, its largest, and d1.1, its default. d1-3B on the community board is one of its
+  // open-weights models, run on the submitter's own GPU.
+  { id: 'liquid/d1-ultra', name: 'd1-ultra', maker: 'Liquid AI' },
+  { id: 'liquid/d1.1', name: 'd1.1', maker: 'Liquid AI' },
 ] as const;
 
 export type ModelId = (typeof DECISION_MODELS)[number]['id'];

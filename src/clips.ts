@@ -20,6 +20,11 @@ export const CLIPS: Record<string, { file: string; mp4: number; gif: number }> =
     "mp4": 561421,
     "gif": 587414
   },
+  "liquid/d1-ultra": {
+    "file": "d1-ultra",
+    "mp4": 553402,
+    "gif": 605736
+  },
   "bespoke/nimble-v4-max": {
     "file": "nimble-v4-max",
     "mp4": 546875,
@@ -29,6 +34,11 @@ export const CLIPS: Record<string, { file: string; mp4: number; gif: number }> =
     "file": "pplx-decider-1-2",
     "mp4": 531450,
     "gif": 606486
+  },
+  "liquid/d1.1": {
+    "file": "d1-1",
+    "mp4": 481037,
+    "gif": 608955
   },
   "upright/eevo-1": {
     "file": "eevo-1",

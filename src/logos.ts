@@ -43,6 +43,8 @@ const COMMUNITY_LOGOS: Record<string, { src: string; shape?: 'round' | 'tile'; m
   von: { src: 'logos/community/von.png', shape: 'round' },
   'modernbert-jev': { src: 'logos/community/ksonny4.png', shape: 'round' },
   'random-dice': { src: 'logos/community/dice.svg' },
+  'reflex-arc-nano': { src: 'logos/community/aphygo.svg', shape: 'tile' },
+  'reflex-arc-max': { src: 'logos/community/aphygo.svg', shape: 'tile' },
 };
 
 export const makerOf = (model: string): string | undefined => LOGOS[model]?.maker;

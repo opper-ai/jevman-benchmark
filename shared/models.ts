@@ -32,6 +32,7 @@ export const DECISION_MODELS = [
   // open-weights models, run on the submitter's own GPU.
   { id: 'liquid/d1-ultra', name: 'd1-ultra', maker: 'Liquid AI' },
   { id: 'liquid/d1.1', name: 'd1.1', maker: 'Liquid AI' },
+  { id: 'gemini/gemini-decision-1', name: 'Gemini Decision 1', maker: 'Google' },
 ] as const;
 
 export type ModelId = (typeof DECISION_MODELS)[number]['id'];

@@ -135,7 +135,8 @@ Max), `perplexity/pplx-decider-v1.2` and `perplexity/pplx-decider-flash-v1.2` (P
 version, Decider Flash 1.2), `cloudflare/clef-omni` (Cloudflare's Clef Omni, which Opper serves as
 `cloudflare:global/clef-omni`), `upright/eevo-1.1` (Upright's Eevo-1.1, which Opper
 serves as `eevo:eu/eevo-1`, Upright's name for its latest version), `morph/reflex` (Morph's
-reflex), and `liquid/d1-ultra` and `liquid/d1.1` (Liquid AI's d1-ultra and its default, d1.1). The server forwards only these, and through Opper
+reflex), `liquid/d1-ultra` and `liquid/d1.1` (Liquid AI's d1-ultra and its default, d1.1), and
+`gemini/gemini-decision-1` (Google's Gemini Decision 1). The server forwards only these, and through Opper
 any of them can play. A TypeSafe key (option C) reaches jev 1.13 only. Two more are retired: their leaderboard rows and
 Watch games stay, but nothing calls them, as their names now reach another model. `upright/eevo-1` (Eevo-1): Upright
 replaced it with 1.1 on 2026-10-18 and keeps no old versions. `opper/kev-4b` (Kev 4B, a Qwen3.5-4B fine-tune by Jared

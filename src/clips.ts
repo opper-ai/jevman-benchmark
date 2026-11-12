@@ -45,6 +45,11 @@ export const CLIPS: Record<string, { file: string; mp4: number; gif: number }> =
     "mp4": 522415,
     "gif": 635343
   },
+  "gemini/gemini-decision-1": {
+    "file": "gemini-decision-1",
+    "mp4": 560197,
+    "gif": 609180
+  },
   "typesafe/jev-1.13.0": {
     "file": "jev",
     "mp4": 547320,

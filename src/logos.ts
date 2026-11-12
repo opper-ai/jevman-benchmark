@@ -27,6 +27,8 @@ const LOGOS: Record<string, { src: string; maker: string; page?: string; shape?:
   // Liquid AI's mark, the one d1-3B has on the community board.
   'liquid/d1-ultra': { src: 'logos/community/liquid-ai.svg', maker: 'Liquid AI', page: 'liquid/d1-ultra', mono: true },
   'liquid/d1.1': { src: 'logos/community/liquid-ai.svg', maker: 'Liquid AI', page: 'liquid/d1-1', mono: true },
+  // Google's Gemini sparkle, as on the Gemini app and site.
+  'gemini/gemini-decision-1': { src: 'logos/gemini.svg', maker: 'Google', page: 'google/gemini-decision-1' },
 };
 
 /**

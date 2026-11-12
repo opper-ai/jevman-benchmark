@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-03T18:34:06.456Z",
+  "generatedAt": "2026-11-12T11:48:19.438Z",
   "settings": {
     "gamesPerModel": 100,
     "maxSeconds": 300,
@@ -181,6 +181,29 @@
         "at/near junction": 131,
         "waiting at junction": 53,
         "ghost ahead in corridor": 116
+      }
+    },
+    {
+      "model": "gemini/gemini-decision-1",
+      "name": "Gemini Decision 1",
+      "games": 100,
+      "meanScore": 2964,
+      "bestScore": 5210,
+      "scoreStdError": 86,
+      "meanSurvivedSeconds": 73.9,
+      "meanPellets": 204,
+      "pelletsPerLife": 68,
+      "meanGhostsEaten": 2.3,
+      "fruitEaten": "162/187",
+      "bestLevel": 2,
+      "fallbackRate": 0.015,
+      "meanLatencyMs": 268,
+      "costPerGame": 0.01216,
+      "deathsBy": {
+        "at/near junction": 125,
+        "ghost ahead in corridor": 150,
+        "waiting at junction": 23,
+        "ghost from behind": 2
       }
     },
     {

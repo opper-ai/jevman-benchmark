@@ -497,6 +497,7 @@ kbd { font: 500 11px var(--j-mono); border: 1px solid var(--j-line); border-bott
 /* The leaderboard's pointer to #add-model wraps whole rather than breaking mid-phrase. */
 .section .sub a.tease { display: inline-block; }
 .section .foot { margin: 0; font-size: 12.5px; color: var(--j-muted); }
+.section .foot a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--j-strong-line); }
 .tablecard { border: 1px solid var(--j-line); border-radius: 16px; overflow: hidden; }
 /* A column's name sorts the leaderboard by it; the sorted column reads a shade darker, with an arrow. */
 .lbt th .sort { display: inline-flex; align-items: center; gap: 3px; padding: 0; border: 0; background: none; font: inherit; color: inherit; white-space: nowrap; cursor: pointer; }
